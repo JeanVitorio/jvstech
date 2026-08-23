@@ -8,8 +8,8 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -30,39 +30,38 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ice: var(--ice);
-  --color-moss: var(--moss);
-  --font-display: "Cinzel", serif;
-  --font-stencil: "Bebas Neue", sans-serif;
+  --color-jade: var(--jade);
+  --font-display: "Sora", ui-sans-serif, system-ui;
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui;
 }
 
 :root {
-  --radius: 0.25rem;
-  --background: oklch(0.13 0.02 240);
-  --foreground: oklch(0.96 0.01 220);
-  --card: oklch(0.17 0.026 240);
-  --card-foreground: oklch(0.96 0.01 220);
-  --popover: oklch(0.17 0.026 240);
-  --popover-foreground: oklch(0.96 0.01 220);
-  --primary: oklch(0.82 0.17 165);
-  --primary-foreground: oklch(0.15 0.03 200);
-  --secondary: oklch(0.24 0.05 245);
-  --secondary-foreground: oklch(0.96 0.01 220);
-  --muted: oklch(0.22 0.03 243);
-  --muted-foreground: oklch(0.72 0.03 225);
-  --accent: oklch(0.68 0.17 245);
-  --accent-foreground: oklch(0.13 0.02 240);
+  --radius: 0.75rem;
+  --background: oklch(0.11 0.015 240);
+  --foreground: oklch(0.97 0.005 220);
+  --card: oklch(0.15 0.02 240);
+  --card-foreground: oklch(0.97 0.005 220);
+  --popover: oklch(0.15 0.02 240);
+  --popover-foreground: oklch(0.97 0.005 220);
+  --primary: oklch(0.74 0.14 218);
+  --primary-foreground: oklch(0.12 0.02 240);
+  --secondary: oklch(0.2 0.03 243);
+  --secondary-foreground: oklch(0.97 0.005 220);
+  --muted: oklch(0.19 0.02 243);
+  --muted-foreground: oklch(0.7 0.02 225);
+  --accent: oklch(0.8 0.15 168);
+  --accent-foreground: oklch(0.12 0.02 240);
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.3 0.04 240 / 60%);
-  --input: oklch(0.3 0.04 240);
-  --ring: oklch(0.72 0.15 200);
-  --ice: oklch(0.85 0.12 220);
-  --moss: oklch(0.78 0.19 155);
+  --border: oklch(0.32 0.03 235 / 45%);
+  --input: oklch(0.28 0.03 240);
+  --ring: oklch(0.74 0.14 218);
+  --ice: oklch(0.85 0.11 220);
+  --jade: oklch(0.82 0.16 165);
 
-  --gradient-pelt: linear-gradient(120deg, oklch(0.55 0.2 262), oklch(0.72 0.16 215), oklch(0.83 0.18 160));
-  --glow-ice: 0 0 60px -10px oklch(0.72 0.16 215 / 55%);
-  --glow-moss: 0 0 80px -20px oklch(0.8 0.18 158 / 55%);
+  --gradient-brand: linear-gradient(110deg, oklch(0.55 0.19 262), oklch(0.72 0.15 215), oklch(0.84 0.16 162));
+  --glow-ice: 0 0 60px -12px oklch(0.72 0.16 215 / 65%);
+  --glow-jade: 0 0 70px -16px oklch(0.82 0.16 165 / 60%);
 }
 
 @layer base {
@@ -79,32 +78,73 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   ::selection {
-    background: oklch(0.82 0.17 165 / 35%);
+    background: oklch(0.74 0.14 218 / 35%);
   }
 }
 
-@utility text-pelt {
-  background: var(--gradient-pelt);
+/* brand gradient text */
+@utility text-brand {
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-@utility rune {
-  font-family: var(--font-stencil);
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
+/* faint technical grid, like blueprint paper */
+@utility tech-grid {
+  background-image:
+    linear-gradient(oklch(0.72 0.14 215 / 6%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.72 0.14 215 / 6%) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
+@utility grain {
+  background-image: radial-gradient(oklch(1 0 0 / 4%) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+@utility glass-card {
+  background: linear-gradient(180deg, oklch(0.19 0.025 240 / 85%), oklch(0.13 0.02 240 / 90%));
+  border: 1px solid oklch(0.4 0.05 225 / 30%);
+  backdrop-filter: blur(10px);
+}
+
+@utility label-xs {
+  font-size: 0.65rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* white-background clips blended into the dark canvas */
 @utility wolf-video {
   mix-blend-mode: screen;
   filter: contrast(1.08) saturate(1.15);
 }
 
-@utility grain {
-  background-image: radial-gradient(oklch(1 0 0 / 5%) 1px, transparent 1px);
-  background-size: 3px 3px;
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@utility bg-brand {
+  background-image: var(--gradient-brand);
 }

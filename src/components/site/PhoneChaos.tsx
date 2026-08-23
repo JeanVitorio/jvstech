@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 const screens = [
   { label: "Loja de moda", metric: "+92%", sub: "vendas mensais" },
   { label: "Indústria", metric: "−87%", sub: "tempo de operação" },
-  { label: "Clínica", metric: "+8", sub: "leads por dia" },
+  { label: "Clínica", metric: "+8", sub: "contactos por dia" },
   { label: "Serviços B2B", metric: "3.4x", sub: "retorno em 90 dias" },
 ];
 
@@ -21,7 +21,7 @@ export function PhoneChaos() {
         stagger: 0.1,
         duration: 0.9,
         ease: "power3.out",
-        scrollTrigger: { trigger: root.current, start: "top 75%" },
+        scrollTrigger: { trigger: root.current, start: "top 78%" },
       });
 
       const stage = root.current!.querySelector<HTMLElement>(".chaos-stage")!;
@@ -47,7 +47,7 @@ export function PhoneChaos() {
           y: 0,
           rotate: 0,
           scale: 1,
-          duration: 0.8,
+          duration: 0.85,
           ease: "elastic.out(1, 0.6)",
           stagger: 0.04,
           overwrite: true,
@@ -64,38 +64,39 @@ export function PhoneChaos() {
   }, []);
 
   return (
-    <section id="caca" ref={root} className="relative overflow-hidden py-24 md:py-32">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="max-w-2xl">
-          <p className="rune text-[0.65rem] text-accent">◆ A caça</p>
-          <h2 className="mt-4 font-display text-3xl leading-tight md:text-5xl">
-            Não mostramos portfólio. <span className="text-pelt">Mostramos presas.</span>
-          </h2>
-          <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-            Passe o mouse sobre a matilha de telas — elas se dispersam como lobos assustados
-            e voltam à formação. Os números, esses, não saem do lugar.
-          </p>
-        </div>
+    <section id="resultados" ref={root} className="relative overflow-hidden py-24 md:py-32">
+      <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
+      <div className="pointer-events-none absolute right-0 top-1/4 h-96 w-96 rounded-full bg-accent/10 blur-[130px]" />
+
+      <div className="relative mx-auto max-w-6xl px-6 text-center">
+        <p className="label-xs text-primary">◆ Resultados</p>
+        <h2 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+          Alguns dos trabalhos que <span className="text-brand">já fizemos.</span>
+        </h2>
+        <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
+          Passe o rato pelos ecrãs — tal como um projeto sem método, tudo se desorganiza.
+          E volta ao lugar quando existe estrutura.
+        </p>
 
         <div className="chaos-stage mt-16 grid grid-cols-2 gap-6 md:grid-cols-4">
           {screens.map((s) => (
             <div
               key={s.label}
-              className="chaos-phone relative aspect-[9/18] overflow-hidden rounded-2xl border border-border bg-card p-3 shadow-[var(--glow-ice)] will-change-transform"
+              className="chaos-phone glass-card relative mx-auto aspect-[9/18] w-full max-w-[170px] overflow-hidden rounded-[1.8rem] p-3 will-change-transform"
             >
-              <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-border" />
-              <div className="flex h-full flex-col justify-between rounded-xl bg-background/70 p-4">
-                <p className="rune text-[0.55rem] text-muted-foreground">{s.label}</p>
-                <div>
-                  <p className="font-display text-3xl text-pelt">{s.metric}</p>
-                  <p className="mt-1 text-[0.7rem] text-muted-foreground">{s.sub}</p>
-                </div>
-                <div className="space-y-1.5 pb-8">
-                  <span className="block h-1.5 w-full rounded bg-primary/30" />
-                  <span className="block h-1.5 w-2/3 rounded bg-accent/30" />
-                  <span className="block h-1.5 w-1/2 rounded bg-border" />
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" />
+              <div className="flex h-full flex-col justify-center rounded-[1.3rem] bg-background/60 px-3 pb-8 text-center">
+                <p className="font-display text-2xl font-semibold text-brand">{s.metric}</p>
+                <p className="mt-1 text-[0.6rem] text-muted-foreground">{s.sub}</p>
+                <div className="mt-4 space-y-1.5">
+                  <div className="h-1.5 w-full rounded-full bg-primary/25" />
+                  <div className="h-1.5 w-2/3 rounded-full bg-primary/15" />
+                  <div className="h-1.5 w-5/6 rounded-full bg-primary/10" />
                 </div>
               </div>
+              <span className="absolute inset-x-0 bottom-3 text-[0.6rem] text-muted-foreground">
+                {s.label}
+              </span>
             </div>
           ))}
         </div>
