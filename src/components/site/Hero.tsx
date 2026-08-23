@@ -29,7 +29,7 @@ export function Hero() {
     <section
       id="topo"
       ref={root}
-      className="relative min-h-screen overflow-hidden bg-background pt-28"
+      className="relative min-h-screen overflow-hidden bg-background pb-24 pt-24 md:pt-28"
     >
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-70" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,oklch(0.5_0.15_230_/_25%),transparent_70%)]" />
@@ -37,7 +37,7 @@ export function Hero() {
       {/* front-walking wolf splitting the screen */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
         <video
-          className="hero-video wolf-video h-[86vh] w-auto min-w-full object-cover md:min-w-0"
+          className="hero-video wolf-video h-[52vh] w-auto object-contain opacity-45 md:h-[86vh] md:opacity-100"
           src={capa.url}
           autoPlay
           muted
@@ -47,15 +47,15 @@ export function Hero() {
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,var(--background)_88%)]" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 md:grid-cols-[1fr_minmax(200px,24vw)_1fr]">
-        <div className="hero-left max-w-md space-y-6">
+      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 md:grid-cols-[1fr_minmax(200px,24vw)_1fr] md:gap-8 md:px-6">
+        <div className="hero-left max-w-md space-y-5 md:space-y-6">
           <span className="label-xs inline-block rounded-full border border-border px-3 py-1 text-primary">
             JVS Tech · Soluções digitais
           </span>
-          <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl">
+          <h1 className="font-display text-[2rem] font-semibold leading-[1.08] tracking-tight sm:text-4xl md:text-5xl">
             Criamos o <span className="text-brand">seu site</span>, pensado para vender.
           </h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-[0.85rem] leading-relaxed text-muted-foreground md:text-sm">
             Estudamos o seu mercado, os seus clientes e construímos uma estrutura digital
             que trabalha por você — todos os dias, sem pausa.
           </p>
@@ -63,23 +63,23 @@ export function Hero() {
 
         <div className="hidden md:block" aria-hidden />
 
-        <div className="hero-right max-w-md space-y-6 md:text-right">
+        <div className="hero-right max-w-md space-y-5 md:space-y-6 md:text-right">
           <span className="label-xs inline-block rounded-full border border-border px-3 py-1 text-accent">
             Sites · Landing pages · Sistemas
           </span>
-          <h2 className="font-display text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+          <h2 className="font-display text-xl font-semibold leading-tight tracking-tight sm:text-2xl md:text-3xl">
             Não vendemos páginas. Entregamos <span className="text-brand">receita previsível</span>.
           </h2>
           <div className="flex flex-col gap-3 md:items-end">
             <a
               href="#orcamento"
-              className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
+              className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3.5 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
               Peça um orçamento grátis →
             </a>
             <a
               href="#servicos"
-              className="inline-flex items-center justify-center rounded-full border border-border px-7 py-3 text-xs font-medium text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center justify-center rounded-full border border-border px-7 py-3.5 text-xs font-medium text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
             >
               Os nossos serviços →
             </a>
@@ -87,11 +87,11 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto mt-12 grid max-w-3xl grid-cols-3 gap-4 px-6 text-center">
+      <div className="relative z-10 mx-auto mt-12 grid max-w-3xl grid-cols-3 gap-3 px-5 text-center md:gap-4 md:px-6">
         {stats.map(([a, b]) => (
           <div key={b} className="hero-stat">
-            <p className="font-display text-2xl font-semibold text-brand md:text-3xl">{a}</p>
-            <p className="mt-1 text-[0.65rem] text-muted-foreground">{b}</p>
+            <p className="font-display text-xl font-semibold text-brand sm:text-2xl md:text-3xl">{a}</p>
+            <p className="mt-1 text-[0.6rem] leading-tight text-muted-foreground md:text-[0.65rem]">{b}</p>
           </div>
         ))}
       </div>

@@ -46,7 +46,6 @@ export function PackScroll() {
             if (video && video.duration) {
               video.currentTime = (paw * video.duration) % video.duration;
             }
-            // slight bob + drift so it reads as walking on top of the cards
             gsap.set(".pack-wolf", {
               x: (self.progress - 0.5) * 220,
               y: Math.sin(paw * Math.PI * 2) * 6,
@@ -73,40 +72,39 @@ export function PackScroll() {
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
       <div className="pointer-events-none absolute inset-x-0 top-1/4 h-[50vh] bg-[radial-gradient(ellipse_at_center,oklch(0.4_0.12_220_/_28%),transparent_70%)]" />
 
-      <div className="pack-head absolute left-6 top-[12vh] z-20 max-w-sm md:left-16">
+      <div className="pack-head absolute left-5 right-5 top-[13vh] z-20 max-w-sm md:left-16 md:right-auto">
         <p className="label-xs text-primary">◆ O método</p>
-        <h2 className="mt-3 font-display text-2xl font-semibold leading-tight tracking-tight md:text-4xl">
+        <h2 className="mt-3 font-display text-xl font-semibold leading-tight tracking-tight sm:text-2xl md:text-4xl">
           Trabalhamos consigo desde o <span className="text-brand">primeiro contacto.</span>
         </h2>
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-[0.72rem] leading-relaxed text-muted-foreground md:text-xs">
           Oito etapas do briefing ao lucro. Role para o lado — a página só liberta o
           caminho depois do último cartão.
         </p>
-        <div className="logo-dock mt-6 h-16 w-16 opacity-0" aria-hidden />
       </div>
 
       {/* card track sitting on the lower half */}
-      <div className="absolute inset-x-0 bottom-[10vh]">
-        <div className="pack-track relative flex w-max gap-6 px-[8vw] will-change-transform">
+      <div className="absolute inset-x-0 bottom-[8vh] md:bottom-[10vh]">
+        <div className="pack-track relative flex w-max gap-4 px-[8vw] will-change-transform md:gap-6">
           {loop.map((c, i) => (
             <article
               key={i}
-              className="glass-card group relative h-[34vh] w-[78vw] shrink-0 overflow-hidden rounded-2xl p-7 transition-colors hover:border-primary/60 sm:w-[46vw] lg:w-[25vw]"
+              className="glass-card group relative h-[32vh] w-[76vw] shrink-0 overflow-hidden rounded-2xl p-5 transition-colors hover:border-primary/60 sm:w-[46vw] md:h-[34vh] md:p-7 lg:w-[25vw]"
             >
-              <span className="font-display text-4xl font-bold text-primary/25 transition-colors group-hover:text-primary/60">
+              <span className="font-display text-3xl font-bold text-primary/25 transition-colors group-hover:text-primary/60 md:text-4xl">
                 {c.n}
               </span>
-              <h3 className="mt-1 font-display text-lg font-semibold">{c.t}</h3>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{c.d}</p>
+              <h3 className="mt-1 font-display text-base font-semibold md:text-lg">{c.t}</h3>
+              <p className="mt-3 text-[0.75rem] leading-relaxed text-muted-foreground md:text-xs">{c.d}</p>
               <div className="absolute bottom-0 left-0 h-px w-0 bg-brand transition-all duration-500 group-hover:w-full" />
             </article>
           ))}
         </div>
         {/* the wolf walks right ON the cards: its paws rest on the card top edge */}
-        <div className="pack-wolf pointer-events-none absolute bottom-[34vh] left-1/2 z-10 -translate-x-1/2">
+        <div className="pack-wolf pointer-events-none absolute bottom-[32vh] left-1/2 z-10 -translate-x-1/2 md:bottom-[34vh]">
           <video
             ref={videoRef}
-            className="h-[26vh] w-auto drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]"
+            className="h-[16vh] w-auto drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)] md:h-[26vh]"
             src={wolfSide.url}
             muted
             playsInline

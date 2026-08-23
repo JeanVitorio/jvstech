@@ -7,9 +7,9 @@ import { PackScroll } from "./PackScroll";
 import { SectionVeil } from "./SectionVeil";
 
 /**
- * Wraps the services section and the method section so the animated brand mark can
- * travel down the lateral of the first one and dock into the second, entirely driven
- * by scroll (both its position and its own animation frames).
+ * The animated brand mark rides the lateral of the services section and docks in the
+ * transition zone right before the method section — same size it started with, driven
+ * entirely by scroll (both its travel and its own animation frames).
  */
 export function ChapterTwo() {
   const root = useRef<HTMLDivElement>(null);
@@ -17,9 +17,10 @@ export function ChapterTwo() {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      const mark = root.current!.querySelector<HTMLElement>(".brand-mark")!;
+      const mark = root.current?.querySelector<HTMLElement>(".brand-mark");
+      const dock = root.current?.querySelector<HTMLElement>(".logo-dock");
+      if (!mark || !dock) return;
       const video = mark.querySelector("video")!;
-      const dock = root.current!.querySelector<HTMLElement>(".logo-dock")!;
 
       const delta = () => {
         const a = mark.getBoundingClientRect();
@@ -33,8 +34,6 @@ export function ChapterTwo() {
       gsap.to(mark, {
         x: () => delta().x,
         y: () => delta().y,
-        scale: 0.34,
-        rotate: 8,
         ease: "none",
         scrollTrigger: {
           trigger: root.current,
@@ -53,8 +52,8 @@ export function ChapterTwo() {
         ".brand-halo",
         { opacity: 0.15, scale: 0.7 },
         {
-          opacity: 0.55,
-          scale: 1.2,
+          opacity: 0.6,
+          scale: 1.25,
           ease: "none",
           scrollTrigger: {
             trigger: root.current,
@@ -86,7 +85,23 @@ export function ChapterTwo() {
       </div>
 
       <Services />
-      <SectionVeil label="o método" />
+
+      {/* transition zone: the mark parks here, at its original size */}
+      <div className="relative">
+        <SectionVeil />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="logo-dock h-[22vh] w-[22vh]" />
+          <video
+            className="h-[16vh] w-[16vh] object-contain opacity-90 md:hidden"
+            src={logoAnim.url}
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        </div>
+      </div>
+
       <PackScroll />
     </div>
   );
