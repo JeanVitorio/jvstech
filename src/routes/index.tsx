@@ -1,24 +1,47 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { HeroWolf } from "@/components/site/HeroWolf";
+import { CraftSection } from "@/components/site/CraftSection";
+import { LogoBridge } from "@/components/site/LogoBridge";
+import { PackScroll } from "@/components/site/PackScroll";
+import { PhoneChaos } from "@/components/site/PhoneChaos";
+import { OverheadSection } from "@/components/site/OverheadSection";
+import { FinalHowl } from "@/components/site/FinalHowl";
+import { SectionVeil } from "@/components/site/SectionVeil";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const title = "JVS Alcateia — Sites e sistemas que caçam clientes";
+const description =
+  "Landing pages, sites e sistemas sob medida focados em conversão real. Estratégia, performance e automação que transformam visitantes em clientes pagantes.";
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="relative bg-background">
+      <HeroWolf />
+      <SectionVeil label="o arsenal" />
+      <CraftSection />
+      <SectionVeil label="a marca" flip />
+      <LogoBridge />
+      <SectionVeil label="o rastro" />
+      <PackScroll />
+      <SectionVeil label="a caça" flip />
+      <PhoneChaos />
+      <SectionVeil label="de cima" />
+      <OverheadSection />
+      <SectionVeil label="último uivo" flip />
+      <FinalHowl />
+    </main>
   );
 }
