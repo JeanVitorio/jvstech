@@ -49,7 +49,7 @@ export function SectionVeil({ label, flip = false }: Props) {
           }}
         />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[var(--gradient-brand)] opacity-50" />
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-brand opacity-50" />
       {label ? (
         <span className="veil-label label-xs absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-background px-5 py-1.5 text-[0.58rem] text-muted-foreground">
           {label}

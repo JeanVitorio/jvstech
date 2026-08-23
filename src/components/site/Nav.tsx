@@ -47,7 +47,7 @@ export function Nav() {
 
         <a
           href="#orcamento"
-          className="rounded-full bg-[var(--gradient-brand)] px-5 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
+          className="rounded-full bg-brand px-5 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
         >
           Pedir orçamento
         </a>

@@ -54,7 +54,7 @@ export function Services() {
 
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="glass-card svc-head relative overflow-hidden rounded-2xl px-8 py-14 text-center">
-          <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-1 w-40 rounded-full bg-[var(--gradient-brand)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-1 w-40 rounded-full bg-brand" />
           <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
             Criação de sites profissionais <span className="text-brand">pensados para si.</span>
           </h2>
@@ -74,7 +74,7 @@ export function Services() {
                   : "glass-card hover:border-primary/40"
               }`}
             >
-              <div className="absolute left-7 top-0 h-1 w-16 rounded-full bg-[var(--gradient-brand)]" />
+              <div className="absolute left-7 top-0 h-1 w-16 rounded-full bg-brand" />
               <h3 className="mt-4 font-display text-xl font-semibold">{p.title}</h3>
               <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                 <span className="font-semibold text-foreground/80">Descrição: </span>
@@ -83,7 +83,7 @@ export function Services() {
               <ul className="mt-6 space-y-2.5">
                 {p.marks.map((m) => (
                   <li key={m} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <span className="mt-[3px] h-3 w-3 shrink-0 rounded-full bg-[var(--gradient-brand)]" />
+                    <span className="mt-[3px] h-3 w-3 shrink-0 rounded-full bg-brand" />
                     {m}
                   </li>
                 ))}

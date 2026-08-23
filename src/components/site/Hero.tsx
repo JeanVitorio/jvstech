@@ -73,7 +73,7 @@ export function Hero() {
           <div className="flex flex-col gap-3 md:items-end">
             <a
               href="#orcamento"
-              className="inline-flex items-center justify-center rounded-full bg-[var(--gradient-brand)] px-7 py-3 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
+              className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
               Peça um orçamento grátis →
             </a>

@@ -98,7 +98,7 @@ export function PackScroll() {
               </span>
               <h3 className="mt-1 font-display text-lg font-semibold">{c.t}</h3>
               <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{c.d}</p>
-              <div className="absolute bottom-0 left-0 h-px w-0 bg-[var(--gradient-brand)] transition-all duration-500 group-hover:w-full" />
+              <div className="absolute bottom-0 left-0 h-px w-0 bg-brand transition-all duration-500 group-hover:w-full" />
             </article>
           ))}
         </div>

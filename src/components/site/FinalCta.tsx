@@ -55,7 +55,7 @@ export function FinalCta() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <a
               href="https://wa.me/5546991163405"
-              className="inline-flex items-center rounded-full bg-[var(--gradient-brand)] px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
+              className="inline-flex items-center rounded-full bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
               Falar no WhatsApp →
             </a>

@@ -71,7 +71,7 @@ export function Pricing() {
                   : "glass-card"
               }`}
             >
-              <div className="absolute left-8 top-0 h-1 w-20 rounded-full bg-[var(--gradient-brand)]" />
+              <div className="absolute left-8 top-0 h-1 w-20 rounded-full bg-brand" />
               <p className="mt-4 font-display text-lg font-semibold">{t.name}</p>
               <p className="mt-3 font-display text-4xl font-bold tracking-tight">
                 {t.price}
@@ -81,7 +81,7 @@ export function Pricing() {
               <ul className="mt-6 space-y-2.5">
                 {t.marks.map((m) => (
                   <li key={m} className="flex items-start gap-2 text-xs text-foreground/80">
-                    <span className="mt-[3px] h-3 w-3 shrink-0 rounded-full bg-[var(--gradient-brand)]" />
+                    <span className="mt-[3px] h-3 w-3 shrink-0 rounded-full bg-brand" />
                     {m}
                   </li>
                 ))}
@@ -97,7 +97,7 @@ export function Pricing() {
 
         <a
           href="#orcamento"
-          className="mt-8 inline-flex items-center rounded-full bg-[var(--gradient-brand)] px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
+          className="mt-8 inline-flex items-center rounded-full bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
         >
           Peça orientação gratuita, sem compromisso →
         </a>
