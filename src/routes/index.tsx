@@ -41,7 +41,6 @@ function Index() {
       <Overhead />
       <SectionVeil label="planos" flip />
       <Pricing />
-      <SectionVeil label="dúvidas" />
       <Faq />
       <SectionVeil label="contacto" flip />
       <FinalCta />
