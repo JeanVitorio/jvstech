@@ -33,20 +33,28 @@ export function Overhead() {
 
       if (!section) return;
 
-      const video = section.querySelector<HTMLElement>(".over-video");
-      const title = section.querySelectorAll<HTMLElement>(".over-title");
-      const blocks = section.querySelectorAll<HTMLElement>(".over-block");
-      const grid = section.querySelector<HTMLElement>(".over-grid");
+      const video =
+        section.querySelector<HTMLElement>(".over-video");
 
       /*
-       * Movimento lateral suave do lobo conforme o scroll.
+       * ==========================================================
+       * VÍDEO
+       * ==========================================================
+       *
+       * O vídeo continua tendo um movimento muito leve conforme
+       * o usuário faz scroll.
+       *
+       * Não usamos opacity aqui.
        */
+
       if (video) {
         gsap.fromTo(
           video,
-          { xPercent: -4 },
           {
-            xPercent: 4,
+            xPercent: -3,
+          },
+          {
+            xPercent: 3,
             ease: "none",
             scrollTrigger: {
               trigger: section,
@@ -59,40 +67,40 @@ export function Overhead() {
       }
 
       /*
-       * Animação do título.
+       * ==========================================================
+       * GARANTIR QUE OS CARDS SEMPRE ESTEJAM VISÍVEIS
+       * ==========================================================
        */
-      if (title.length) {
-        gsap.from(title, {
-          y: 40,
-          opacity: 0,
-          stagger: 0.08,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 75%",
-            once: true,
-          },
-        });
-      }
+
+      const cardElements =
+        section.querySelectorAll<HTMLElement>(".over-block");
+
+      gsap.set(cardElements, {
+        opacity: 1,
+        visibility: "visible",
+        y: 0,
+      });
 
       /*
-       * Animação dos cards.
+       * ==========================================================
+       * GARANTIR QUE O TÍTULO TAMBÉM ESTEJA VISÍVEL
+       * ==========================================================
        */
-      if (blocks.length && grid) {
-        gsap.from(blocks, {
-          y: 50,
-          opacity: 0,
-          stagger: 0.12,
-          duration: 0.9,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: grid,
-            start: "top 88%",
-            once: true,
-          },
-        });
-      }
+
+      const titleElements =
+        section.querySelectorAll<HTMLElement>(".over-title");
+
+      gsap.set(titleElements, {
+        opacity: 1,
+        visibility: "visible",
+        y: 0,
+      });
+
+      /*
+       * ==========================================================
+       * REFRESH
+       * ==========================================================
+       */
 
       requestAnimationFrame(() => {
         ScrollTrigger.refresh();
@@ -107,12 +115,15 @@ export function Overhead() {
       ref={root}
       className="relative overflow-hidden py-20 md:py-24"
     >
-      {/* Grid tecnológico */}
+      {/* ====================================================== */}
+      {/* GRID DE FUNDO */}
+      {/* ====================================================== */}
+
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
 
-      {/* ========================================================= */}
+      {/* ====================================================== */}
       {/* TÍTULO */}
-      {/* ========================================================= */}
+      {/* ====================================================== */}
 
       <div className="relative z-10 mx-auto max-w-6xl px-5 md:px-6">
         <p className="over-title label-xs text-center text-primary">
@@ -128,20 +139,29 @@ export function Overhead() {
         </h2>
       </div>
 
-      {/* ========================================================= */}
+      {/* ====================================================== */}
       {/* VÍDEO + CARDS */}
-      {/* ========================================================= */}
+      {/* ====================================================== */}
 
       <div className="relative z-10 mx-auto mt-10 max-w-7xl px-5 md:mt-14 md:px-6">
-        <div className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10">
-          
-          {/* ===================================================== */}
+        <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12">
+
+          {/* ================================================== */}
           {/* LOBO */}
-          {/* ===================================================== */}
+          {/* ================================================== */}
 
           <div className="relative flex items-center justify-center overflow-hidden">
+
             <video
-              className="over-video block h-auto w-full max-w-[620px] object-contain"
+              className="
+                over-video
+                block
+                h-auto
+                w-full
+                max-w-[480px]
+                object-contain
+                md:max-w-[520px]
+              "
               src={cima}
               autoPlay
               muted
@@ -151,47 +171,125 @@ export function Overhead() {
             />
 
             {/* Fade lateral */}
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,transparent_12%,transparent_88%,var(--background)_100%)]" />
+
+            <div
+              className="
+                pointer-events-none
+                absolute
+                inset-0
+                bg-[linear-gradient(90deg,var(--background)_0%,transparent_12%,transparent_88%,var(--background)_100%)]
+              "
+            />
 
             {/* Fade inferior */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(to_top,var(--background),transparent)]" />
+
+            <div
+              className="
+                pointer-events-none
+                absolute
+                inset-x-0
+                bottom-0
+                h-24
+                bg-[linear-gradient(to_top,var(--background),transparent)]
+              "
+            />
           </div>
 
-          {/* ===================================================== */}
+          {/* ================================================== */}
           {/* CARDS */}
-          {/* ===================================================== */}
+          {/* ================================================== */}
 
           <div className="over-grid grid gap-4 sm:grid-cols-2 lg:gap-5">
+
             {blocks.map((b) => (
-              <div
+              <article
                 key={b.tag}
-                className="over-block glass-card group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 md:p-6"
+                className="
+                  over-block
+                  group
+                  relative
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-primary/35
+                  bg-[linear-gradient(145deg,oklch(0.19_0.04_235_/_98%),oklch(0.12_0.025_240_/_98%))]
+                  p-6
+                  opacity-100
+                  shadow-[0_20px_60px_-30px_oklch(0.72_0.16_215_/_60%)]
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1
+                  hover:border-primary/70
+                  hover:shadow-[0_25px_70px_-25px_oklch(0.72_0.16_215_/_80%)]
+                  md:p-7
+                "
               >
+
                 {/* Glow */}
-                <div className="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full bg-primary/10 blur-3xl transition-opacity duration-500 group-hover:bg-primary/20" />
+
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    -right-16
+                    -top-16
+                    h-40
+                    w-40
+                    rounded-full
+                    bg-primary/15
+                    blur-3xl
+                    transition-all
+                    duration-500
+                    group-hover:bg-primary/25
+                  "
+                />
 
                 {/* Linha superior */}
-                <div className="absolute left-0 top-0 h-1 w-12 rounded-full bg-brand transition-all duration-500 group-hover:w-20" />
 
-                <p className="relative label-xs text-primary">
-                  {b.tag}
-                </p>
+                <div
+                  className="
+                    absolute
+                    left-0
+                    top-0
+                    h-1
+                    w-16
+                    rounded-full
+                    bg-brand
+                    shadow-[0_0_14px_oklch(0.72_0.16_215_/_60%)]
+                    transition-all
+                    duration-500
+                    group-hover:w-24
+                  "
+                />
 
-                <p className="relative mt-3 text-[0.78rem] leading-relaxed text-muted-foreground md:text-xs">
-                  {b.body}
-                </p>
-              </div>
+                {/* Conteúdo */}
+
+                <div className="relative z-10">
+
+                  <p className="label-xs text-primary">
+                    {b.tag}
+                  </p>
+
+                  <p className="mt-3 text-[0.8rem] leading-relaxed text-white/75 md:text-sm">
+                    {b.body}
+                  </p>
+
+                </div>
+
+              </article>
             ))}
+
           </div>
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* INDICADORES — MANTIDOS ABAIXO */}
-      {/* ========================================================= */}
+      {/* ====================================================== */}
+      {/* INDICADORES */}
+      {/* ====================================================== */}
 
       <div className="relative z-10 mx-auto mt-12 max-w-6xl px-5 md:px-6">
         <div className="grid grid-cols-2 gap-6 border-t border-border pt-10 md:grid-cols-4">
+
           {[
             ["+40", "projetos entregues"],
             ["8 anos", "de estrada"],
@@ -208,6 +306,7 @@ export function Overhead() {
               </p>
             </div>
           ))}
+
         </div>
       </div>
     </section>
