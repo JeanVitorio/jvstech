@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/logo-jvs.png.asset.json";
+import logo from "@/assets/logo-jvs.png";
 
 const links = [
   { href: "#servicos", label: "Serviços" },
@@ -29,7 +29,7 @@ export function Nav() {
         }`}
       >
         <a href="#topo" className="flex items-center gap-2 pl-2">
-          <img src={logo.url} alt="Logo JVS Tech" className="h-8 w-8 object-contain" />
+          <img src={logo} alt="Logo JVS Tech" className="h-8 w-8 object-contain" />
           <span className="font-display text-sm font-semibold tracking-tight">
             JVS <span className="text-brand">Tech</span>
           </span>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import cima from "@/assets/caminhando_de_cima.mp4.asset.json";
+import cima from "@/assets/caminhando_de_cima.mp4";
 
 const blocks = [
   {
@@ -73,7 +73,7 @@ export function Overhead() {
       <div className="relative mt-10 w-full md:mt-14">
         <video
           className="over-video wolf-video mx-auto block h-auto w-full max-w-[1500px] object-contain"
-          src={cima.url}
+          src={cima}
           autoPlay
           muted
           loop

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import matilha from "@/assets/caminhando_com_os_lobos_vermelho_e_branco_ao_lado.mp4.asset.json";
-import logo from "@/assets/logo-jvs.png.asset.json";
+import matilha from "@/assets/caminhando_com_os_lobos_vermelho_e_branco_ao_lado.mp4";
+import logo from "@/assets/logo-jvs.png";
 
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
@@ -67,7 +67,7 @@ export function FinalCta() {
 
         <div className="glass-card flex items-center justify-center rounded-2xl p-8">
           <img
-            src={logo.url}
+            src={logo}
             alt="Marca JVS Tech"
             className="w-40 drop-shadow-[0_0_50px_oklch(0.72_0.16_215_/_45%)]"
           />
@@ -77,7 +77,7 @@ export function FinalCta() {
       <div className="relative mt-8">
         <video
           className="cta-video wolf-video mx-auto w-full max-w-5xl"
-          src={matilha.url}
+          src={matilha}
           autoPlay
           muted
           loop
@@ -90,7 +90,7 @@ export function FinalCta() {
         <div className="grid gap-10 border-t border-border pt-10 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-2">
-              <img src={logo.url} alt="" className="h-8 w-8 object-contain" />
+              <img src={logo} alt="" className="h-8 w-8 object-contain" />
               <p className="font-display text-base font-semibold">
                 JVS <span className="text-brand">Tech</span>
               </p>

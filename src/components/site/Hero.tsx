@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import capa from "@/assets/video_da_capa.mp4.asset.json";
+import capa from "@/assets/video_da_capa.mp4";
 
 const stats = [
   ["24h", "tempo de resposta"],
@@ -38,7 +38,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
         <video
           className="hero-video wolf-video h-[52vh] w-auto object-contain opacity-45 md:h-[86vh] md:opacity-100"
-          src={capa.url}
+          src={capa}
           autoPlay
           muted
           loop
@@ -57,7 +57,7 @@ export function Hero() {
           </h1>
           <p className="text-[0.85rem] leading-relaxed text-muted-foreground md:text-sm">
             Estudamos o seu mercado, os seus clientes e construímos uma estrutura digital
-            que trabalha por você — todos os dias, sem pausa.
+            que trabalha por você todos os dias, sem pausa.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export function Hero() {
             Sites · Landing pages · Sistemas
           </span>
           <h2 className="font-display text-xl font-semibold leading-tight tracking-tight sm:text-2xl md:text-3xl">
-            Não vendemos páginas. Entregamos <span className="text-brand">receita previsível</span>.
+            Não vendemos páginas. Entregamos <span className="text-brand">excelência e qualidade</span>.
           </h2>
           <div className="flex flex-col gap-3 md:items-end">
             <a

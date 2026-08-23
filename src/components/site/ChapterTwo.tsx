@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import logoAnim from "@/assets/logo-anim.webm.asset.json";
+import logoAnim from "@/assets/logo-anim.webm";
 import { Services } from "./Services";
 import { PackScroll } from "./PackScroll";
 import { SectionVeil } from "./SectionVeil";
@@ -76,7 +76,7 @@ export function ChapterTwo() {
           <div className="brand-halo absolute inset-0 rounded-full bg-[radial-gradient(circle,oklch(0.72_0.16_215_/_45%),transparent_68%)]" />
           <video
             className="relative h-full w-full object-contain drop-shadow-[0_0_40px_oklch(0.72_0.16_215_/_55%)]"
-            src={logoAnim.url}
+            src={logoAnim}
             muted
             playsInline
             preload="auto"
@@ -93,7 +93,7 @@ export function ChapterTwo() {
           <div className="logo-dock h-[22vh] w-[22vh]" />
           <video
             className="h-[16vh] w-[16vh] object-contain opacity-90 md:hidden"
-            src={logoAnim.url}
+            src={logoAnim}
             autoPlay
             muted
             loop
