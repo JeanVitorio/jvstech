@@ -130,12 +130,6 @@ export function Pricing() {
             </article>
           ))}
         </div>
-
-        <p className="mx-auto mt-10 max-w-xl text-[0.72rem] text-muted-foreground md:text-xs">
-          Todos os projetos incluem o primeiro mês do plano Base{" "}
-          <strong className="text-foreground/80">sem custos</strong>. Depois desse período,
-          continua apenas se fizer sentido para si.
-        </p>
       </div>
     </section>
   );
