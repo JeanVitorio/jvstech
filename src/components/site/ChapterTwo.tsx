@@ -7,9 +7,8 @@ import { PackScroll } from "./PackScroll";
 import { SectionVeil } from "./SectionVeil";
 
 /**
- * Wraps the services section and the method section so the animated brand mark can
- * travel down the lateral of the first one and dock into the second, entirely driven
- * by scroll (both its position and its own animation frames).
+ * The animated brand mark rides the lateral of the services section and docks in the
+ * transition strip right above the method section — same size it had when it appeared.
  */
 export function ChapterTwo() {
   const root = useRef<HTMLDivElement>(null);
@@ -33,8 +32,6 @@ export function ChapterTwo() {
       gsap.to(mark, {
         x: () => delta().x,
         y: () => delta().y,
-        scale: 0.34,
-        rotate: 8,
         ease: "none",
         scrollTrigger: {
           trigger: root.current,
@@ -72,8 +69,8 @@ export function ChapterTwo() {
   return (
     <div ref={root} className="relative">
       {/* brand mark riding the right lateral, scroll-scrubbed */}
-      <div className="pointer-events-none absolute right-[3vw] top-[18vh] z-30 hidden md:block">
-        <div className="brand-mark relative h-[22vh] w-[22vh]">
+      <div className="pointer-events-none absolute right-[3vw] top-[18vh] z-30">
+        <div className="brand-mark relative h-[13vh] w-[13vh] md:h-[22vh] md:w-[22vh]">
           <div className="brand-halo absolute inset-0 rounded-full bg-[radial-gradient(circle,oklch(0.72_0.16_215_/_45%),transparent_68%)]" />
           <video
             className="relative h-full w-full object-contain drop-shadow-[0_0_40px_oklch(0.72_0.16_215_/_55%)]"
@@ -86,7 +83,16 @@ export function ChapterTwo() {
       </div>
 
       <Services />
-      <SectionVeil label="o método" />
+
+      {/* transition strip: the logo lands exactly here */}
+      <div className="relative">
+        <SectionVeil />
+        <div
+          className="logo-dock pointer-events-none absolute left-1/2 top-1/2 h-[13vh] w-[13vh] -translate-x-1/2 -translate-y-1/2 md:h-[22vh] md:w-[22vh]"
+          aria-hidden
+        />
+      </div>
+
       <PackScroll />
     </div>
   );
