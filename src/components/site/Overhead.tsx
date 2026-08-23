@@ -30,10 +30,9 @@ export function Overhead() {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ".over-video",
-        { xPercent: -6, scale: 1.06 },
+        { xPercent: -4 },
         {
-          xPercent: 6,
-          scale: 1,
+          xPercent: 4,
           ease: "none",
           scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: true },
         },
@@ -43,7 +42,7 @@ export function Overhead() {
         opacity: 0,
         duration: 1,
         ease: "power3.out",
-        scrollTrigger: { trigger: root.current, start: "top 70%" },
+        scrollTrigger: { trigger: root.current, start: "top 75%" },
       });
       gsap.from(".over-block", {
         y: 50,
@@ -51,49 +50,52 @@ export function Overhead() {
         stagger: 0.12,
         duration: 0.9,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".over-grid", start: "top 82%" },
+        scrollTrigger: { trigger: ".over-grid", start: "top 88%" },
       });
     }, root);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={root} className="relative overflow-hidden py-24">
+    <section ref={root} className="relative overflow-hidden py-20 md:py-24">
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
 
-      <div className="relative mx-auto max-w-6xl px-6">
-        <h2 className="over-title mx-auto max-w-3xl text-center font-display text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
+      <div className="relative mx-auto max-w-6xl px-5 md:px-6">
+        <p className="over-title label-xs text-center text-primary">◆ Diagnóstico</p>
+        <h2 className="over-title mx-auto mt-4 max-w-3xl text-center font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-5xl">
           O problema nunca é o site.
           <br />
           <span className="text-brand">É o caminho até a venda.</span>
         </h2>
       </div>
 
-      {/* overhead footage as a full-width corridor, in its natural orientation */}
-      <div className="relative mt-14 w-full overflow-hidden">
+      {/* overhead footage as a full-width corridor — never cropped, paws always visible */}
+      <div className="relative mt-10 w-full md:mt-14">
         <video
-          className="over-video wolf-video mx-auto w-full max-w-[1500px]"
+          className="over-video wolf-video mx-auto block h-auto w-full max-w-[1500px] object-contain"
           src={cima.url}
           autoPlay
           muted
           loop
           playsInline
         />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,transparent_18%,transparent_82%,var(--background)_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,var(--background)_0%,transparent_22%,transparent_70%,var(--background)_98%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,transparent_14%,transparent_86%,var(--background)_100%)]" />
       </div>
 
-      <div className="relative mx-auto -mt-16 max-w-6xl px-6 md:-mt-24">
-        <div className="over-grid grid gap-5 md:grid-cols-2">
+      <div className="relative mx-auto mt-10 max-w-6xl px-5 md:px-6">
+        <div className="over-grid grid gap-4 md:grid-cols-2 md:gap-5">
           {blocks.map((b) => (
-            <div key={b.tag} className="over-block glass-card rounded-2xl p-7">
+            <div
+              key={b.tag}
+              className="over-block glass-card rounded-2xl p-6 transition-colors hover:border-primary/50 md:p-7"
+            >
               <p className="label-xs text-primary">{b.tag}</p>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{b.body}</p>
+              <p className="mt-3 text-[0.82rem] leading-relaxed text-muted-foreground md:text-sm">{b.body}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-6 border-t border-border pt-10 md:grid-cols-4">
+        <div className="mt-12 grid grid-cols-2 gap-6 border-t border-border pt-10 md:grid-cols-4">
           {[
             ["+40", "projetos entregues"],
             ["8 anos", "de estrada"],
