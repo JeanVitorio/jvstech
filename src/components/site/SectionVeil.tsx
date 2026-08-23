@@ -12,8 +12,8 @@ export function SectionVeil({ label, flip = false }: Props) {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".veil-sheet",
-        { scaleX: 0.2, opacity: 0.15 },
+        ".veil-arc",
+        { scaleX: 0.35, opacity: 0.2 },
         {
           scaleX: 1,
           opacity: 1,
@@ -25,7 +25,7 @@ export function SectionVeil({ label, flip = false }: Props) {
         ".veil-label",
         { letterSpacing: "0.6em", opacity: 0 },
         {
-          letterSpacing: "0.28em",
+          letterSpacing: "0.24em",
           opacity: 1,
           ease: "none",
           scrollTrigger: { trigger: root.current, start: "top bottom", end: "center center", scrub: true },
@@ -36,18 +36,22 @@ export function SectionVeil({ label, flip = false }: Props) {
   }, []);
 
   return (
-    <div ref={root} className="relative h-40 overflow-hidden bg-background md:h-56">
-      <div
-        className="veil-sheet absolute inset-0 origin-left"
-        style={{
-          background: flip
-            ? "linear-gradient(180deg, oklch(0.13 0.02 240) 0%, oklch(0.17 0.04 200 / 70%) 50%, oklch(0.13 0.02 240) 100%)"
-            : "linear-gradient(180deg, oklch(0.13 0.02 240) 0%, oklch(0.19 0.05 250 / 70%) 50%, oklch(0.13 0.02 240) 100%)",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[var(--gradient-pelt)] opacity-60" />
+    <div ref={root} className="relative h-36 overflow-hidden bg-background md:h-44">
+      <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center">
+        <div
+          className="veil-arc h-24 w-[110vw] rounded-[50%]"
+          style={{
+            background: flip
+              ? "radial-gradient(closest-side, oklch(0.85 0.15 165 / 55%), transparent 72%)"
+              : "radial-gradient(closest-side, oklch(0.78 0.15 215 / 55%), transparent 72%)",
+            filter: "blur(14px)",
+          }}
+        />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[var(--gradient-brand)] opacity-50" />
       {label ? (
-        <span className="veil-label absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-5 text-[0.6rem] rune text-muted-foreground">
+        <span className="veil-label label-xs absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-background px-5 py-1.5 text-[0.58rem] text-muted-foreground">
           {label}
         </span>
       ) : null}
