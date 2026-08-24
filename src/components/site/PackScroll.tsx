@@ -76,12 +76,14 @@ export function PackScroll() {
       const wolfTravel = 220;
       let paw = 0;
       let lastProgress = 0;
+      let skipReturn = false;
+      let packTween: gsap.core.Tween | null = null;
 
       /*
-       * Recoloca o lobo no cartão 01 e o mantém fora
-       * da passagem quando o visitante segue para Resultados.
+       * Recoloca os cartões e o lobo no início sem alterar
+       * a posição atual da página.
        */
-      const resetWolf = () => {
+      const resetMethod = () => {
         paw = 0;
         lastProgress = 0;
 
@@ -89,10 +91,12 @@ export function PackScroll() {
           video.currentTime = 0;
         }
 
+        packTween?.progress(0);
+        gsap.set(track, { x: 0 });
         gsap.set(".pack-wolf", {
           x: -wolfTravel / 2,
           y: 0,
-          autoAlpha: 0,
+          autoAlpha: 1,
         });
       };
 
@@ -128,7 +132,7 @@ export function PackScroll() {
       /*
        * Movimento horizontal dos cards.
        */
-      gsap.to(track, {
+      packTween = gsap.to(track, {
         x: () => -distance(),
         ease: "none",
 
@@ -145,23 +149,21 @@ export function PackScroll() {
 
           onUpdate: (self) => {
             /*
-             * Na descida, o lobo não interfere na leitura.
-             * Ele volta a caminhar quando o usuário sobe.
+             * Depois do reset em Resultados, mantém o método
+             * no cartão 01 durante o retorno rápido.
              */
-            if (self.direction > 0) {
-              lastProgress = self.progress;
-              gsap.set(".pack-wolf", { autoAlpha: 0 });
+            if (skipReturn && self.direction < 0) {
+              resetMethod();
               return;
             }
 
             /*
              * O lobo continua andando para frente
-             * durante o retorno pelos cartões.
+             * acompanhando o movimento do scroll.
              */
             paw += Math.abs(self.progress - lastProgress) * 14;
 
             lastProgress = self.progress;
-            gsap.set(".pack-wolf", { autoAlpha: 1 });
 
             /*
              * Controla o frame do vídeo de acordo
@@ -186,10 +188,35 @@ export function PackScroll() {
             });
           },
           onEnterBack: (self) => {
+            if (skipReturn) {
+              resetMethod();
+              skipReturn = false;
+
+              window.requestAnimationFrame(() => {
+                window.scrollTo({
+                  top: Math.max(0, self.start + 1),
+                  behavior: "auto",
+                });
+              });
+
+              return;
+            }
+
             lastProgress = self.progress;
-            gsap.set(".pack-wolf", { autoAlpha: 1 });
           },
-          onLeave: resetWolf,
+        },
+      });
+
+      /*
+       * Quando Resultados chega ao centro, prepara o método
+       * para reaparecer no cartão 01 durante a subida.
+       */
+      ScrollTrigger.create({
+        trigger: "#resultados",
+        start: "center center",
+        onEnter: () => {
+          skipReturn = true;
+          resetMethod();
         },
       });
 
@@ -305,9 +332,7 @@ export function PackScroll() {
             pointer-events-none
             absolute
             bottom-[32vh]
-            invisible
             left-1/2
-            opacity-0
             z-30
             -translate-x-1/2
             md:bottom-[34vh]
