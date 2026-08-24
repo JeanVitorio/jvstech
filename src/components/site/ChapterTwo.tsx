@@ -91,7 +91,7 @@ export function ChapterTwo() {
       <div className="relative">
         <SectionVeil />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="logo-dock h-[22vh] w-[22vh]" />
+          <div className="logo-dock absolute left-1/2 top-1/2 h-[22vh] w-[22vh] -translate-x-1/2 -translate-y-1/2" />
           <img
             className="h-[16vh] w-[16vh] object-contain opacity-90 md:hidden"
             src={logoAnimMobile}
