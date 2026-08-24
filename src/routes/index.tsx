@@ -9,6 +9,7 @@ import { Pricing } from "@/components/site/Pricing";
 import { Faq } from "@/components/site/Faq";
 import { FinalCta } from "@/components/site/FinalCta";
 import { SectionVeil } from "@/components/site/SectionVeil";
+import { WhatsAppPrompt } from "@/components/site/WhatsAppPrompt";
 
 const title = "JVS Tech — Sites e sistemas que vendem todos os dias";
 const description =
@@ -32,6 +33,7 @@ function Index() {
   return (
     <main className="relative bg-background">
       <Nav />
+      <WhatsAppPrompt />
       <Hero />
       <Marquee />
       <ChapterTwo />
