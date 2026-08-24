@@ -23,10 +23,6 @@ const faqs = [
     a: "Sim. Entregamos painel de edição quando o projeto pede, e pequenas alterações estão incluídas nos planos de manutenção.",
   },
   {
-    q: "Vocês integram com WhatsApp, CRM e pagamentos?",
-    a: "Sim. Ligamos o site às ferramentas que já usa — WhatsApp, CRM, e-mail marketing, gateways de pagamento e automações internas.",
-  },
-  {
     q: "E se eu já tiver um site?",
     a: "Fazemos o diagnóstico gratuito, mostramos o que está a travar as conversões e propomos reformulação ou migração, mantendo o histórico de SEO.",
   },

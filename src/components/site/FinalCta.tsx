@@ -49,7 +49,7 @@ export function FinalCta() {
             Pronto para ter um site que <span className="text-brand">trabalha por si?</span>
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Conte-nos o que precisa e entramos em contacto em menos de 24h — com um
+            Conte-nos o que precisa e entramos em contacto em menos de 24h com um
             diagnóstico gratuito e um plano de ação claro. Sem qualquer compromisso.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">

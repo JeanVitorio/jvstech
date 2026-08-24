@@ -78,6 +78,25 @@ export function PackScroll() {
       let lastProgress = 0;
 
       /*
+       * Recoloca o lobo no cartão 01 e o mantém fora
+       * da passagem quando o visitante segue para Resultados.
+       */
+      const resetWolf = () => {
+        paw = 0;
+        lastProgress = 0;
+
+        if (video.readyState >= 1) {
+          video.currentTime = 0;
+        }
+
+        gsap.set(".pack-wolf", {
+          x: -wolfTravel / 2,
+          y: 0,
+          autoAlpha: 0,
+        });
+      };
+
+      /*
        * Garante que o navegador carregue os metadados
        * antes de tentarmos controlar o currentTime.
        */
@@ -126,12 +145,23 @@ export function PackScroll() {
 
           onUpdate: (self) => {
             /*
+             * Na descida, o lobo não interfere na leitura.
+             * Ele volta a caminhar quando o usuário sobe.
+             */
+            if (self.direction > 0) {
+              lastProgress = self.progress;
+              gsap.set(".pack-wolf", { autoAlpha: 0 });
+              return;
+            }
+
+            /*
              * O lobo continua andando para frente
-             * mesmo se o usuário voltar o scroll.
+             * durante o retorno pelos cartões.
              */
             paw += Math.abs(self.progress - lastProgress) * 14;
 
             lastProgress = self.progress;
+            gsap.set(".pack-wolf", { autoAlpha: 1 });
 
             /*
              * Controla o frame do vídeo de acordo
@@ -155,6 +185,11 @@ export function PackScroll() {
               y: Math.sin(paw * Math.PI * 2) * 6,
             });
           },
+          onEnterBack: (self) => {
+            lastProgress = self.progress;
+            gsap.set(".pack-wolf", { autoAlpha: 1 });
+          },
+          onLeave: resetWolf,
         },
       });
 
@@ -270,7 +305,9 @@ export function PackScroll() {
             pointer-events-none
             absolute
             bottom-[32vh]
+            invisible
             left-1/2
+            opacity-0
             z-30
             -translate-x-1/2
             md:bottom-[34vh]
