@@ -223,9 +223,9 @@ export function PackScroll() {
         </p>
 
         <h2 className="mt-3 font-display text-xl font-semibold leading-tight tracking-tight sm:text-2xl md:text-4xl">
-          Trabalhamos consigo desde o{" "}
+          Acompanhamos o seu negócio desde o{" "}
           <span className="text-brand">
-            primeiro contacto.
+            primeiro contacto ao resultado.
           </span>
         </h2>
 
