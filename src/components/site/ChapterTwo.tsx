@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import logoAnim from "@/assets/logo-anim.webm";
+import logoAnimMobile from "@/assets/logo-anim-mobile.webp";
 import { Services } from "./Services";
 import { PackScroll } from "./PackScroll";
 import { SectionVeil } from "./SectionVeil";
@@ -91,13 +92,11 @@ export function ChapterTwo() {
         <SectionVeil />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="logo-dock h-[22vh] w-[22vh]" />
-          <video
+          <img
             className="h-[16vh] w-[16vh] object-contain opacity-90 md:hidden"
-            src={logoAnim}
-            autoPlay
-            muted
-            loop
-            playsInline
+            src={logoAnimMobile}
+            alt=""
+            aria-hidden="true"
           />
         </div>
       </div>

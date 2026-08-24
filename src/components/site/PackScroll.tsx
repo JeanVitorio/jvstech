@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import wolfSide from "@/assets/caminhando_de_lado.webm";
+import wolfSideMobile from "@/assets/caminhando-de-lado-mobile.webp";
 
 const cards = [
   {
@@ -66,6 +67,13 @@ export function PackScroll() {
 
       if (!track || !video) return;
 
+      const finalCard = track.children.item(
+        cards.length - 1
+      ) as HTMLElement | null;
+
+      if (!finalCard) return;
+
+      const wolfTravel = 220;
       let paw = 0;
       let lastProgress = 0;
 
@@ -86,10 +94,16 @@ export function PackScroll() {
       }
 
       /*
-       * Distância que os cards irão percorrer.
+       * Encerra o percurso com o lobo centralizado sobre
+       * o cartão 08, sem avançar para o próximo ciclo.
        */
       const distance = () => {
-        return track.scrollWidth / 2;
+        const finalWolfX =
+          section.clientWidth / 2 + wolfTravel / 2;
+        const finalCardX =
+          finalCard.offsetLeft + finalCard.offsetWidth / 2;
+
+        return Math.max(0, finalCardX - finalWolfX);
       };
 
       /*
@@ -137,7 +151,7 @@ export function PackScroll() {
              * sensação de caminhada.
              */
             gsap.set(".pack-wolf", {
-              x: (self.progress - 0.5) * 220,
+              x: (self.progress - 0.5) * wolfTravel,
               y: Math.sin(paw * Math.PI * 2) * 6,
             });
           },
@@ -262,14 +276,28 @@ export function PackScroll() {
             md:bottom-[34vh]
           "
         >
-          <video
-            ref={videoRef}
+          <img
             className="
               block
               h-[16vh]
               w-auto
               object-contain
               drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
+              md:hidden
+            "
+            src={wolfSideMobile}
+            alt=""
+            aria-hidden="true"
+          />
+
+          <video
+            ref={videoRef}
+            className="
+              hidden
+              w-auto
+              object-contain
+              drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
+              md:block
               md:h-[26vh]
             "
             src={wolfSide}
