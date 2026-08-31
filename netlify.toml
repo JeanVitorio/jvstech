@@ -1,0 +1,27 @@
+# ---------------------------------------------------------
+# Rewrite (proxy) para o template de MECANICA
+# ---------------------------------------------------------
+
+[[redirects]]
+  from = "/mecanica/*"
+  to = "https://jvstechmecanica.netlify.app/:splat"
+  status = 200
+  force = true
+
+# ---------------------------------------------------------
+# Rewrite (proxy) para o template de CARROS
+# ---------------------------------------------------------
+[[redirects]]
+  from = "/carros"
+  to = "https://zailonsoftinst.netlify.app/:splat"
+  status = 200
+  force = true
+
+# ---------------------------------------------------------
+# Regra original do seu site (SPA fallback)
+# Precisa ficar por ULTIMO, pois e um "pega tudo"
+# ---------------------------------------------------------
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
