@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import logo from "@/assets/logo-jvs.png";
 
 const links = [
-  { href: "#servicos", label: "Serviços" },
-  { href: "#metodo", label: "Método" },
-  { href: "#resultados", label: "Resultados" },
+  { href: "#servicos", label: "Recursos" },
+  { href: "#metodo", label: "Como funciona" },
+  { href: "#resultados", label: "Benefícios" },
   { href: "#planos", label: "Planos" },
   { href: "#faq", label: "FAQ" },
 ];
@@ -31,7 +31,7 @@ export function Nav() {
         <a href="#topo" className="flex items-center gap-2 pl-2">
           <img src={logo} alt="Logo JVS Tech" className="h-8 w-8 object-contain" />
           <span className="font-display text-sm font-semibold tracking-tight">
-            JVS <span className="text-brand">Tech</span>
+            JVS <span className="text-brand">LeadFlow</span>
           </span>
         </a>
 
@@ -46,10 +46,10 @@ export function Nav() {
         </ul>
 
         <a
-          href="#orcamento"
+          href="/LeadFlow/login"
           className="rounded-full bg-brand px-5 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
         >
-          Pedir orçamento
+          Fazer login
         </a>
       </nav>
     </div>

@@ -49,7 +49,7 @@ const App = () => (
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
-                <BrowserRouter>
+                <BrowserRouter basename="/LeadFlow">
                   <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route element={<Protected><AppLayout /></Protected>}>

@@ -8,43 +8,43 @@ import wolfSideMobile from "@/assets/caminhando-de-lado-mobile.webp";
 const cards = [
   {
     n: "01",
-    t: "Conversa inicial",
-    d: "Ouvimos o seu negócio, os objetivos e o que precisa. Sem compromisso.",
+    t: "Defina o público",
+    d: "Configure o segmento, a localização e os critérios das empresas que deseja encontrar.",
   },
   {
     n: "02",
-    t: "Diagnóstico",
-    d: "Analisamos concorrência, público e o ponto exato onde o dinheiro está a escapar.",
+    t: "Crie o bot",
+    d: "Salve a estratégia de prospecção e escolha o colaborador responsável pelos novos leads.",
   },
   {
     n: "03",
-    t: "Proposta",
-    d: "Escopo claro: o que será feito, em quanto tempo e por quanto. Nada de surpresas.",
+    t: "Inicie a busca",
+    d: "O aplicativo executa a automação e pesquisa empresas dentro dos filtros definidos.",
   },
   {
     n: "04",
-    t: "Design",
-    d: "Mostramos como o seu site vai ficar. Só avançamos quando aprovar.",
+    t: "Receba os leads",
+    d: "Os contatos encontrados são enviados diretamente para o banco de dados da operação.",
   },
   {
     n: "05",
-    t: "Desenvolvimento",
-    d: "Código enxuto, Core Web Vitals no verde e integrações com WhatsApp, CRM e pagamento.",
+    t: "Qualifique",
+    d: "Revise as informações e concentre o esforço comercial nas oportunidades mais relevantes.",
   },
   {
     n: "06",
-    t: "Testes",
-    d: "Dispositivos reais, formulários, velocidade e SEO técnico revisados linha a linha.",
+    t: "Distribua",
+    d: "Organize os responsáveis e mantenha cada lead com o colaborador que fará o atendimento.",
   },
   {
     n: "07",
-    t: "Lançamento",
-    d: "Publicação acompanhada e monitorização desde o primeiro minuto no ar.",
+    t: "Acompanhe o funil",
+    d: "Mova as negociações pelas etapas e veja com clareza onde cada oportunidade está.",
   },
   {
     n: "08",
-    t: "Otimização",
-    d: "Medimos, cortamos o que não converte e reforçamos o que vende. Todos os meses.",
+    t: "Converta mais",
+    d: "Use os dados da operação para ajustar a prospecção e repetir o que gera resultado.",
   },
 ];
 
@@ -281,20 +281,19 @@ export function PackScroll() {
       {/* Título */}
       <div className="pack-head absolute left-5 right-5 top-[13vh] z-20 max-w-sm md:left-16 md:right-auto">
         <p className="label-xs text-primary">
-          ◆ O método
+          ◆ Como funciona
         </p>
 
         <h2 className="mt-3 font-display text-xl font-semibold leading-tight tracking-tight sm:text-2xl md:text-4xl">
-          Acompanhamos o seu negócio desde o{" "}
+          Um fluxo contínuo da busca até o{" "}
           <span className="text-brand">
-            primeiro contacto ao resultado.
+            fechamento da venda.
           </span>
         </h2>
 
         <p className="mt-3 text-[0.72rem] leading-relaxed text-muted-foreground md:text-xs">
-          Oito etapas do briefing ao lucro. Role para o lado
-          — a página só liberta o caminho depois do último
-          cartão.
+          Oito etapas conectam automação, equipe e acompanhamento.
+          Role para o lado para conhecer o fluxo completo.
         </p>
       </div>
 

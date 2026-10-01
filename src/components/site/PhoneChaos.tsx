@@ -3,28 +3,28 @@ import gsap from "gsap";
 
 const screens = [
   {
-    label: "Loja de moda",
-    metric: "+92%",
-    sub: "vendas mensais",
-    note: "E-commerce refeito do zero",
+    label: "Prospecção",
+    metric: "24h",
+    sub: "operação automatizada",
+    note: "Bots trabalhando conforme sua estratégia",
   },
   {
-    label: "Indústria",
-    metric: "−87%",
-    sub: "tempo de operação",
-    note: "Sistema interno sob medida",
+    label: "Centralização",
+    metric: "1 só",
+    sub: "painel de controle",
+    note: "Leads, bots e equipe no mesmo ambiente",
   },
   {
-    label: "Clínica",
-    metric: "+8",
-    sub: "contactos por dia",
-    note: "Landing page de captação",
+    label: "Organização",
+    metric: "Funil",
+    sub: "visual e prático",
+    note: "Negociações acompanhadas por etapa",
   },
   {
-    label: "Serviços B2B",
-    metric: "3.4x",
-    sub: "retorno em 90 dias",
-    note: "Site institucional + SEO",
+    label: "Colaboração",
+    metric: "Equipe",
+    sub: "com acesso definido",
+    note: "Responsáveis e permissões centralizados",
   },
 ];
 
@@ -133,20 +133,19 @@ export function PhoneChaos() {
         {/* TÍTULO */}
 
         <p className="label-xs text-primary">
-          ◆ Resultados
+          ◆ Benefícios
         </p>
 
         <h2 className="mx-auto mt-4 max-w-2xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-          Alguns dos trabalhos que{" "}
+          Mais controle para sua equipe{" "}
           <span className="text-brand">
-            já fizemos.
+            vender melhor.
           </span>
         </h2>
 
         <p className="mx-auto mt-4 max-w-lg text-[0.8rem] leading-relaxed text-muted-foreground md:text-sm">
-          Passe o mouse pelos ecrãs tal como um projeto sem
-          método, tudo se desorganiza. E volta ao lugar quando
-          existe estrutura.
+          O JVS LeadFlow reduz tarefas repetitivas e organiza as informações
+          que sua operação precisa para transformar contatos em vendas.
         </p>
 
         {/* ====================================================== */}
@@ -196,7 +195,7 @@ export function PhoneChaos() {
               <div className="relative mb-4 flex items-center justify-between">
 
                 <span className="text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-primary">
-                  Projeto
+                  LeadFlow
                 </span>
 
                 <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_12px_oklch(0.72_0.16_215_/_100%)]" />
@@ -310,31 +309,31 @@ export function PhoneChaos() {
 
           <div className="glass-card rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 text-left">
             <p className="font-display text-sm font-semibold text-brand">
-              Média de 21 dias
+              Prospecção automatizada
             </p>
 
             <p className="mt-1 text-[0.72rem] text-muted-foreground">
-              do briefing ao site no ar
+              para buscar novas empresas
             </p>
           </div>
 
           <div className="glass-card rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 text-left">
             <p className="font-display text-sm font-semibold text-brand">
-              100% responsivo
+              Gestão centralizada
             </p>
 
             <p className="mt-1 text-[0.72rem] text-muted-foreground">
-              testado em dispositivos reais
+              para leads, bots e usuários
             </p>
           </div>
 
           <div className="glass-card rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 text-left">
             <p className="font-display text-sm font-semibold text-brand">
-              Zero surpresa
+              Funil organizado
             </p>
 
             <p className="mt-1 text-[0.72rem] text-muted-foreground">
-              escopo e preço fechados antes
+              para acompanhar cada oportunidade
             </p>
           </div>
 

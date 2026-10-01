@@ -1,4 +1,17 @@
 # ---------------------------------------------------------
+# Aplicativo JVS LeadFlow incorporado ao site principal
+# ---------------------------------------------------------
+[[redirects]]
+  from = "/LeadFlow"
+  to = "/LeadFlow/"
+  status = 301
+
+[[redirects]]
+  from = "/LeadFlow/*"
+  to = "/LeadFlow/index.html"
+  status = 200
+
+# ---------------------------------------------------------
 # Rewrite (proxy) para o template de MECANICA
 # ---------------------------------------------------------
 

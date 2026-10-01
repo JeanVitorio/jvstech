@@ -46,21 +46,21 @@ export function FinalCta() {
           <div className="absolute" />
           <p className="label-xs text-primary">◆ Vamos começar</p>
           <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-            Pronto para ter um site que <span className="text-brand">trabalha por si?</span>
+            Pronto para transformar sua prospecção em <span className="text-brand">um fluxo de vendas?</span>
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Conte-nos o que precisa e entramos em contacto em menos de 24h com um
-            diagnóstico gratuito e um plano de ação claro. Sem qualquer compromisso.
+            Fale com a JVS e veja na prática como o LeadFlow pode automatizar a busca
+            por empresas e organizar o trabalho da sua equipe comercial.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <a
               href="https://wa.me/5546991163405"
               className="inline-flex items-center rounded-full bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
-              Falar no WhatsApp →
+              Agendar demonstração →
             </a>
             <span className="text-[0.7rem] text-muted-foreground">
-              Resposta em até 2h · Apenas 4 vagas por mês
+              Atendimento direto com a equipe JVS
             </span>
           </div>
         </div>
@@ -92,21 +92,22 @@ export function FinalCta() {
             <div className="flex items-center gap-2">
               <img src={logo} alt="" className="h-8 w-8 object-contain" />
               <p className="font-display text-base font-semibold">
-                JVS <span className="text-brand">Tech</span>
+                JVS <span className="text-brand">LeadFlow</span>
               </p>
             </div>
             <p className="mt-3 max-w-xs text-xs leading-relaxed text-muted-foreground">
-              Sites, landing pages e sistemas sob medida focados em conversão real.
+              Prospecção automatizada, gestão de leads e funil de vendas em um único sistema.
             </p>
           </div>
           <div>
             <p className="label-xs text-muted-foreground">Navegação</p>
             <ul className="mt-4 space-y-2 text-xs text-foreground/75">
-              <li><a className="hover:text-primary" href="#servicos">Serviços</a></li>
-              <li><a className="hover:text-primary" href="#metodo">Método</a></li>
-              <li><a className="hover:text-primary" href="#resultados">Resultados</a></li>
+              <li><a className="hover:text-primary" href="#servicos">Recursos</a></li>
+              <li><a className="hover:text-primary" href="#metodo">Como funciona</a></li>
+              <li><a className="hover:text-primary" href="#resultados">Benefícios</a></li>
               <li><a className="hover:text-primary" href="#planos">Planos</a></li>
               <li><a className="hover:text-primary" href="#faq">FAQ</a></li>
+              <li><a className="hover:text-primary" href="/LeadFlow/login">Login</a></li>
             </ul>
           </div>
           <div>

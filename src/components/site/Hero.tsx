@@ -3,9 +3,9 @@ import gsap from "gsap";
 import capa from "@/assets/video_da_capa.mp4";
 
 const stats = [
-  ["24h", "tempo de resposta"],
-  ["+40", "projetos entregues"],
-  ["1 mês", "de suporte grátis"],
+  ["24h", "prospecção ativa"],
+  ["1 painel", "para toda a operação"],
+  ["100%", "foco em oportunidades"],
 ];
 
 export function Hero() {
@@ -50,14 +50,14 @@ export function Hero() {
       <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-5 md:grid-cols-[1fr_minmax(200px,24vw)_1fr] md:gap-8 md:px-6">
         <div className="hero-left max-w-md space-y-5 md:space-y-6">
           <span className="label-xs inline-block rounded-full border border-border px-3 py-1 text-primary">
-            JVS Tech · Soluções digitais
+            JVS LeadFlow · Prospecção inteligente
           </span>
           <h1 className="font-display text-[2rem] font-semibold leading-[1.08] tracking-tight sm:text-4xl md:text-5xl">
-            Criamos o <span className="text-brand">seu site</span>, pensado para vender.
+            Encontre empresas e transforme contatos em <span className="text-brand">oportunidades reais.</span>
           </h1>
           <p className="text-[0.85rem] leading-relaxed text-muted-foreground md:text-sm">
-            Estudamos o seu mercado, os seus clientes e construímos uma estrutura digital
-            que trabalha por você todos os dias, sem pausa.
+            Automatize a busca por leads, organize sua equipe e acompanhe cada negociação
+            em um único sistema criado para acelerar suas vendas.
           </p>
         </div>
 
@@ -65,23 +65,23 @@ export function Hero() {
 
         <div className="hero-right max-w-md space-y-5 md:space-y-6 md:text-right">
           <span className="label-xs inline-block rounded-full border border-border px-3 py-1 text-accent">
-            Sites · Landing pages · Sistemas
+            Leads · Bots · Funil de vendas
           </span>
           <h2 className="font-display text-xl font-semibold leading-tight tracking-tight sm:text-2xl md:text-3xl">
-            Não vendemos páginas. Entregamos <span className="text-brand">excelência e qualidade</span>.
+            Menos trabalho manual. Mais tempo para <span className="text-brand">fechar negócios.</span>
           </h2>
           <div className="flex flex-col gap-3 md:items-end">
             <a
-              href="#orcamento"
+              href="/LeadFlow/login"
               className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3.5 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
-              Peça um orçamento grátis →
+              Acessar o JVS LeadFlow →
             </a>
             <a
               href="#servicos"
               className="inline-flex items-center justify-center rounded-full border border-border px-7 py-3.5 text-xs font-medium text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
             >
-              Os nossos serviços →
+              Conhecer os recursos →
             </a>
           </div>
         </div>

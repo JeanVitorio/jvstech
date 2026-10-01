@@ -4,50 +4,50 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const plans = [
   {
-    title: "Site Institucional",
-    desc: "Para o negócio que quer ser encontrado no Google e transmitir credibilidade aos seus clientes.",
+    title: "Prospecção automatizada",
+    desc: "Defina o perfil ideal de empresa e deixe os bots buscarem novas oportunidades para sua equipe.",
     marks: [
-      "Design exclusivo e adaptado a mobile",
-      "Otimizado para aparecer no Google",
-      "Suporte incluído após o lançamento",
+      "Filtros por segmento e localização",
+      "Execução contínua no aplicativo",
+      "Leads enviados direto para o painel",
     ],
   },
   {
-    title: "Soluções Personalizadas",
-    desc: "Sistemas sob medida para quem precisa operar sem depender de planilha ou trabalho manual.",
+    title: "Gestão de leads",
+    desc: "Centralize os contatos encontrados e mantenha as informações comerciais acessíveis para a equipe.",
     marks: [
-      "Painel administrativo próprio",
-      "Automação de processos internos",
-      "Integrações com o que já usa",
+      "Dados organizados em um só lugar",
+      "Responsável definido por lead",
+      "Histórico da operação comercial",
     ],
   },
   {
-    title: "E-commerce",
-    desc: "Loja online pronta para vender a qualquer hora, com pagamento e stock sob controlo.",
+    title: "Funil de vendas",
+    desc: "Acompanhe cada oportunidade desde o primeiro contato até o fechamento sem depender de planilhas.",
     marks: [
-      "Pagamentos integrados e seguros",
-      "Gestão de produtos e stock",
-      "Checkout pensado para converter",
+      "Etapas comerciais visuais",
+      "Movimentação simples entre fases",
+      "Visão clara das negociações",
     ],
   },
   {
-    title: "Landing Pages",
-    desc: "Páginas de campanha focadas num único objetivo: transformar visitas em contactos.",
+    title: "Bots de WhatsApp",
+    desc: "Apoie o primeiro contato com mensagens organizadas e uma operação integrada à prospecção.",
     marks: [
-      "Estrutura pensada para gerar contactos",
-      "Copy e ofertas testadas",
-      "Relatório mensal de performance",
+      "Configuração por nicho",
+      "Agenda semanal de execução",
+      "Acompanhamento pelo painel",
     ],
   },
   {
-    title: "White Labels",
-    desc: "Projetos prontos, já construídos e testados, disponíveis para a sua marca entrar e operar.",
+    title: "Equipe e permissões",
+    desc: "Distribua oportunidades entre colaboradores e mantenha cada usuário com o acesso adequado.",
     marks: [
-      "Entrega muito mais rápida",
-      "Personalizado com a sua identidade",
-      "Catálogo disponível sob consulta",
+      "Perfis de acesso por função",
+      "Gestão centralizada pelo líder",
+      "Distribuição de leads por responsável",
     ],
-    cta: "Ver White Labels disponíveis →",
+    cta: "Acessar a plataforma →",
   },
 ];
 
@@ -146,20 +146,19 @@ export function Services() {
           <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-1 w-32 rounded-full bg-brand md:w-40" />
 
           <p className="label-xs text-primary">
-            ◆ Serviços
+            ◆ Recursos
           </p>
 
           <h2 className="mx-auto mt-4 max-w-2xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-            Criação de sites profissionais{" "}
+            Tudo o que sua prospecção precisa{" "}
             <span className="text-brand">
-              pensados para si.
+              em um único fluxo.
             </span>
           </h2>
 
           <p className="mx-auto mt-4 max-w-xl text-[0.8rem] leading-relaxed text-muted-foreground md:text-sm">
-            Para negócios que querem marcar presença online —
-            estudamos o seu mercado, os seus clientes e
-            construímos algo pensado ao detalhe.
+            Da busca por empresas ao acompanhamento das oportunidades,
+            o JVS LeadFlow conecta automação, dados e equipe comercial.
           </p>
         </div>
 
@@ -203,7 +202,7 @@ export function Services() {
               {/* CTA */}
               {p.cta && (
                 <a
-                  href="#orcamento"
+                  href="/LeadFlow/login"
                   className="relative mt-6 inline-flex items-center justify-center rounded-full bg-brand px-5 py-3 text-[0.7rem] font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
                 >
                   {p.cta}

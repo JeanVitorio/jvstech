@@ -6,19 +6,19 @@ import cima from "@/assets/caminhando_de_cima.mp4";
 const blocks = [
   {
     tag: "O que trava",
-    body: "Site bonito que não vende. Formulário que ninguém preenche. Orçamento que se perde no WhatsApp. Planilha a segurar a operação inteira.",
+    body: "Busca manual, contatos espalhados, oportunidades sem responsável e planilhas que não mostram o andamento real da operação.",
   },
   {
     tag: "O que custa",
-    body: "Cada mês parado é receita entregue ao concorrente que respondeu primeiro e apareceu melhor na pesquisa.",
+    body: "Tempo da equipe gasto procurando empresas, duplicando informações e tentando descobrir quem já foi atendido.",
   },
   {
     tag: "O que fazemos",
-    body: "Reescrevemos a oferta, encurtamos o caminho até a compra e automatizamos o que consome o seu tempo.",
+    body: "Automatizamos a busca por leads e conectamos os dados ao fluxo comercial em um painel simples de acompanhar.",
   },
   {
     tag: "O que fica",
-    body: "Um ativo que trabalha 24h, mede tudo e melhora todos os meses. Previsível, rastreável e seu.",
+    body: "Uma operação centralizada, com responsáveis, histórico e visão clara das oportunidades em andamento.",
   },
 ];
 
@@ -131,10 +131,10 @@ export function Overhead() {
         </p>
 
         <h2 className="over-title mx-auto mt-4 max-w-3xl text-center font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-5xl">
-          O problema nunca é o site.
+          Prospecção sem processo gera esforço.
           <br />
           <span className="text-brand">
-            É o caminho até a venda.
+            O LeadFlow transforma esforço em fluxo.
           </span>
         </h2>
       </div>
@@ -291,10 +291,10 @@ export function Overhead() {
         <div className="grid grid-cols-2 gap-6 border-t border-border pt-10 md:grid-cols-4">
 
           {[
-            ["+40", "projetos entregues"],
-            ["8 anos", "de estrada"],
-            ["+92%", "de venda no melhor caso"],
-            ["2h", "tempo médio de resposta"],
+            ["Leads", "centralizados no painel"],
+            ["Bots", "configurados por estratégia"],
+            ["Funil", "organizado por etapa"],
+            ["Equipe", "com acessos e responsáveis"],
           ].map(([a, b]) => (
             <div key={b}>
               <p className="font-display text-2xl font-semibold text-brand md:text-3xl">

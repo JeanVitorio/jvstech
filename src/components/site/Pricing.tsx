@@ -4,29 +4,29 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const tiers = [
   {
-    name: "Base",
-    price: "R$ 249",
-    per: "/mês",
-    tagline: "Tranquilidade técnica",
-    desc: "Para quem quer o site sempre a funcionar, sem se preocupar com nada.",
+    name: "Demonstração",
+    price: "Grátis",
+    per: "",
+    tagline: "Conheça a plataforma",
+    desc: "Veja como o JVS LeadFlow pode se encaixar na rotina comercial da sua empresa.",
     marks: [
-      "Manutenção técnica contínua",
-      "Relatório mensal de performance",
-      "Pequenas alterações no site",
-      "Suporte direto via WhatsApp",
+      "Apresentação dos recursos",
+      "Entendimento da sua operação",
+      "Demonstração do fluxo de prospecção",
+      "Conversa direta com a JVS",
     ],
   },
   {
-    name: "Posicionamento",
-    price: "R$ 449",
-    per: "/mês",
-    tagline: "Crescimento acompanhado",
-    desc: "Para quem quer crescer online e aparecer antes da concorrência.",
+    name: "JVS LeadFlow",
+    price: "Sob consulta",
+    per: "",
+    tagline: "Prospecção completa",
+    desc: "Para empresas que querem automatizar a busca por leads e organizar o processo comercial.",
     marks: [
-      "Tudo o que está no plano Base",
-      "Estudo do mercado e dos concorrentes",
-      "Otimização para as pesquisas dos clientes",
-      "Reunião mensal de análise e ajuste",
+      "Bots de prospecção configuráveis",
+      "Gestão de leads e responsáveis",
+      "Funil de vendas integrado",
+      "Acesso para sua equipe",
     ],
     featured: true,
   },
@@ -64,13 +64,13 @@ export function Pricing() {
       <div className="price-aura pointer-events-none absolute left-1/2 top-1/3 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-primary/10 opacity-50 blur-[150px]" />
 
       <div className="relative mx-auto max-w-5xl px-5 text-center md:px-6">
-        <p className="label-xs text-primary">◆ Planos de acompanhamento</p>
+        <p className="label-xs text-primary">◆ Comece agora</p>
         <h2 className="mx-auto mt-4 max-w-2xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-          E depois do site estar pronto? <span className="text-brand">Ficamos consigo.</span>
+          Conheça o sistema antes de decidir. <span className="text-brand">Fale com a JVS.</span>
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-[0.82rem] leading-relaxed text-muted-foreground md:text-sm">
-          Manter um site pode parecer um desafio — por isso tratamos disso por si, para que
-          se foque no que realmente importa: o seu negócio.
+          Mostramos o funcionamento da plataforma e entendemos o volume e as necessidades
+          da sua operação para apresentar a configuração adequada.
         </p>
 
         <div className="price-grid mt-12 grid gap-5 text-left md:mt-14 md:grid-cols-2 md:gap-6">
@@ -125,7 +125,7 @@ export function Pricing() {
                     : "border border-border text-foreground/85 hover:border-primary hover:text-primary"
                 }`}
               >
-                Quero o plano {t.name} →
+                {t.name === "Demonstração" ? "Agendar demonstração" : "Falar sobre o LeadFlow"} →
               </a>
             </article>
           ))}

@@ -11,9 +11,9 @@ import { FinalCta } from "@/components/site/FinalCta";
 import { SectionVeil } from "@/components/site/SectionVeil";
 import { WhatsAppPrompt } from "@/components/site/WhatsAppPrompt";
 
-const title = "JVS Tech — Sites e sistemas que vendem todos os dias";
+const title = "JVS LeadFlow — Prospecção inteligente e gestão de vendas";
 const description =
-  "Criamos sites, landing pages e sistemas sob medida focados em conversão real. Estratégia, performance e UX que transformam visitantes em clientes pagantes.";
+  "Automatize a busca por empresas, centralize seus leads e acompanhe todo o funil de vendas com o JVS LeadFlow.";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,14 +37,14 @@ function Index() {
       <Hero />
       <Marquee />
       <ChapterTwo />
-      <SectionVeil label="resultados" flip />
+      <SectionVeil label="benefícios" flip />
       <PhoneChaos />
-      <SectionVeil label="diagnóstico" />
+      <SectionVeil label="operação" />
       <Overhead />
       <SectionVeil label="planos" flip />
       <Pricing />
       <Faq />
-      <SectionVeil label="contacto" flip />
+      <SectionVeil label="demonstração" flip />
       <FinalCta />
     </main>
   );

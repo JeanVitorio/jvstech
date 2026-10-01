@@ -10,7 +10,7 @@ import {
 
 const REMINDER_DELAY = 60_000;
 const WHATSAPP_URL =
-  "https://wa.me/5546991163405?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20JVS%20Tech%20e%20gostaria%20de%20conversar.";
+  "https://wa.me/5546991163405?text=Ol%C3%A1%21%20Gostaria%20de%20conhecer%20o%20JVS%20LeadFlow.";
 
 export function WhatsAppPrompt() {
   const [open, setOpen] = useState(false);
@@ -64,13 +64,13 @@ export function WhatsAppPrompt() {
           <p className="label-xs text-primary">◆ Podemos ajudar?</p>
 
           <DialogTitle className="mt-3 font-display text-2xl font-semibold leading-tight sm:text-3xl">
-            Vamos conversar sobre o{" "}
-            <span className="text-brand">seu projeto?</span>
+            Quer conhecer o{" "}
+            <span className="text-brand">JVS LeadFlow?</span>
           </DialogTitle>
 
           <DialogDescription className="mt-3 text-sm leading-relaxed">
-            Chame a JVS Tech no WhatsApp e conte o que precisa. A primeira
-            conversa é gratuita e sem compromisso.
+            Chame a JVS no WhatsApp e veja como automatizar sua prospecção
+            e organizar o fluxo comercial.
           </DialogDescription>
 
           <div className="mt-6 space-y-3 text-xs text-foreground/80">
@@ -79,7 +79,7 @@ export function WhatsAppPrompt() {
                 className="h-4 w-4 shrink-0 text-accent"
                 aria-hidden="true"
               />
-              Atendimento direto, sem formulários
+              Demonstração sem compromisso
             </p>
             <p className="flex items-center gap-2.5">
               <Clock3

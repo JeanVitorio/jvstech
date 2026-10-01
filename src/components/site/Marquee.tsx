@@ -1,9 +1,9 @@
 const items = [
-  "Resposta em menos de 24h",
-  "Orçamento grátis",
-  "Otimizado para o Google",
-  "Feito à sua medida",
-  "Suporte após o lançamento",
+  "Geração automática de leads",
+  "Funil de vendas visual",
+  "Gestão de colaboradores",
+  "Bots de prospecção",
+  "Dados centralizados",
 ];
 
 export function Marquee() {

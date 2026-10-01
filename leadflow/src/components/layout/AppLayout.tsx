@@ -43,8 +43,8 @@ export function AppLayout() {
         <div className="flex items-center gap-3 px-2 mb-8">
           <Logo size={36} />
           <div>
-            <h1 className="font-display font-bold text-lg leading-none">Prospecta Flow</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Robot</p>
+            <h1 className="font-display font-bold text-lg leading-none">JVS LeadFlow</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Prospecção inteligente</p>
           </div>
         </div>
 

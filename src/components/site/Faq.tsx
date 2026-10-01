@@ -7,24 +7,24 @@ import {
 
 const faqs = [
   {
-    q: "Quanto tempo demora a ficar pronto?",
-    a: "Uma landing page fica pronta em 5 a 10 dias. Sites institucionais entre 2 e 3 semanas. Sistemas dependem do escopo e são definidos na proposta, com prazos por etapa.",
+    q: "O que é o JVS LeadFlow?",
+    a: "É uma plataforma de prospecção que reúne bots, leads, colaboradores e funil de vendas para organizar a operação comercial em um único lugar.",
   },
   {
-    q: "Como funciona o pagamento?",
-    a: "50% para iniciar e 50% na entrega. Planos de manutenção são mensais e podem ser cancelados quando quiser, sem multa.",
+    q: "Como os leads são encontrados?",
+    a: "Você configura os critérios da prospecção e o aplicativo executa a busca. Os contatos encontrados são enviados para o painel da equipe.",
   },
   {
-    q: "O site vai aparecer no Google?",
-    a: "Entregamos toda a estrutura técnica de SEO: velocidade, semântica, metadados, sitemap e dados estruturados. O plano Posicionamento cuida do trabalho contínuo de conteúdo e palavras-chave.",
+    q: "Posso distribuir leads entre colaboradores?",
+    a: "Sim. O líder pode criar usuários, definir acessos e indicar o responsável por cada bot ou oportunidade.",
   },
   {
-    q: "Eu consigo alterar o conteúdo depois?",
-    a: "Sim. Entregamos painel de edição quando o projeto pede, e pequenas alterações estão incluídas nos planos de manutenção.",
+    q: "Preciso instalar alguma coisa?",
+    a: "O painel funciona pela web. Para executar os bots de prospecção, o aplicativo do JVS LeadFlow deve ser instalado em um computador ou servidor Windows.",
   },
   {
-    q: "E se eu já tiver um site?",
-    a: "Fazemos o diagnóstico gratuito, mostramos o que está a travar as conversões e propomos reformulação ou migração, mantendo o histórico de SEO.",
+    q: "Como conheço o sistema?",
+    a: "Entre em contato com a JVS para agendar uma demonstração. Apresentamos o fluxo completo e avaliamos a configuração adequada para sua operação.",
   },
 ];
 
@@ -39,7 +39,7 @@ export function Faq() {
           <span className="text-brand">Perguntas</span> Frequentes
         </h2>
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Tudo o que precisa de saber antes de pedir o seu orçamento.
+          As principais informações para entender como o JVS LeadFlow funciona.
         </p>
 
         <Accordion type="single" collapsible className="mt-12 space-y-3">

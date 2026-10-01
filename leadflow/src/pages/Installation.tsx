@@ -105,7 +105,7 @@ export default function Installation() {
     <div className="max-w-5xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Instalação"
-        subtitle="Baixe e instale o Prospecta Flow no servidor sem configurar Python, Node.js ou bibliotecas."
+        subtitle="Baixe e instale o JVS LeadFlow no servidor sem configurar Python, Node.js ou bibliotecas."
       />
 
       <Card className="relative overflow-hidden p-6 sm:p-8 mb-6">
@@ -117,7 +117,7 @@ export default function Installation() {
                 <Monitor className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="font-display text-2xl font-bold">Prospecta Flow para Windows</h2>
+                <h2 className="font-display text-2xl font-bold">JVS LeadFlow para Windows</h2>
                 <p className="text-sm text-muted-foreground">Instalador completo para Windows 10 e 11 — 64 bits</p>
                 <Badge variant="outline" className="mt-2 border-accent/40 text-accent">
                   Versão atual: {appVersion}
