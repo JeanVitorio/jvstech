@@ -1,0 +1,159 @@
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  try {
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return json({ error: 'Autorização necessária' }, 401);
+    }
+
+    const jwt = authHeader.substring(7); // Remove 'Bearer ' prefix
+    
+    const userClient = createClient(SUPABASE_URL, ANON, {
+      global: { headers: { Authorization: `Bearer ${jwt}` } },
+    });
+    
+    const { data: { user: caller }, error: authError } = await userClient.auth.getUser();
+    if (authError || !caller) {
+      return json({ error: 'Sessão inválida ou expirada' }, 401);
+    }
+
+    // A criação de acessos é exclusiva de usuários com papel de líder.
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+    const { data: roles, error: rolesError } = await admin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', caller.id);
+    
+    if (rolesError) {
+      console.error('Error fetching caller roles:', rolesError);
+      return json({ error: 'Erro ao verificar permissões' }, 500);
+    }
+
+    const callerRoles = (roles ?? []).map((r: { role: string }) => r.role);
+    if (!callerRoles.includes('leader')) {
+      return json({ error: 'Apenas líderes podem criar usuários' }, 403);
+    }
+
+    const body = await req.json();
+    const {
+      email,
+      password,
+      name,
+      role = 'collaborator',
+      position,
+      phone,
+      hourly_rate,
+      contract_start,
+      contract_end,
+      team_ids = [],
+    } = body;
+
+    if (!email || !password || !name) {
+      return json({ error: 'Campos obrigatórios: email, password, name' }, 400);
+    }
+    if (password.length < 6) {
+      return json({ error: 'Senha deve ter no mínimo 6 caracteres' }, 400);
+    }
+    if (!['collaborator', 'manager', 'commercial', 'leader'].includes(role)) {
+      return json({ error: 'Nível inválido' }, 400);
+    }
+
+    // Create auth user
+    const { data: created, error: createErr } = await admin.auth.admin.createUser({
+      email: email.trim().toLowerCase(),
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    });
+    if (createErr || !created.user) {
+      return json({ error: createErr?.message ?? 'Falha ao criar usuário' }, 400);
+    }
+    const newUserId = created.user.id;
+
+    // O projeto não possui trigger de criação de profile para novos usuários.
+    // O upsert garante que toda conta do Auth também apareça nas telas da web.
+    const { error: profileError } = await admin.from('profiles').upsert({
+      id: newUserId,
+      email: email.trim().toLowerCase(),
+      name,
+      position: position?.trim() || null,
+      phone: phone?.trim() || null,
+      hourly_rate: typeof hourly_rate === 'number' ? hourly_rate : null,
+      contract_start: contract_start || null,
+      contract_end: contract_end || null,
+      is_active: true,
+    }, { onConflict: 'id' });
+
+    if (profileError) {
+      console.error('Error updating profile:', profileError);
+      await admin.auth.admin.deleteUser(newUserId);
+      return json({ error: 'Falha ao criar o perfil do usuário' }, 500);
+    }
+
+    // Set role atomically: first delete any existing, then insert the chosen role
+    // Note: Due to auth trigger, a default 'collaborator' role might be auto-inserted
+    const { error: deleteError } = await admin
+      .from('user_roles')
+      .delete()
+      .eq('user_id', newUserId);
+
+    if (deleteError) {
+      console.error('Error deleting old roles:', deleteError);
+    }
+
+    const { error: insertError } = await admin
+      .from('user_roles')
+      .insert([{ user_id: newUserId, role }]);
+
+    if (insertError) {
+      console.error('Error inserting role:', insertError);
+      await admin.auth.admin.deleteUser(newUserId);
+      return json({ error: 'Falha ao atribuir nível de acesso' }, 500);
+    }
+
+    // Add to teams if specified
+    if (Array.isArray(team_ids) && team_ids.length > 0) {
+      const teamRows = team_ids.map((tid: string) => ({
+        team_id: tid,
+        user_id: newUserId,
+        role_in_team: role === 'manager' ? 'manager' : 'member',
+      }));
+      
+      const { error: teamError } = await admin
+        .from('team_members')
+        .insert(teamRows);
+
+      if (teamError) {
+        console.error('Error adding to teams:', teamError);
+        // Don't fail the entire operation for this
+      }
+    }
+
+    return json({ ok: true, user_id: newUserId });
+  } catch (e: unknown) {
+    console.error('Unexpected error in create-user:', e);
+    return json({
+      error: e instanceof Error ? e.message : 'Erro interno do servidor',
+    }, 500);
+  }
+});
+
+function json(b: unknown, status = 200) {
+  return new Response(JSON.stringify(b), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
