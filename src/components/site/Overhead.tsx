@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import cima from "@/assets/caminhando_de_cima.mp4";
+import { useVideoVisibility } from "@/hooks/use-video-visibility";
 
 const blocks = [
   {
@@ -24,6 +25,8 @@ const blocks = [
 
 export function Overhead() {
   const root = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useVideoVisibility(videoRef);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -153,6 +156,7 @@ export function Overhead() {
           <div className="relative flex items-center justify-center overflow-hidden">
 
             <video
+              ref={videoRef}
               className="
                 over-video
                 block
@@ -163,11 +167,10 @@ export function Overhead() {
                 md:max-w-[520px]
               "
               src={cima}
-              autoPlay
               muted
               loop
               playsInline
-              preload="auto"
+              preload="metadata"
             />
 
             {/* Fade lateral */}

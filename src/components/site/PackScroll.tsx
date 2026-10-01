@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import wolfSide from "@/assets/caminhando_de_lado.webm";
 import wolfSideMobile from "@/assets/caminhando-de-lado-mobile.webp";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const cards = [
   {
@@ -51,6 +52,7 @@ const cards = [
 export function PackScroll() {
   const root = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -65,7 +67,7 @@ export function PackScroll() {
 
       const video = videoRef.current;
 
-      if (!track || !video) return;
+      if (!track) return;
 
       const finalCard = track.children.item(
         cards.length - 1
@@ -87,7 +89,7 @@ export function PackScroll() {
         paw = 0;
         lastProgress = 0;
 
-        if (video.readyState >= 1) {
+        if (video && video.readyState >= 1) {
           video.currentTime = 0;
         }
 
@@ -105,14 +107,14 @@ export function PackScroll() {
        * antes de tentarmos controlar o currentTime.
        */
       const prepareVideo = () => {
-        if (video.readyState >= 1) {
+        if (video && video.readyState >= 1) {
           video.currentTime = 0;
         }
       };
 
-      if (video.readyState >= 1) {
+      if (video && video.readyState >= 1) {
         prepareVideo();
-      } else {
+      } else if (video) {
         video.addEventListener("loadedmetadata", prepareVideo);
       }
 
@@ -170,6 +172,7 @@ export function PackScroll() {
              * com o movimento do scroll.
              */
             if (
+              video &&
               video.readyState >= 2 &&
               Number.isFinite(video.duration) &&
               video.duration > 0
@@ -247,7 +250,7 @@ export function PackScroll() {
       ScrollTrigger.refresh();
 
       return () => {
-        video.removeEventListener(
+        video?.removeEventListener(
           "loadedmetadata",
           prepareVideo
         );
@@ -259,7 +262,7 @@ export function PackScroll() {
     }, root);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
 
   /*
    * Duplica os cards para criar o efeito de loop.
@@ -337,35 +340,37 @@ export function PackScroll() {
             md:bottom-[34vh]
           "
         >
-          <img
-            className="
-              block
-              h-[16vh]
-              w-auto
-              object-contain
-              drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
-              md:hidden
-            "
-            src={wolfSideMobile}
-            alt=""
-            aria-hidden="true"
-          />
-
-          <video
-            ref={videoRef}
-            className="
-              hidden
-              w-auto
-              object-contain
-              drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
-              md:block
-              md:h-[26vh]
-            "
-            src={wolfSide}
-            muted
-            playsInline
-            preload="auto"
-          />
+          {isMobile ? (
+            <img
+              className="
+                block
+                h-[16vh]
+                w-auto
+                object-contain
+                drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
+                md:hidden
+              "
+              src={wolfSideMobile}
+              alt=""
+              aria-hidden="true"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              className="
+                hidden
+                w-auto
+                object-contain
+                drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
+                md:block
+                md:h-[26vh]
+              "
+              src={wolfSide}
+              muted
+              playsInline
+              preload="metadata"
+            />
+          )}
 
           {/* Sombra/glow abaixo das patas */}
           <div

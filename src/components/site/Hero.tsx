@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import capa from "@/assets/video_da_capa.mp4";
+import { useVideoVisibility } from "@/hooks/use-video-visibility";
 
 const stats = [
   ["24h", "prospecção ativa"],
@@ -10,6 +11,8 @@ const stats = [
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useVideoVisibility(videoRef);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -37,12 +40,13 @@ export function Hero() {
       {/* front-walking wolf splitting the screen */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
         <video
+          ref={videoRef}
           className="hero-video wolf-video h-[52vh] w-auto object-contain opacity-45 md:h-[86vh] md:opacity-100"
           src={capa}
-          autoPlay
           muted
           loop
           playsInline
+          preload="metadata"
         />
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_38%,var(--background)_88%)]" />

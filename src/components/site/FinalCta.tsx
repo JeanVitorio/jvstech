@@ -2,10 +2,13 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import matilha from "@/assets/caminhando_com_os_lobos_vermelho_e_branco_ao_lado.mp4";
-import logo from "@/assets/logo-jvs.png";
+import logo from "@/assets/logo-jvs-optimized.webp";
+import { useVideoVisibility } from "@/hooks/use-video-visibility";
 
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useVideoVisibility(videoRef);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -76,12 +79,13 @@ export function FinalCta() {
 
       <div className="relative mt-8">
         <video
+          ref={videoRef}
           className="cta-video wolf-video mx-auto w-full max-w-5xl"
           src={matilha}
-          autoPlay
           muted
           loop
           playsInline
+          preload="metadata"
         />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,var(--background)_0%,transparent_22%,transparent_62%,var(--background)_97%)]" />
       </div>

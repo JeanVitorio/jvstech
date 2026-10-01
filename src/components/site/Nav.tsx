@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/logo-jvs.png";
+import logo from "@/assets/logo-jvs-optimized.webp";
 
 const links = [
   { href: "#servicos", label: "Recursos" },
