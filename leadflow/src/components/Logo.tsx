@@ -1,4 +1,4 @@
-import logo from "@/assets/logo-optimized.webp";
+import logo from "@/assets/logo-jvs-wolf.webp";
 
 export function Logo({ size = 32, className = "" }: { size?: number; className?: string }) {
   return (

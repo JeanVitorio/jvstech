@@ -283,7 +283,7 @@ export default function SalesFunnel() {
     if (!stageForm?.name?.trim()) return toast.error("Nome da etapa obrigatório");
     const payload = {
       name: stageForm.name.trim(),
-      color: stageForm.color || "#6366f1",
+      color: stageForm.color || "#FF6500",
       position: Number(stageForm.position ?? stages.length),
       is_won: false,
       is_lost: !!stageForm.is_lost,
@@ -340,7 +340,7 @@ export default function SalesFunnel() {
               </SelectContent>
             </Select>
           )}
-          {isLeader && <Button variant="outline" onClick={() => setStageForm({ color: "#6366f1", position: stages.length })} className="gap-2"><Plus className="w-4 h-4" /> Nova etapa</Button>}
+          {isLeader && <Button variant="outline" onClick={() => setStageForm({ color: "#FF6500", position: stages.length })} className="gap-2"><Plus className="w-4 h-4" /> Nova etapa</Button>}
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild><Button className="gap-2"><Plus className="w-4 h-4" /> Novo lead</Button></DialogTrigger>
             <DialogContent className="max-w-md w-full max-h-[85vh] flex flex-col overflow-hidden">
@@ -461,7 +461,7 @@ export default function SalesFunnel() {
           <div className="grid gap-3">
             <div><Label>Nome</Label><Input value={stageForm?.name ?? ""} onChange={e => setStageForm(f => ({ ...f!, name: e.target.value }))} /></div>
             <div className="grid grid-cols-2 gap-2">
-              <div><Label>Cor</Label><Input type="color" value={stageForm?.color ?? "#6366f1"} onChange={e => setStageForm(f => ({ ...f!, color: e.target.value }))} /></div>
+              <div><Label>Cor</Label><Input type="color" value={stageForm?.color ?? "#FF6500"} onChange={e => setStageForm(f => ({ ...f!, color: e.target.value }))} /></div>
               <div><Label>Posição</Label><Input type="number" value={stageForm?.position ?? 0} onChange={e => setStageForm(f => ({ ...f!, position: Number(e.target.value) }))} /></div>
             </div>
           </div>

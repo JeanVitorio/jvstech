@@ -167,7 +167,7 @@ export function Services() {
           {plans.map((p) => (
             <article
               key={p.title}
-              className="svc-card glass-card group relative flex flex-col overflow-hidden rounded-2xl border border-primary/25 p-6 shadow-[0_20px_60px_-40px_oklch(0.72_0.16_215_/_80%)] transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-[var(--glow-ice)] md:p-7"
+              className="svc-card glass-card group relative flex flex-col overflow-hidden rounded-2xl border border-primary/25 p-6 shadow-[0_20px_60px_-40px_rgb(255_101_0_/_75%)] transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/60 hover:shadow-[var(--glow-ice)] md:p-7"
             >
               {/* Glow do card */}
               <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl transition-opacity duration-500 group-hover:bg-primary/20" />

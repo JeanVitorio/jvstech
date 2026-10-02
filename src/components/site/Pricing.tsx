@@ -79,7 +79,7 @@ export function Pricing() {
               key={t.name}
               className={`price-card group relative overflow-hidden rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-2 md:p-9 ${
                 t.featured
-                  ? "border border-primary/60 bg-[linear-gradient(165deg,oklch(0.28_0.08_235_/_95%),oklch(0.16_0.03_240_/_95%))] shadow-[var(--glow-ice)]"
+                  ? "border border-primary/60 bg-[linear-gradient(165deg,#171717_0%,#050505_100%)] shadow-[var(--glow-ice)]"
                   : "glass-card border-primary/25"
               }`}
             >

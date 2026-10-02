@@ -35,7 +35,7 @@ export function Hero() {
       className="relative min-h-screen overflow-hidden bg-background pb-24 pt-24 md:pt-28"
     >
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-70" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,oklch(0.5_0.15_230_/_25%),transparent_70%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgb(255_101_0_/_24%),transparent_70%)]" />
 
       {/* front-walking wolf splitting the screen */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
@@ -106,7 +106,7 @@ export function Hero() {
           className="hero-arc h-[46vh] w-[130vw] rounded-[50%]"
           style={{
             background:
-              "radial-gradient(closest-side, oklch(0.92 0.1 200 / 90%), oklch(0.72 0.16 215 / 45%) 45%, transparent 72%)",
+              "radial-gradient(closest-side, rgb(255 176 0 / 92%), rgb(255 101 0 / 50%) 45%, transparent 72%)",
             filter: "blur(6px)",
           }}
         />

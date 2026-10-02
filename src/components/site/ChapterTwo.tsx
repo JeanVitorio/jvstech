@@ -77,9 +77,9 @@ export function ChapterTwo() {
       {!isMobile ? (
         <div className="pointer-events-none absolute right-[3vw] top-[18vh] z-30 hidden md:block">
           <div className="brand-mark relative h-[22vh] w-[22vh]">
-            <div className="brand-halo absolute inset-0 rounded-full bg-[radial-gradient(circle,oklch(0.72_0.16_215_/_45%),transparent_68%)]" />
+            <div className="brand-halo absolute inset-0 rounded-full bg-[radial-gradient(circle,rgb(255_101_0_/_48%),transparent_68%)]" />
             <video
-              className="relative h-full w-full object-contain drop-shadow-[0_0_40px_oklch(0.72_0.16_215_/_55%)]"
+              className="fire-media relative h-full w-full object-contain drop-shadow-[0_0_40px_rgb(255_101_0_/_60%)]"
               src={logoAnim}
               muted
               playsInline
@@ -98,7 +98,7 @@ export function ChapterTwo() {
           <div className="logo-dock absolute left-1/2 top-1/2 h-[22vh] w-[22vh] -translate-x-1/2 -translate-y-1/2" />
           {isMobile ? (
             <img
-              className="h-[16vh] w-[16vh] object-contain opacity-90 md:hidden"
+              className="fire-media h-[16vh] w-[16vh] object-contain opacity-90 md:hidden"
               src={logoAnimMobile}
               alt=""
               aria-hidden="true"

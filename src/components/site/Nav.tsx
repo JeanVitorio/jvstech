@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/logo-jvs-optimized.webp";
+import logo from "@/assets/logo-jvs-wolf.webp";
 
 const links = [
   { href: "#servicos", label: "Recursos" },
@@ -24,7 +24,7 @@ export function Nav() {
       <nav
         className={`pointer-events-auto flex w-full max-w-5xl items-center justify-between rounded-full border px-3 py-2 transition-all duration-500 ${
           solid
-            ? "border-border bg-background/80 shadow-[0_10px_40px_-20px_oklch(0.72_0.16_215_/_60%)] backdrop-blur-xl"
+            ? "border-border bg-background/80 shadow-[0_10px_40px_-20px_rgb(255_101_0_/_65%)] backdrop-blur-xl"
             : "border-transparent bg-transparent"
         }`}
       >

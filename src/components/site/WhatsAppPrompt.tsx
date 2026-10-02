@@ -48,7 +48,7 @@ export function WhatsAppPrompt() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-[calc(100%-2rem)] overflow-hidden rounded-3xl border-primary/35 bg-[linear-gradient(160deg,oklch(0.18_0.03_235),oklch(0.115_0.018_240))] p-0 shadow-[0_30px_100px_-20px_oklch(0.72_0.16_215_/_55%)] sm:max-w-md">
+      <DialogContent className="w-[calc(100%-2rem)] overflow-hidden rounded-3xl border-primary/35 bg-[linear-gradient(160deg,#171717_0%,#050505_100%)] p-0 shadow-[0_30px_100px_-20px_rgb(255_101_0_/_60%)] sm:max-w-md">
         <div className="absolute inset-x-8 top-0 h-1 rounded-full bg-brand" />
         <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-accent/15 blur-[90px]" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-56 w-56 rounded-full bg-primary/15 blur-[90px]" />

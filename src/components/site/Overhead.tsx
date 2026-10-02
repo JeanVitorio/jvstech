@@ -158,6 +158,7 @@ export function Overhead() {
             <video
               ref={videoRef}
               className="
+                fire-media
                 over-video
                 block
                 h-auto
@@ -215,15 +216,15 @@ export function Overhead() {
                   rounded-2xl
                   border
                   border-primary/35
-                  bg-[linear-gradient(145deg,oklch(0.19_0.04_235_/_98%),oklch(0.12_0.025_240_/_98%))]
+                  bg-[linear-gradient(145deg,#171717_0%,#050505_100%)]
                   p-6
                   opacity-100
-                  shadow-[0_20px_60px_-30px_oklch(0.72_0.16_215_/_60%)]
+                  shadow-[0_20px_60px_-30px_rgb(255_101_0_/_65%)]
                   transition-all
                   duration-300
                   hover:-translate-y-1
                   hover:border-primary/70
-                  hover:shadow-[0_25px_70px_-25px_oklch(0.72_0.16_215_/_80%)]
+                  hover:shadow-[0_25px_70px_-25px_rgb(255_45_0_/_75%)]
                   md:p-7
                 "
               >
@@ -258,7 +259,7 @@ export function Overhead() {
                     w-16
                     rounded-full
                     bg-brand
-                    shadow-[0_0_14px_oklch(0.72_0.16_215_/_60%)]
+                    shadow-[0_0_14px_rgb(255_101_0_/_65%)]
                     transition-all
                     duration-500
                     group-hover:w-24

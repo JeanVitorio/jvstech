@@ -164,14 +164,14 @@ export function PhoneChaos() {
                 rounded-3xl
                 border
                 border-primary/50
-                bg-[linear-gradient(145deg,oklch(0.27_0.055_235_/_100%),oklch(0.18_0.035_240_/_100%))]
+                bg-[linear-gradient(145deg,#171717_0%,#050505_100%)]
                 p-4
                 opacity-100
-                shadow-[0_25px_70px_-25px_oklch(0.72_0.16_215_/_70%)]
+                shadow-[0_25px_70px_-25px_rgb(255_101_0_/_70%)]
                 transition-shadow
                 duration-300
                 hover:border-primary
-                hover:shadow-[0_30px_90px_-25px_oklch(0.72_0.16_215_/_95%)]
+                hover:shadow-[0_30px_90px_-25px_rgb(255_45_0_/_90%)]
                 md:p-5
               "
             >
@@ -184,7 +184,7 @@ export function PhoneChaos() {
                   absolute
                   inset-0
                   rounded-3xl
-                  bg-[radial-gradient(circle_at_50%_0%,oklch(0.72_0.16_215_/_18%),transparent_55%)]
+                  bg-[radial-gradient(circle_at_50%_0%,rgb(255_101_0_/_20%),transparent_55%)]
                 "
               />
 
@@ -198,7 +198,7 @@ export function PhoneChaos() {
                   LeadFlow
                 </span>
 
-                <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_12px_oklch(0.72_0.16_215_/_100%)]" />
+                <span className="h-2 w-2 rounded-full bg-brand shadow-[0_0_12px_rgb(255_101_0_/_100%)]" />
 
               </div>
 
@@ -217,9 +217,9 @@ export function PhoneChaos() {
                   rounded-[1.9rem]
                   border
                   border-primary/60
-                  bg-[linear-gradient(160deg,oklch(0.42_0.075_235_/_100%),oklch(0.25_0.045_240_/_100%))]
+                  bg-[linear-gradient(160deg,#292929_0%,#171717_100%)]
                   p-2.5
-                  shadow-[0_25px_60px_-20px_oklch(0.72_0.16_215_/_90%)]
+                  shadow-[0_25px_60px_-20px_rgb(255_101_0_/_85%)]
                 "
               >
 
@@ -238,7 +238,7 @@ export function PhoneChaos() {
                     rounded-[1.4rem]
                     border
                     border-white/20
-                    bg-[linear-gradient(145deg,oklch(0.31_0.05_235_/_100%),oklch(0.22_0.035_240_/_100%))]
+                    bg-[linear-gradient(145deg,#171717_0%,#050505_100%)]
                     px-3
                     text-center
                   "
@@ -246,7 +246,7 @@ export function PhoneChaos() {
 
                   {/* Métrica */}
 
-                  <p className="font-display text-2xl font-bold text-brand drop-shadow-[0_0_14px_oklch(0.72_0.16_215_/_60%)] md:text-[1.7rem]">
+                  <p className="font-display text-2xl font-bold text-brand drop-shadow-[0_0_14px_rgb(255_101_0_/_65%)] md:text-[1.7rem]">
                     {s.metric}
                   </p>
 
@@ -260,7 +260,7 @@ export function PhoneChaos() {
 
                   <div className="mt-5 space-y-2">
 
-                    <div className="h-1.5 w-full rounded-full bg-brand shadow-[0_0_10px_oklch(0.72_0.16_215_/_60%)]" />
+                    <div className="h-1.5 w-full rounded-full bg-brand shadow-[0_0_10px_rgb(255_101_0_/_65%)]" />
 
                     <div className="h-1.5 w-2/3 rounded-full bg-primary/75" />
 
@@ -272,7 +272,7 @@ export function PhoneChaos() {
 
                 {/* Glow */}
 
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(ellipse_at_top,oklch(0.72_0.16_215_/_40%),transparent_70%)]" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(ellipse_at_top,rgb(255_176_0_/_40%),transparent_70%)]" />
 
                 {/* Reflexo */}
 

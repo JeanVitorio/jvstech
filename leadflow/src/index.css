@@ -6,111 +6,111 @@
 
 @layer base {
   :root {
-    /* LIGHT — limpo, alto contraste, inspirado em Notion */
-    --background: 210 30% 98%;
-    --foreground: 222 47% 11%;
+    /* LIGHT — neutro, com a identidade fogo da JVS WOLF */
+    --background: 0 0% 96%;
+    --foreground: 0 0% 2%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 2%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 2%;
 
-    --primary: 217 91% 55%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 195 95% 60%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 2%;
+    --primary-glow: 41 100% 50%;
 
-    --secondary: 210 25% 94%;
-    --secondary-foreground: 222 47% 15%;
+    --secondary: 0 0% 91%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 210 25% 95%;
-    --muted-foreground: 215 16% 45%;
+    --muted: 0 0% 91%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 195 90% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 41 100% 50%;
+    --accent-foreground: 0 0% 2%;
 
     --success: 152 70% 40%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --warning: 41 100% 50%;
+    --warning-foreground: 0 0% 2%;
+    --destructive: 11 100% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 90%;
-    --input: 215 20% 92%;
-    --ring: 217 91% 55%;
+    --border: 0 0% 64%;
+    --input: 0 0% 91%;
+    --ring: 24 100% 50%;
 
     --radius: 0.75rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%), hsl(195 95% 60%));
-    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 30% 98%));
-    --gradient-glow: radial-gradient(ellipse at top, hsl(195 95% 60% / 0.15), transparent 60%);
-    --shadow-sm: 0 1px 2px hsl(222 47% 11% / 0.04);
-    --shadow-md: 0 4px 12px hsl(222 47% 11% / 0.06);
-    --shadow-lg: 0 10px 40px -10px hsl(217 91% 55% / 0.18);
-    --shadow-glow: 0 0 30px hsl(195 95% 60% / 0.25);
+    --gradient-primary: linear-gradient(135deg, hsl(41 100% 50%), hsl(24 100% 50%), hsl(11 100% 50%), hsl(15 100% 43%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 96%));
+    --gradient-glow: radial-gradient(ellipse at top, hsl(24 100% 50% / 0.18), transparent 60%);
+    --shadow-sm: 0 1px 2px hsl(0 0% 2% / 0.05);
+    --shadow-md: 0 4px 12px hsl(0 0% 2% / 0.08);
+    --shadow-lg: 0 10px 40px -10px hsl(24 100% 50% / 0.28);
+    --shadow-glow: 0 0 30px hsl(24 100% 50% / 0.32);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 30% 25%;
-    --sidebar-primary: 217 91% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 25% 95%;
-    --sidebar-accent-foreground: 217 91% 55%;
-    --sidebar-border: 215 20% 92%;
-    --sidebar-ring: 217 91% 55%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 24 100% 50%;
+    --sidebar-primary-foreground: 0 0% 2%;
+    --sidebar-accent: 24 100% 95%;
+    --sidebar-accent-foreground: 24 100% 45%;
+    --sidebar-border: 0 0% 84%;
+    --sidebar-ring: 24 100% 50%;
   }
 
   .dark {
-    /* DARK — bioluminescent, profundo, inspirado na logo */
-    --background: 222 47% 6%;
-    --foreground: 210 30% 95%;
+    /* DARK — paleta oficial JVS WOLF */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 96%;
 
-    --card: 222 40% 9%;
-    --card-foreground: 210 30% 95%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 222 45% 8%;
-    --popover-foreground: 210 30% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 6%;
-    --primary-glow: 195 100% 65%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 2%;
+    --primary-glow: 41 100% 50%;
 
-    --secondary: 222 30% 14%;
-    --secondary-foreground: 210 30% 95%;
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 96%;
 
-    --muted: 222 30% 13%;
-    --muted-foreground: 215 16% 62%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 64%;
 
-    --accent: 195 95% 55%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 41 100% 50%;
+    --accent-foreground: 0 0% 2%;
 
     --success: 152 65% 50%;
-    --success-foreground: 222 47% 6%;
-    --warning: 38 95% 60%;
-    --warning-foreground: 222 47% 6%;
-    --destructive: 0 75% 60%;
+    --success-foreground: 0 0% 2%;
+    --warning: 41 100% 50%;
+    --warning-foreground: 0 0% 2%;
+    --destructive: 11 100% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 30% 16%;
-    --input: 222 30% 14%;
-    --ring: 195 95% 55%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 24 100% 50%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 50%), hsl(195 100% 55%));
-    --gradient-surface: linear-gradient(180deg, hsl(222 40% 9%), hsl(222 47% 7%));
-    --gradient-glow: radial-gradient(ellipse at top, hsl(195 100% 55% / 0.18), transparent 60%);
+    --gradient-primary: linear-gradient(135deg, hsl(41 100% 50%), hsl(24 100% 50%), hsl(11 100% 50%), hsl(15 100% 43%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 9%), hsl(0 0% 2%));
+    --gradient-glow: radial-gradient(ellipse at top, hsl(24 100% 50% / 0.22), transparent 60%);
     --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.3);
     --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.4);
-    --shadow-lg: 0 10px 40px -10px hsl(195 100% 50% / 0.25);
-    --shadow-glow: 0 0 40px hsl(195 100% 55% / 0.3);
+    --shadow-lg: 0 10px 40px -10px hsl(24 100% 50% / 0.35);
+    --shadow-glow: 0 0 40px hsl(24 100% 50% / 0.4);
 
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 215 16% 70%;
-    --sidebar-primary: 195 95% 55%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 222 30% 12%;
-    --sidebar-accent-foreground: 195 95% 55%;
-    --sidebar-border: 222 30% 14%;
-    --sidebar-ring: 195 95% 55%;
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 0 0% 64%;
+    --sidebar-primary: 24 100% 50%;
+    --sidebar-primary-foreground: 0 0% 2%;
+    --sidebar-accent: 0 0% 9%;
+    --sidebar-accent-foreground: 41 100% 50%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 24 100% 50%;
   }
 }
 

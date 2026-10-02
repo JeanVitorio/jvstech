@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import matilha from "@/assets/caminhando_com_os_lobos_vermelho_e_branco_ao_lado.mp4";
-import logo from "@/assets/logo-jvs-optimized.webp";
+import logo from "@/assets/logo-jvs-wolf.webp";
 import { useVideoVisibility } from "@/hooks/use-video-visibility";
 
 export function FinalCta() {
@@ -72,7 +72,7 @@ export function FinalCta() {
           <img
             src={logo}
             alt="Marca JVS Tech"
-            className="w-40 drop-shadow-[0_0_50px_oklch(0.72_0.16_215_/_45%)]"
+            className="w-40 drop-shadow-[0_0_50px_rgb(255_101_0_/_55%)]"
           />
         </div>
       </div>

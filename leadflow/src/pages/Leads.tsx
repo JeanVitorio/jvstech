@@ -200,7 +200,7 @@ export default function Leads() {
 
   const getStageColor = (stageId?: string) => {
     const stage = stages.find(s => s.id === stageId);
-    return stage?.color || "#6366f1";
+    return stage?.color || "#FF6500";
   };
 
   const getStageName = (stageId?: string) => {

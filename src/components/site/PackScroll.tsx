@@ -279,7 +279,7 @@ export function PackScroll() {
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
 
       {/* Glow central */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/4 h-[50vh] bg-[radial-gradient(ellipse_at_center,oklch(0.4_0.12_220_/_28%),transparent_70%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-1/4 h-[50vh] bg-[radial-gradient(ellipse_at_center,rgb(255_45_0_/_24%),transparent_70%)]" />
 
       {/* Título */}
       <div className="pack-head absolute left-5 right-5 top-[13vh] z-20 max-w-sm md:left-16 md:right-auto">
@@ -343,11 +343,12 @@ export function PackScroll() {
           {isMobile ? (
             <img
               className="
+                fire-media
                 block
                 h-[16vh]
                 w-auto
                 object-contain
-                drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
+                drop-shadow-[0_18px_30px_rgb(5_5_5_/_85%)]
                 md:hidden
               "
               src={wolfSideMobile}
@@ -358,10 +359,11 @@ export function PackScroll() {
             <video
               ref={videoRef}
               className="
+                fire-media
                 hidden
                 w-auto
                 object-contain
-                drop-shadow-[0_18px_30px_oklch(0.1_0.02_240_/_75%)]
+                drop-shadow-[0_18px_30px_rgb(5_5_5_/_85%)]
                 md:block
                 md:h-[26vh]
               "
@@ -380,7 +382,7 @@ export function PackScroll() {
               h-3
               w-[70%]
               rounded-[50%]
-              bg-[radial-gradient(ellipse_at_center,oklch(0.72_0.16_215_/_45%),transparent_70%)]
+              bg-[radial-gradient(ellipse_at_center,rgb(255_101_0_/_50%),transparent_70%)]
               blur-[2px]
             "
           />

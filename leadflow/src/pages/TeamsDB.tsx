@@ -127,7 +127,7 @@ export default function TeamsDB() {
               <Card key={t.id} className="p-4">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-3 h-3 rounded-full shrink-0" style={{ background: t.color ?? "#6366f1" }} />
+                    <div className="w-3 h-3 rounded-full shrink-0" style={{ background: t.color ?? "#FF6500" }} />
                     <div className="min-w-0">
                       <h3 className="font-semibold truncate">{t.name}</h3>
                       {t.description && <p className="text-xs text-muted-foreground truncate">{t.description}</p>}
@@ -218,7 +218,7 @@ export default function TeamsDB() {
 function NewTeamDialog({ onCreated }: { onCreated: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#6366f1");
+  const [color, setColor] = useState("#FF6500");
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {

@@ -43,8 +43,8 @@ export function SectionVeil({ label, flip = false }: Props) {
           className="veil-arc h-24 w-[110vw] rounded-[50%]"
           style={{
             background: flip
-              ? "radial-gradient(closest-side, oklch(0.85 0.15 165 / 55%), transparent 72%)"
-              : "radial-gradient(closest-side, oklch(0.78 0.15 215 / 55%), transparent 72%)",
+              ? "radial-gradient(closest-side, rgb(255 176 0 / 58%), transparent 72%)"
+              : "radial-gradient(closest-side, rgb(255 101 0 / 58%), transparent 72%)",
             filter: "blur(14px)",
           }}
         />

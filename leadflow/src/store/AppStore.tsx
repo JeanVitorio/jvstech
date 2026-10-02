@@ -196,7 +196,7 @@ function mapTeam(row: any, members: any[]): Team {
     id: row.id,
     name: row.name,
     description: row.description ?? null,
-    color: row.color ?? "#6366f1",
+    color: row.color ?? "#FF6500",
     manager_id: row.leader_id ?? null,
     member_ids: members.filter((m) => m.team_id === row.id).map((m) => m.user_id),
     created_at: row.created_at,

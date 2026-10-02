@@ -77,6 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#050505" },
       { title: "JVS LeadFlow" },
       { name: "description", content: "Prospecção automatizada e gestão do funil de vendas." },
       { name: "author", content: "JVS Tech" },
