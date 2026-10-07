@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit2, Phone, Mail, Building, Target, DollarSign, MessageCircle, MapPin } from "lucide-react";
+import { Plus, Trash2, Edit2, Phone, Mail, Building, Target, DollarSign, MessageCircle, MapPin, Globe, Instagram } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate } from "@/lib/format";
@@ -24,6 +24,8 @@ interface Lead {
   company?: string;
   email?: string;
   phone?: string;
+  website?: string;
+  instagram?: string;
   whatsapp?: string;
   whatsapp_do_not_contact?: boolean;
   first_contact_message?: string;
@@ -50,6 +52,16 @@ interface LeadStage {
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Operação não concluída.";
 
+const externalHttpUrl = (value?: string) => {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function Leads() {
   const { user } = useAuth();
   const { users } = useApp();
@@ -65,6 +77,8 @@ export default function Leads() {
     company: "",
     email: "",
     phone: "",
+    website: "",
+    instagram: "",
     whatsapp: "",
     whatsapp_do_not_contact: false,
     source: "",
@@ -119,7 +133,8 @@ export default function Leads() {
     leads.filter(l => 
       (l.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
       (l.company?.toLowerCase().includes(search.toLowerCase())) ||
-      (l.email?.toLowerCase().includes(search.toLowerCase()))
+      (l.email?.toLowerCase().includes(search.toLowerCase())) ||
+      (l.instagram?.toLowerCase().includes(search.toLowerCase()))
     ),
     [leads, search]
   );
@@ -131,6 +146,8 @@ export default function Leads() {
       company: "",
       email: "",
       phone: "",
+      website: "",
+      instagram: "",
       whatsapp: "",
       whatsapp_do_not_contact: false,
       source: "",
@@ -152,6 +169,12 @@ export default function Leads() {
   async function save() {
     if (!form.stage_id) return toast.error("Estágio é obrigatório");
     if (!form.owner_id && !editingId) return toast.error("Comercial responsável é obrigatório");
+    if (form.website?.trim() && !externalHttpUrl(form.website)) {
+      return toast.error("Informe um link válido para o site");
+    }
+    if (form.instagram?.trim() && !externalHttpUrl(form.instagram)) {
+      return toast.error("Informe um link válido para o Instagram");
+    }
 
     try {
       const payload = {
@@ -159,6 +182,8 @@ export default function Leads() {
         company: form.company?.trim() || null,
         email: form.email?.trim() || null,
         phone: form.phone?.trim() || null,
+        website: form.website?.trim() || null,
+        instagram: form.instagram?.trim() || null,
         whatsapp: form.whatsapp?.trim() || null,
         whatsapp_do_not_contact: !!form.whatsapp_do_not_contact,
         source: form.source?.trim() || null,
@@ -245,6 +270,8 @@ export default function Leads() {
               lead.first_contact_message,
             );
             const mapsLink = googleMapsLink(lead.google_maps_url || lead.notes);
+            const websiteLink = externalHttpUrl(lead.website);
+            const instagramLink = externalHttpUrl(lead.instagram);
             return (
               <Card key={lead.id} className="p-4 hover:bg-muted/50 transition">
                 <div className="flex items-start justify-between gap-4">
@@ -271,6 +298,26 @@ export default function Leads() {
                         <div className="flex items-center gap-1">
                           <Phone className="w-3.5 h-3.5" /> {lead.phone}
                         </div>
+                      )}
+                      {websiteLink && (
+                        <a
+                          href={websiteLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 hover:text-primary"
+                        >
+                          <Globe className="w-3.5 h-3.5" /> Site
+                        </a>
+                      )}
+                      {instagramLink && (
+                        <a
+                          href={instagramLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 hover:text-primary"
+                        >
+                          <Instagram className="w-3.5 h-3.5" /> Instagram
+                        </a>
                       )}
                     </div>
 
@@ -408,6 +455,27 @@ export default function Leads() {
                   value={form.whatsapp || ""}
                   onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
                   placeholder="(11) 9999-9999"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Site</Label>
+                <Input
+                  type="url"
+                  value={form.website || ""}
+                  onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  placeholder="https://empresa.com.br"
+                />
+              </div>
+              <div>
+                <Label>Instagram</Label>
+                <Input
+                  type="url"
+                  value={form.instagram || ""}
+                  onChange={(e) => setForm({ ...form, instagram: e.target.value })}
+                  placeholder="https://instagram.com/empresa"
                 />
               </div>
             </div>

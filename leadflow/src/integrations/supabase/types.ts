@@ -450,6 +450,7 @@ export type Database = {
           first_contact_message: string
           google_maps_url: string | null
           id: string
+          instagram: string | null
           name: string
           niche: string | null
           next_followup_at: string | null
@@ -459,6 +460,7 @@ export type Database = {
           source: string | null
           stage_id: string | null
           updated_at: string
+          website: string | null
           whatsapp: string | null
           whatsapp_do_not_contact: boolean
         }
@@ -471,6 +473,7 @@ export type Database = {
           first_contact_message?: string
           google_maps_url?: string | null
           id?: string
+          instagram?: string | null
           name: string
           niche?: string | null
           next_followup_at?: string | null
@@ -480,6 +483,7 @@ export type Database = {
           source?: string | null
           stage_id?: string | null
           updated_at?: string
+          website?: string | null
           whatsapp?: string | null
           whatsapp_do_not_contact?: boolean
         }
@@ -492,6 +496,7 @@ export type Database = {
           first_contact_message?: string
           google_maps_url?: string | null
           id?: string
+          instagram?: string | null
           name?: string
           niche?: string | null
           next_followup_at?: string | null
@@ -501,6 +506,7 @@ export type Database = {
           source?: string | null
           stage_id?: string | null
           updated_at?: string
+          website?: string | null
           whatsapp?: string | null
           whatsapp_do_not_contact?: boolean
         }

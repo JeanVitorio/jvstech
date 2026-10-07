@@ -47,7 +47,7 @@ const steps = [
   },
   {
     title: "Configure e use",
-    description: "Ao final, informe a conexão do Supabase na janela local. O servidor será iniciado automaticamente.",
+    description: "Ao final, informe o link da Web e a conexão do Supabase do cliente. O servidor será iniciado automaticamente.",
   },
 ];
 
