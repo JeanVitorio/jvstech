@@ -96,12 +96,12 @@ export function Pricing() {
       <div className="relative mx-auto max-w-7xl px-5 text-center md:px-6">
         <p className="label-xs text-primary">◆ Comece agora</p>
         <h2 className="mx-auto mt-4 max-w-3xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-          Escolha o plano ideal e comece a prospectar.{" "}
-          <span className="text-brand">Sem configuração complicada.</span>
+          Comece grátis. Aumente o volume{" "}
+          <span className="text-brand">quando sua operação crescer.</span>
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-[0.82rem] leading-relaxed text-muted-foreground md:text-sm">
-          Todos os planos incluem acesso ao painel web e ao aplicativo.
-          Você pode alterar o plano ou cancelar quando quiser.
+          Compare pelo número de leads que deseja gerar. Todos os planos incluem o fluxo completo e
+          podem ser alterados quando quiser.
         </p>
 
         <div className="price-grid mt-12 grid gap-5 text-left md:mt-14 md:grid-cols-2 xl:grid-cols-4">
@@ -133,13 +133,18 @@ export function Pricing() {
                 {t.price}
                 <span className="text-base font-medium text-foreground/60">{t.per}</span>
               </p>
-              <p className="mt-3 text-[0.8rem] leading-relaxed text-foreground/70 md:text-xs">{t.desc}</p>
+              <p className="mt-3 text-[0.8rem] leading-relaxed text-foreground/70 md:text-xs">
+                {t.desc}
+              </p>
 
               <div className="my-6 h-px w-full bg-border" />
 
               <ul className="flex-1 space-y-3">
                 {t.marks.map((m) => (
-                  <li key={m} className="flex items-start gap-3 text-[0.8rem] text-foreground/85 md:text-xs">
+                  <li
+                    key={m}
+                    className="flex items-start gap-3 text-[0.8rem] text-foreground/85 md:text-xs"
+                  >
                     <span className="mt-[1px] grid h-4 w-4 shrink-0 place-items-center rounded-full bg-brand text-[0.55rem] font-bold text-primary-foreground">
                       ✓
                     </span>
@@ -156,10 +161,19 @@ export function Pricing() {
                     : "border border-border text-foreground/85 hover:border-primary hover:text-primary"
                 }`}
               >
-                {t.code === "free" ? "Criar conta grátis" : "Escolher este plano"} →
+                {t.code === "free"
+                  ? "Começar grátis"
+                  : `Assinar ${t.name.replace("LeadFlow ", "")}`}{" "}
+                →
               </a>
             </article>
           ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-muted-foreground">
+          <span>✓ Pagamento seguro pela Stripe</span>
+          <span>✓ Troque de plano quando precisar</span>
+          <span>✓ Cancele online sem burocracia</span>
         </div>
       </div>
     </section>

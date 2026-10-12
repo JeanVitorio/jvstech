@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/site/Nav";
-import { Hero } from "@/components/site/Hero";
+import { SalesHero } from "@/components/site/SalesHero";
 import { Marquee } from "@/components/site/Marquee";
-import { ChapterTwo } from "@/components/site/ChapterTwo";
-import { PhoneChaos } from "@/components/site/PhoneChaos";
+import { Services } from "@/components/site/Services";
+import { HowItWorks } from "@/components/site/HowItWorks";
+import { ConversionBenefits } from "@/components/site/ConversionBenefits";
 import { Overhead } from "@/components/site/Overhead";
 import { Pricing } from "@/components/site/Pricing";
 import { Faq } from "@/components/site/Faq";
 import { FinalCta } from "@/components/site/FinalCta";
-import { SectionVeil } from "@/components/site/SectionVeil";
-import { WhatsAppPrompt } from "@/components/site/WhatsAppPrompt";
+import { WhatsAppSupport } from "@/components/site/WhatsAppSupport";
 
 const title = "JVS LeadFlow — Prospecção inteligente e gestão de vendas";
 const description =
@@ -33,18 +33,15 @@ function Index() {
   return (
     <main className="relative bg-background">
       <Nav />
-      <WhatsAppPrompt />
-      <Hero />
+      <WhatsAppSupport />
+      <SalesHero />
       <Marquee />
-      <ChapterTwo />
-      <SectionVeil label="benefícios" flip />
-      <PhoneChaos />
-      <SectionVeil label="operação" />
+      <Services />
+      <HowItWorks />
+      <ConversionBenefits />
       <Overhead />
-      <SectionVeil label="planos" flip />
       <Pricing />
       <Faq />
-      <SectionVeil label="demonstração" flip />
       <FinalCta />
     </main>
   );

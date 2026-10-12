@@ -4,7 +4,7 @@ import logo from "@/assets/logo-jvs-wolf.webp";
 const links = [
   { href: "#servicos", label: "Recursos" },
   { href: "#metodo", label: "Como funciona" },
-  { href: "#resultados", label: "Benefícios" },
+  { href: "#resultados", label: "Resultados" },
   { href: "#planos", label: "Planos" },
   { href: "#faq", label: "FAQ" },
 ];
@@ -56,7 +56,7 @@ export function Nav() {
             href="/LeadFlow/signup?plan=free"
             className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04] sm:px-5"
           >
-            Criar conta
+            Testar grátis
           </a>
         </div>
       </nav>

@@ -23,8 +23,12 @@ const faqs = [
     a: "O painel funciona pela web. Para executar os bots de prospecção, o aplicativo do JVS LeadFlow deve ser instalado em um computador ou servidor Windows.",
   },
   {
-    q: "Como conheço o sistema?",
-    a: "Entre em contato com a JVS para agendar uma demonstração. Apresentamos o fluxo completo e avaliamos a configuração adequada para sua operação.",
+    q: "Preciso cadastrar cartão para testar?",
+    a: "Não. O plano Free libera até 50 leads por mês sem cartão de crédito. Você só informa os dados de pagamento ao escolher um plano pago.",
+  },
+  {
+    q: "Posso trocar ou cancelar meu plano?",
+    a: "Sim. Você pode atualizar o cartão, trocar de plano ou cancelar a assinatura online pela área de cobrança.",
   },
 ];
 

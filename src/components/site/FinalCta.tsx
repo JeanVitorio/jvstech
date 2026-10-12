@@ -47,24 +47,30 @@ export function FinalCta() {
       <div className="relative mx-auto grid max-w-5xl gap-5 px-6 md:grid-cols-[1.3fr_1fr]">
         <div className="cta-copy glass-card rounded-2xl p-9">
           <div className="absolute" />
-          <p className="label-xs text-primary">◆ Vamos começar</p>
+          <p className="label-xs text-primary">◆ Seu próximo lead começa aqui</p>
           <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-            Pronto para transformar sua prospecção em <span className="text-brand">um fluxo de vendas?</span>
+            Crie sua conta agora e gere seus{" "}
+            <span className="text-brand">primeiros leads gratuitamente.</span>
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Fale com a JVS e veja na prática como o LeadFlow pode automatizar a busca
-            por empresas e organizar o trabalho da sua equipe comercial.
+            Você recebe 50 leads por mês no plano Free, sem cadastrar cartão. Quando precisar de
+            mais volume, escolha o plano ideal em poucos cliques.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <a
-              href="https://wa.me/5546991163405"
+              href="/LeadFlow/signup?plan=free"
               className="inline-flex items-center rounded-full bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
-              Agendar demonstração →
+              Criar minha conta grátis →
             </a>
-            <span className="text-[0.7rem] text-muted-foreground">
-              Atendimento direto com a equipe JVS
-            </span>
+            <a
+              href="https://wa.me/5546991163405?text=Ol%C3%A1%21%20Preciso%20de%20ajuda%20para%20escolher%20um%20plano%20do%20LeadFlow."
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-full border border-border px-6 py-4 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
+            >
+              Falar com um especialista
+            </a>
           </div>
         </div>
 
@@ -106,12 +112,36 @@ export function FinalCta() {
           <div>
             <p className="label-xs text-muted-foreground">Navegação</p>
             <ul className="mt-4 space-y-2 text-xs text-foreground/75">
-              <li><a className="hover:text-primary" href="#servicos">Recursos</a></li>
-              <li><a className="hover:text-primary" href="#metodo">Como funciona</a></li>
-              <li><a className="hover:text-primary" href="#resultados">Benefícios</a></li>
-              <li><a className="hover:text-primary" href="#planos">Planos</a></li>
-              <li><a className="hover:text-primary" href="#faq">FAQ</a></li>
-              <li><a className="hover:text-primary" href="/LeadFlow/login">Login</a></li>
+              <li>
+                <a className="hover:text-primary" href="#servicos">
+                  Recursos
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary" href="#metodo">
+                  Como funciona
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary" href="#resultados">
+                  Benefícios
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary" href="#planos">
+                  Planos
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary" href="#faq">
+                  FAQ
+                </a>
+              </li>
+              <li>
+                <a className="hover:text-primary" href="/LeadFlow/login">
+                  Login
+                </a>
+              </li>
             </ul>
           </div>
           <div>

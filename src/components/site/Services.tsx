@@ -33,11 +33,7 @@ const plans = [
   {
     title: "Bots de WhatsApp",
     desc: "Apoie o primeiro contato com mensagens organizadas e uma operação integrada à prospecção.",
-    marks: [
-      "Configuração por nicho",
-      "Agenda semanal de execução",
-      "Acompanhamento pelo painel",
-    ],
+    marks: ["Configuração por nicho", "Agenda semanal de execução", "Acompanhamento pelo painel"],
   },
   {
     title: "Equipe e permissões",
@@ -47,7 +43,7 @@ const plans = [
       "Gestão centralizada pelo líder",
       "Distribuição de leads por responsável",
     ],
-    cta: "Acessar a plataforma →",
+    cta: "Criar conta grátis →",
   },
 ];
 
@@ -127,11 +123,7 @@ export function Services() {
   }, []);
 
   return (
-    <section
-      id="servicos"
-      ref={root}
-      className="relative z-10 overflow-hidden py-20 md:py-32"
-    >
+    <section id="servicos" ref={root} className="relative z-10 overflow-hidden py-20 md:py-32">
       {/* Grid tecnológico */}
       <div className="tech-grid pointer-events-none absolute inset-0 z-0 opacity-50" />
 
@@ -145,20 +137,16 @@ export function Services() {
           {/* Linha superior */}
           <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-1 w-32 rounded-full bg-brand md:w-40" />
 
-          <p className="label-xs text-primary">
-            ◆ Recursos
-          </p>
+          <p className="label-xs text-primary">◆ Recursos</p>
 
           <h2 className="mx-auto mt-4 max-w-2xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-            Tudo o que sua prospecção precisa{" "}
-            <span className="text-brand">
-              em um único fluxo.
-            </span>
+            Menos ferramentas. Mais oportunidades{" "}
+            <span className="text-brand">no mesmo lugar.</span>
           </h2>
 
           <p className="mx-auto mt-4 max-w-xl text-[0.8rem] leading-relaxed text-muted-foreground md:text-sm">
-            Da busca por empresas ao acompanhamento das oportunidades,
-            o JVS LeadFlow conecta automação, dados e equipe comercial.
+            Encontre contatos, organize sua equipe e acompanhe as vendas sem depender de planilhas
+            ou sistemas desconectados.
           </p>
         </div>
 
@@ -202,7 +190,7 @@ export function Services() {
               {/* CTA */}
               {p.cta && (
                 <a
-                  href="/LeadFlow/login"
+                  href="/LeadFlow/signup?plan=free"
                   className="relative mt-6 inline-flex items-center justify-center rounded-full bg-brand px-5 py-3 text-[0.7rem] font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
                 >
                   {p.cta}
