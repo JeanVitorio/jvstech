@@ -20,17 +20,26 @@ async function authorizeTenantManager(request) {
   if (authError || !authData.user) {
     throw new AuthorizationError("Sess\xE3o inv\xE1lida ou expirada", 401);
   }
-  const { data: tenantId, error: tenantError } = await userClient.rpc("current_tenant_id");
-  if (tenantError || !tenantId) {
+  const admin = createClient(supabaseUrl, serviceRole);
+  const [{ data: profile }, { data: memberships, error: membershipError }] = await Promise.all([
+    admin.from("profiles").select("active_tenant_id").eq("id", authData.user.id).maybeSingle(),
+    admin.from("tenant_memberships").select("tenant_id, role").eq("user_id", authData.user.id).not("accepted_at", "is", null).order("created_at", { ascending: true })
+  ]);
+  if (membershipError) throw membershipError;
+  const membership = memberships?.find((item) => item.tenant_id === profile?.active_tenant_id) ?? memberships?.[0];
+  if (!membership) {
     throw new AuthorizationError("Empresa n\xE3o vinculada ao usu\xE1rio", 403);
   }
-  const admin = createClient(supabaseUrl, serviceRole);
-  const { data: membership, error: membershipError } = await admin.from("tenant_memberships").select("role").eq("tenant_id", tenantId).eq("user_id", authData.user.id).not("accepted_at", "is", null).maybeSingle();
-  if (membershipError || !membership || !["owner", "admin"].includes(membership.role)) {
+  if (!["owner", "admin"].includes(membership.role)) {
     throw new AuthorizationError(
-      "Apenas respons\xE1veis pela assinatura podem realizar esta a\xE7\xE3o",
+      "Apenas o propriet\xE1rio ou administrador pode alterar a assinatura",
       403
     );
+  }
+  const tenantId = membership.tenant_id;
+  const { data: tenant, error: tenantError } = await admin.from("tenants").select("id").eq("id", tenantId).maybeSingle();
+  if (tenantError || !tenant) {
+    throw new AuthorizationError("Empresa n\xE3o encontrada", 403);
   }
   return {
     user: authData.user,

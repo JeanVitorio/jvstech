@@ -1,22 +1,29 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import type {
-  BillingStatus,
-  PlanCode,
-  SubscriptionPlan,
-} from "@/types/billing";
+import type { BillingStatus, PlanCode, SubscriptionPlan } from "@/types/billing";
 
 // Os tipos são regenerados após a aplicação das migrations SaaS.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
+
+async function getFunctionErrorMessage(error: unknown, fallback: string): Promise<string> {
+  const context = (error as { context?: Response } | null)?.context;
+  if (context) {
+    try {
+      const payload = (await context.json()) as {
+        error?: string;
+        message?: string;
+      };
+      if (payload.error || payload.message) {
+        return payload.error ?? payload.message ?? fallback;
+      }
+    } catch {
+      // Mantém a mensagem original quando a resposta não contém JSON.
+    }
+  }
+  return error instanceof Error && error.message ? error.message : fallback;
+}
 
 interface BillingState {
   status: BillingStatus | null;
@@ -66,33 +73,53 @@ export function BillingProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const checkout = useCallback(async (plan: Exclude<PlanCode, "free">) => {
-    const { data, error } = await supabase.functions.invoke(
-      "create-checkout-session",
-      { body: { plan_code: plan } },
-    );
-    if (error) throw error;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      throw new Error("Sua sessão expirou. Entre novamente para assinar.");
+    }
+    const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+      body: { plan_code: plan },
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (error) {
+      throw new Error(
+        await getFunctionErrorMessage(error, "Não foi possível iniciar o pagamento."),
+      );
+    }
     if (!data?.url) throw new Error(data?.error ?? "Checkout indisponível");
     window.location.assign(data.url);
   }, []);
 
   const openPortal = useCallback(async () => {
-    const { data, error } = await supabase.functions.invoke(
-      "create-portal-session",
-    );
-    if (error) throw error;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      throw new Error("Sua sessão expirou. Entre novamente para continuar.");
+    }
+    const { data, error } = await supabase.functions.invoke("create-portal-session", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (error) {
+      throw new Error(
+        await getFunctionErrorMessage(error, "Não foi possível abrir o portal de cobrança."),
+      );
+    }
     if (!data?.url) throw new Error(data?.error ?? "Portal indisponível");
     window.location.assign(data.url);
   }, []);
 
   return (
-    <BillingCtx.Provider value={{
-      status,
-      plans,
-      loading,
-      refresh,
-      checkout,
-      openPortal,
-    }}>
+    <BillingCtx.Provider
+      value={{
+        status,
+        plans,
+        loading,
+        refresh,
+        checkout,
+        openPortal,
+      }}
+    >
       {children}
     </BillingCtx.Provider>
   );
