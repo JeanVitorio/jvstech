@@ -45,12 +45,20 @@ export function Nav() {
           ))}
         </ul>
 
-        <a
-          href="/LeadFlow/login"
-          className="rounded-full bg-brand px-5 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
-        >
-          Fazer login
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/LeadFlow/login"
+            className="hidden px-3 py-2 text-xs font-medium text-foreground/80 transition-colors hover:text-primary sm:inline-flex"
+          >
+            Entrar
+          </a>
+          <a
+            href="/LeadFlow/signup?plan=free"
+            className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04] sm:px-5"
+          >
+            Criar conta
+          </a>
+        </div>
       </nav>
     </div>
   );

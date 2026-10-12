@@ -76,16 +76,16 @@ export function Hero() {
           </h2>
           <div className="flex flex-col gap-3 md:items-end">
             <a
-              href="/LeadFlow/login"
+              href="/LeadFlow/signup?plan=free"
               className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3.5 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
-              Acessar o JVS LeadFlow →
+              Começar grátis →
             </a>
             <a
-              href="#servicos"
+              href="/LeadFlow/login"
               className="inline-flex items-center justify-center rounded-full border border-border px-7 py-3.5 text-xs font-medium text-foreground/80 backdrop-blur transition-colors hover:border-primary hover:text-primary"
             >
-              Conhecer os recursos →
+              Já tenho uma conta →
             </a>
           </div>
         </div>

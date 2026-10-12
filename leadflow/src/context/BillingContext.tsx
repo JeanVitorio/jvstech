@@ -65,7 +65,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     });
   }, [refresh]);
 
-  async function checkout(plan: Exclude<PlanCode, "free">) {
+  const checkout = useCallback(async (plan: Exclude<PlanCode, "free">) => {
     const { data, error } = await supabase.functions.invoke(
       "create-checkout-session",
       { body: { plan_code: plan } },
@@ -73,16 +73,16 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
     if (!data?.url) throw new Error(data?.error ?? "Checkout indisponível");
     window.location.assign(data.url);
-  }
+  }, []);
 
-  async function openPortal() {
+  const openPortal = useCallback(async () => {
     const { data, error } = await supabase.functions.invoke(
       "create-portal-session",
     );
     if (error) throw error;
     if (!data?.url) throw new Error(data?.error ?? "Portal indisponível");
     window.location.assign(data.url);
-  }
+  }, []);
 
   return (
     <BillingCtx.Provider value={{

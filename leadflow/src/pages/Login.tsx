@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,13 +10,22 @@ import { LogIn, AlertCircle } from "lucide-react";
 
 export default function Login() {
   const { user, ready, login } = useAuth();
+  const [searchParams] = useSearchParams();
+  const requestedPlan = searchParams.get("plan");
+  const paidPlan = requestedPlan &&
+    ["basic", "plus", "pro"].includes(requestedPlan)
+    ? requestedPlan
+    : null;
+  const destination = paidPlan
+    ? `/billing?plan=${paidPlan}&onboarding=1`
+    : "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   if (!ready) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={destination} replace />;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,7 +77,10 @@ export default function Login() {
           </form>
           <p className="text-sm text-center text-muted-foreground mt-5">
             Ainda não possui conta?{" "}
-            <Link to="/signup" className="text-primary hover:underline">
+            <Link
+              to={requestedPlan ? `/signup?plan=${requestedPlan}` : "/signup"}
+              className="text-primary hover:underline"
+            >
               Criar conta grátis
             </Link>
           </p>

@@ -4,31 +4,61 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const tiers = [
   {
-    name: "Demonstração",
+    code: "free",
+    name: "LeadFlow Free",
     price: "Grátis",
     per: "",
-    tagline: "Conheça a plataforma",
-    desc: "Veja como o JVS LeadFlow pode se encaixar na rotina comercial da sua empresa.",
+    tagline: "Para começar",
+    desc: "Crie sua conta e conheça o fluxo completo sem cadastrar cartão.",
     marks: [
-      "Apresentação dos recursos",
-      "Entendimento da sua operação",
-      "Demonstração do fluxo de prospecção",
-      "Conversa direta com a JVS",
+      "50 leads gerados por mês",
+      "Gestão de leads e funil de vendas",
+      "Bot de prospecção configurável",
+      "Acesso pelo computador e celular",
     ],
   },
   {
-    name: "JVS LeadFlow",
-    price: "Sob consulta",
-    per: "",
-    tagline: "Prospecção completa",
-    desc: "Para empresas que querem automatizar a busca por leads e organizar o processo comercial.",
+    code: "basic",
+    name: "LeadFlow Básico",
+    price: "R$ 197",
+    per: "/mês",
+    tagline: "Operação essencial",
+    desc: "Para iniciar uma rotina previsível de prospecção automatizada.",
     marks: [
-      "Bots de prospecção configuráveis",
+      "500 leads gerados por mês",
       "Gestão de leads e responsáveis",
       "Funil de vendas integrado",
-      "Acesso para sua equipe",
+      "Cobrança mensal recorrente",
+    ],
+  },
+  {
+    code: "plus",
+    name: "LeadFlow Plus",
+    price: "R$ 397",
+    per: "/mês",
+    tagline: "Para equipes em crescimento",
+    desc: "Mais volume para acelerar a operação comercial da sua empresa.",
+    marks: [
+      "1.500 leads gerados por mês",
+      "Gestão de equipe e responsáveis",
+      "Bots de prospecção e WhatsApp",
+      "Troca de plano e cartão online",
     ],
     featured: true,
+  },
+  {
+    code: "pro",
+    name: "LeadFlow Pro",
+    price: "R$ 597",
+    per: "/mês",
+    tagline: "Máxima prospecção",
+    desc: "Para operações que precisam gerar oportunidades em maior escala.",
+    marks: [
+      "3.000 leads gerados por mês",
+      "Todos os recursos do LeadFlow",
+      "Operação centralizada por empresa",
+      "Cancelamento online a qualquer momento",
+    ],
   },
 ];
 
@@ -63,21 +93,22 @@ export function Pricing() {
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
       <div className="price-aura pointer-events-none absolute left-1/2 top-1/3 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-primary/10 opacity-50 blur-[150px]" />
 
-      <div className="relative mx-auto max-w-5xl px-5 text-center md:px-6">
+      <div className="relative mx-auto max-w-7xl px-5 text-center md:px-6">
         <p className="label-xs text-primary">◆ Comece agora</p>
-        <h2 className="mx-auto mt-4 max-w-2xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
-          Conheça o sistema antes de decidir. <span className="text-brand">Fale com a JVS.</span>
+        <h2 className="mx-auto mt-4 max-w-3xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+          Escolha o plano ideal e comece a prospectar.{" "}
+          <span className="text-brand">Sem configuração complicada.</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-[0.82rem] leading-relaxed text-muted-foreground md:text-sm">
-          Mostramos o funcionamento da plataforma e entendemos o volume e as necessidades
-          da sua operação para apresentar a configuração adequada.
+        <p className="mx-auto mt-4 max-w-2xl text-[0.82rem] leading-relaxed text-muted-foreground md:text-sm">
+          Todos os planos incluem acesso ao painel web e ao aplicativo.
+          Você pode alterar o plano ou cancelar quando quiser.
         </p>
 
-        <div className="price-grid mt-12 grid gap-5 text-left md:mt-14 md:grid-cols-2 md:gap-6">
+        <div className="price-grid mt-12 grid gap-5 text-left md:mt-14 md:grid-cols-2 xl:grid-cols-4">
           {tiers.map((t) => (
             <article
               key={t.name}
-              className={`price-card group relative overflow-hidden rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-2 md:p-9 ${
+              className={`price-card group relative flex h-full flex-col overflow-hidden rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-2 ${
                 t.featured
                   ? "border border-primary/60 bg-[linear-gradient(165deg,#171717_0%,#050505_100%)] shadow-[var(--glow-ice)]"
                   : "glass-card border-primary/25"
@@ -106,7 +137,7 @@ export function Pricing() {
 
               <div className="my-6 h-px w-full bg-border" />
 
-              <ul className="space-y-3">
+              <ul className="flex-1 space-y-3">
                 {t.marks.map((m) => (
                   <li key={m} className="flex items-start gap-3 text-[0.8rem] text-foreground/85 md:text-xs">
                     <span className="mt-[1px] grid h-4 w-4 shrink-0 place-items-center rounded-full bg-brand text-[0.55rem] font-bold text-primary-foreground">
@@ -118,14 +149,14 @@ export function Pricing() {
               </ul>
 
               <a
-                href="#orcamento"
+                href={`/LeadFlow/signup?plan=${t.code}`}
                 className={`mt-8 inline-flex w-full items-center justify-center rounded-full px-6 py-3.5 text-[0.72rem] font-semibold transition-transform hover:scale-[1.03] ${
                   t.featured
                     ? "bg-brand text-primary-foreground shadow-[var(--glow-ice)]"
                     : "border border-border text-foreground/85 hover:border-primary hover:text-primary"
                 }`}
               >
-                {t.name === "Demonstração" ? "Agendar demonstração" : "Falar sobre o LeadFlow"} →
+                {t.code === "free" ? "Criar conta grátis" : "Escolher este plano"} →
               </a>
             </article>
           ))}

@@ -5,6 +5,7 @@ import {
   supabase,
 } from "@/integrations/supabase/client";
 import type { Session, User as SupaUser } from "@supabase/supabase-js";
+import type { PlanCode } from "@/types/billing";
 
 // O schema SaaS será incluído nos tipos gerados após a migration remota.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +37,7 @@ interface AuthState {
     companyName: string,
     email: string,
     password: string,
+    planCode?: PlanCode,
   ) => Promise<{ ok: boolean; error?: string; confirmation?: boolean }>;
   requestPasswordReset: (
     email: string,
@@ -146,7 +148,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     companyName: string,
     email: string,
     password: string,
+    planCode: PlanCode = "free",
   ) {
+    const redirectPath = planCode === "free"
+      ? "/LeadFlow/"
+      : `/LeadFlow/billing?plan=${encodeURIComponent(planCode)}&onboarding=1`;
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -155,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: name.trim(),
           company_name: companyName.trim(),
         },
-        emailRedirectTo: `${window.location.origin}/LeadFlow/`,
+        emailRedirectTo: `${window.location.origin}${redirectPath}`,
       },
     });
     if (error) return { ok: false, error: error.message };

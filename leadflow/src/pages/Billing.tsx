@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, CreditCard, Sparkles } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ export default function Billing() {
   const [busyPlan, setBusyPlan] = useState<PlanCode | "portal" | null>(
     null,
   );
+  const onboardingStarted = useRef(false);
   const canManage =
     user?.tenant_role === "owner" || user?.tenant_role === "admin";
   const usagePercent = useMemo(() => {
@@ -35,6 +36,38 @@ export default function Billing() {
       void refresh();
     }
   }, [refresh, searchParams]);
+
+  useEffect(() => {
+    const requestedPlan = searchParams.get("plan");
+    if (
+      loading ||
+      !canManage ||
+      !status ||
+      onboardingStarted.current ||
+      !["basic", "plus", "pro"].includes(requestedPlan ?? "")
+    ) {
+      return;
+    }
+    onboardingStarted.current = true;
+    const plan = requestedPlan as Exclude<PlanCode, "free">;
+    setBusyPlan(plan);
+    const action = status?.plan_code === "free" ? checkout(plan) : openPortal();
+    action.catch((error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível abrir o pagamento.",
+      );
+      setBusyPlan(null);
+    });
+  }, [
+    canManage,
+    checkout,
+    loading,
+    openPortal,
+    searchParams,
+    status?.plan_code,
+  ]);
 
   async function choosePlan(code: PlanCode) {
     if (code === "free" || !canManage) return;

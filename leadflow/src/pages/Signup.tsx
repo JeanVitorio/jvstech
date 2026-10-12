@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { AlertCircle, UserPlus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Logo } from "@/components/Logo";
@@ -7,9 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { PlanCode } from "@/types/billing";
+
+const planDetails: Record<PlanCode, { name: string; price: string }> = {
+  free: { name: "LeadFlow Free", price: "50 leads/mês" },
+  basic: { name: "LeadFlow Básico", price: "R$ 197/mês" },
+  plus: { name: "LeadFlow Plus", price: "R$ 397/mês" },
+  pro: { name: "LeadFlow Pro", price: "R$ 597/mês" },
+};
 
 export default function Signup() {
   const { user, ready, signup } = useAuth();
+  const [searchParams] = useSearchParams();
+  const requestedPlan = searchParams.get("plan");
+  const selectedPlan: PlanCode = requestedPlan &&
+      Object.prototype.hasOwnProperty.call(planDetails, requestedPlan)
+    ? requestedPlan as PlanCode
+    : "free";
+  const destination = selectedPlan === "free"
+    ? "/"
+    : `/billing?plan=${selectedPlan}&onboarding=1`;
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,7 +36,7 @@ export default function Signup() {
   const [busy, setBusy] = useState(false);
 
   if (!ready) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to={destination} replace />;
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -35,6 +52,7 @@ export default function Signup() {
       companyName,
       email,
       password,
+      selectedPlan,
     );
     setBusy(false);
     if (!result.ok) {
@@ -42,7 +60,9 @@ export default function Signup() {
       return;
     }
     if (result.confirmation) {
-      setMessage("Confira seu e-mail para confirmar a conta.");
+      setMessage(
+        "Confira seu e-mail para confirmar a conta e continuar com o plano.",
+      );
     }
   }
 
@@ -56,11 +76,20 @@ export default function Signup() {
               Criar conta no LeadFlow
             </h1>
             <p className="text-sm text-muted-foreground">
-              Comece gratuitamente com 50 leads por mês.
+              Cadastre sua empresa para continuar.
             </p>
           </div>
         </div>
         <Card className="p-5 sm:p-6">
+          <div className="mb-5 rounded-lg border border-primary/30 bg-primary/5 p-3 text-center">
+            <p className="text-xs text-muted-foreground">Plano selecionado</p>
+            <p className="font-display font-semibold">
+              {planDetails[selectedPlan].name}
+            </p>
+            <p className="text-xs text-primary">
+              {planDetails[selectedPlan].price}
+            </p>
+          </div>
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label htmlFor="name">Seu nome</Label>
@@ -113,12 +142,19 @@ export default function Signup() {
             )}
             <Button className="w-full gap-2" disabled={busy}>
               <UserPlus className="w-4 h-4" />
-              {busy ? "Criando..." : "Criar conta grátis"}
+              {busy
+                ? "Criando..."
+                : selectedPlan === "free"
+                ? "Criar conta grátis"
+                : "Criar conta e continuar"}
             </Button>
           </form>
           <p className="text-sm text-center text-muted-foreground mt-5">
             Já possui conta?{" "}
-            <Link to="/login" className="text-primary hover:underline">
+            <Link
+              to={`/login?plan=${selectedPlan}`}
+              className="text-primary hover:underline"
+            >
               Entrar
             </Link>
           </p>
