@@ -7,22 +7,43 @@ import type { BillingStatus, PlanCode, SubscriptionPlan } from "@/types/billing"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
-async function getFunctionErrorMessage(error: unknown, fallback: string): Promise<string> {
-  const context = (error as { context?: Response } | null)?.context;
-  if (context) {
+function readErrorMessage(value: unknown): string | null {
+  if (!value || typeof value !== "object") return null;
+  const payload = value as { error?: unknown; message?: unknown };
+  if (typeof payload.error === "string" && payload.error) return payload.error;
+  if (typeof payload.message === "string" && payload.message) {
+    return payload.message;
+  }
+  return null;
+}
+
+async function getFunctionErrorMessage(
+  error: unknown,
+  responseData: unknown,
+  fallback: string,
+): Promise<string> {
+  const dataMessage = readErrorMessage(responseData);
+  if (dataMessage) return dataMessage;
+
+  const errorMessage = readErrorMessage(error);
+  const context = (error as { context?: unknown } | null)?.context;
+  const contextMessage = readErrorMessage(context);
+  if (contextMessage) return contextMessage;
+
+  if (
+    context &&
+    typeof context === "object" &&
+    "json" in context &&
+    typeof context.json === "function"
+  ) {
     try {
-      const payload = (await context.json()) as {
-        error?: string;
-        message?: string;
-      };
-      if (payload.error || payload.message) {
-        return payload.error ?? payload.message ?? fallback;
-      }
+      const payloadMessage = readErrorMessage(await context.json());
+      if (payloadMessage) return payloadMessage;
     } catch {
       // Mantém a mensagem original quando a resposta não contém JSON.
     }
   }
-  return error instanceof Error && error.message ? error.message : fallback;
+  return errorMessage ?? fallback;
 }
 
 interface BillingState {
@@ -84,7 +105,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     });
     if (error) {
       throw new Error(
-        await getFunctionErrorMessage(error, "Não foi possível iniciar o pagamento."),
+        await getFunctionErrorMessage(error, data, "Não foi possível iniciar o pagamento."),
       );
     }
     if (!data?.url) throw new Error(data?.error ?? "Checkout indisponível");
@@ -102,7 +123,7 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     });
     if (error) {
       throw new Error(
-        await getFunctionErrorMessage(error, "Não foi possível abrir o portal de cobrança."),
+        await getFunctionErrorMessage(error, data, "Não foi possível abrir o portal de cobrança."),
       );
     }
     if (!data?.url) throw new Error(data?.error ?? "Portal indisponível");

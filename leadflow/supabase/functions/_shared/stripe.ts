@@ -1,8 +1,7 @@
 import Stripe from "npm:stripe@18.5.0";
 
 let stripeClient: Stripe | null = null;
-export const stripeCryptoProvider =
-  Stripe.createSubtleCryptoProvider();
+export const stripeCryptoProvider = Stripe.createSubtleCryptoProvider();
 
 export function getStripe(): Stripe {
   if (stripeClient) return stripeClient;
@@ -15,9 +14,7 @@ export function getStripe(): Stripe {
 }
 
 export function appUrl(path = ""): string {
-  const configured = (Deno.env.get("LEADFLOW_APP_URL") ?? "")
-    .trim()
-    .replace(/\/+$/, "");
+  const configured = (Deno.env.get("LEADFLOW_APP_URL") ?? "").trim().replace(/\/+$/, "");
   if (!configured.startsWith("https://")) {
     throw new Error("LEADFLOW_APP_URL deve ser uma URL HTTPS");
   }
@@ -31,5 +28,6 @@ export function configuredPriceId(planCode: string): string | null {
     pro: "STRIPE_PRICE_PRO",
   };
   const key = keyByPlan[planCode];
-  return key ? Deno.env.get(key)?.trim() || null : null;
+  const value = key ? Deno.env.get(key)?.trim() : null;
+  return value?.startsWith("price_") ? value : null;
 }

@@ -104,7 +104,8 @@ function configuredPriceId(planCode) {
     pro: "STRIPE_PRICE_PRO"
   };
   const key = keyByPlan[planCode];
-  return key ? Deno.env.get(key)?.trim() || null : null;
+  const value = key ? Deno.env.get(key)?.trim() : null;
+  return value?.startsWith("price_") ? value : null;
 }
 
 // supabase/functions/create-checkout-session/index.ts
@@ -127,7 +128,7 @@ Deno.serve(async (request) => {
       data: tenant,
       error: tenantError
     }, { data: currentSubscription }] = await Promise.all([
-      admin.from("subscription_plans").select("code, stripe_product_id, stripe_price_id").eq("code", planCode).eq("active", true).single(),
+      admin.from("subscription_plans").select("code, monthly_price_cents, stripe_product_id, stripe_price_id").eq("code", planCode).eq("active", true).single(),
       admin.from("tenants").select("name, stripe_customer_id").eq("id", tenantId).single(),
       admin.from("tenant_subscriptions").select("stripe_subscription_id, status").eq("tenant_id", tenantId).maybeSingle()
     ]);
@@ -165,6 +166,17 @@ Deno.serve(async (request) => {
         { expand: ["default_price"] }
       );
       priceId = typeof product.default_price === "string" ? product.default_price : product.default_price?.id ?? null;
+      if (!priceId) {
+        const prices = await stripe.prices.list({
+          product: plan.stripe_product_id,
+          active: true,
+          type: "recurring",
+          limit: 100
+        });
+        priceId = prices.data.find(
+          (price) => price.currency === "brl" && price.unit_amount === plan.monthly_price_cents && price.recurring?.interval === "month"
+        )?.id ?? null;
+      }
     }
     if (!priceId) {
       throw new Error(
