@@ -1,68 +1,118 @@
-import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders(request) });
+  }
   try {
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-    const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
-
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return j({ error: 'Autorização necessária' }, 401);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authorization = request.headers.get("Authorization");
+    if (!authorization?.startsWith("Bearer ")) {
+      return jsonResponse(
+        request,
+        { error: "Autorização necessária" },
+        401,
+      );
     }
 
-    const jwt = authHeader.substring(7);
-    const userClient = createClient(SUPABASE_URL, ANON, { 
-      global: { headers: { Authorization: `Bearer ${jwt}` } } 
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authorization } },
     });
-    
-    const { data: { user: caller }, error: authError } = await userClient.auth.getUser();
-    if (authError || !caller) {
-      return j({ error: 'Sessão inválida ou expirada' }, 401);
+    const { data: authData, error: authError } =
+      await userClient.auth.getUser();
+    if (authError || !authData.user) {
+      return jsonResponse(
+        request,
+        { error: "Sessão inválida ou expirada" },
+        401,
+      );
     }
 
-    const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const { data: callerRoles, error: rolesError } = await admin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', caller.id);
-
-    if (rolesError) {
-      console.error('Error fetching caller roles:', rolesError);
-      return j({ error: 'Erro ao verificar permissões' }, 500);
+    const { data: tenantId, error: tenantError } =
+      await userClient.rpc("current_tenant_id");
+    if (tenantError || !tenantId) {
+      return jsonResponse(
+        request,
+        { error: "Empresa não vinculada ao usuário" },
+        403,
+      );
     }
 
-    const isLeader = (callerRoles ?? []).some((r: any) => r.role === 'leader');
-    if (!isLeader) {
-      return j({ error: 'Apenas líderes podem remover colaboradores' }, 403);
+    const admin = createClient(supabaseUrl, serviceRole);
+    const { data: callerMembership, error: membershipError } =
+      await admin
+        .from("tenant_memberships")
+        .select("role")
+        .eq("tenant_id", tenantId)
+        .eq("user_id", authData.user.id)
+        .not("accepted_at", "is", null)
+        .maybeSingle();
+    if (membershipError) throw membershipError;
+    if (
+      !callerMembership ||
+      !["owner", "admin"].includes(callerMembership.role)
+    ) {
+      return jsonResponse(request, {
+        error: "Apenas administradores da empresa podem remover usuários",
+      }, 403);
     }
 
-    const { user_id } = await req.json();
-    if (!user_id) {
-      return j({ error: 'user_id é obrigatório' }, 400);
+    const body = await request.json() as { user_id?: string };
+    const userId = body.user_id;
+    if (!userId) {
+      return jsonResponse(
+        request,
+        { error: "user_id é obrigatório" },
+        400,
+      );
     }
-    if (user_id === caller.id) {
-      return j({ error: 'Você não pode remover a si mesmo' }, 400);
+    if (userId === authData.user.id) {
+      return jsonResponse(
+        request,
+        { error: "Você não pode remover a si mesmo" },
+        400,
+      );
     }
 
-    const { error } = await admin.auth.admin.deleteUser(user_id);
+    const { data: targetMembership } = await admin
+      .from("tenant_memberships")
+      .select("role")
+      .eq("tenant_id", tenantId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!targetMembership) {
+      return jsonResponse(
+        request,
+        { error: "Usuário não pertence à sua empresa" },
+        404,
+      );
+    }
+    if (targetMembership.role === "owner") {
+      return jsonResponse(
+        request,
+        { error: "O proprietário da empresa não pode ser removido" },
+        400,
+      );
+    }
+
+    const { error } = await admin.auth.admin.deleteUser(userId);
     if (error) {
-      console.error('Error deleting user:', error);
-      return j({ error: error.message || 'Falha ao remover usuário' }, 400);
+      return jsonResponse(
+        request,
+        { error: error.message || "Falha ao remover usuário" },
+        400,
+      );
     }
-
-    return j({ ok: true });
-  } catch (e: any) {
-    console.error('Unexpected error in delete-user:', e);
-    return j({ error: e?.message ?? 'Erro interno do servidor' }, 500);
+    return jsonResponse(request, { ok: true });
+  } catch (error) {
+    console.error("delete-user:", error);
+    return jsonResponse(request, {
+      error: error instanceof Error
+        ? error.message
+        : "Erro interno do servidor",
+    }, 500);
   }
 });
-
-function j(b: unknown, s = 200) {
-  return new Response(JSON.stringify(b), { 
-    status: s, 
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-  });
-}

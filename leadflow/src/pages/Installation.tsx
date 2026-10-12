@@ -20,22 +20,6 @@ const releaseUrl =
 const releaseApiUrl =
   "https://api.github.com/repos/JeanVitorio/prospecta-flow-robot/releases/latest";
 
-interface NativeUpdateResponse {
-  status: "updated" | "installing" | "error";
-  version: string;
-  message: string;
-}
-
-declare global {
-  interface Window {
-    pywebview?: {
-      api?: {
-        buscar_e_instalar_atualizacao: () => Promise<NativeUpdateResponse>;
-      };
-    };
-  }
-}
-
 const steps = [
   {
     title: "Baixe o instalador",
@@ -47,7 +31,7 @@ const steps = [
   },
   {
     title: "Configure e use",
-    description: "Ao final, informe o link da Web e a conexão do Supabase do cliente. O servidor será iniciado automaticamente.",
+    description: "Abra o aplicativo e faça login normalmente. O banco SaaS e a Web já vêm configurados.",
   },
 ];
 

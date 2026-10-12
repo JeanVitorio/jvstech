@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,15 @@ export default function Login() {
               <Input id="email" type="email" autoComplete="email" value={email} onChange={e => { setEmail(e.target.value); setErr(null); }} required />
             </div>
             <div>
-              <Label htmlFor="password">Senha</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="password">Senha</Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Esqueci minha senha
+                </Link>
+              </div>
               <Input id="password" type="password" autoComplete="current-password" value={password} onChange={e => { setPassword(e.target.value); setErr(null); }} required />
             </div>
             {err && (
@@ -58,6 +66,12 @@ export default function Login() {
               <LogIn className="w-4 h-4" /> {busy ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+          <p className="text-sm text-center text-muted-foreground mt-5">
+            Ainda não possui conta?{" "}
+            <Link to="/signup" className="text-primary hover:underline">
+              Criar conta grátis
+            </Link>
+          </p>
         </Card>
         <p className="text-[10px] text-muted-foreground/60 text-center mt-6">por JVS Tech</p>
       </div>

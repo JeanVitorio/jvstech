@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Bot, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { BotCard } from "@/components/bots/BotCard";
 import { BotFormDialog } from "@/components/bots/BotFormDialog";
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
+import { useBilling } from "@/context/BillingContext";
 import {
   useBotActions,
   useBotEvents,
@@ -34,6 +36,7 @@ const errorMessage = (error: unknown, fallback: string) =>
 
 export default function Bots() {
   const { user } = useAuth();
+  const { status: billing } = useBilling();
   const bots = useBots();
   const runners = useOnlineRunners();
   const actions = useBotActions();
@@ -45,6 +48,11 @@ export default function Bots() {
   const events = useBotEvents(eventsBot?.config.id);
   const busy = actions.command.isPending;
   const isAdmin = user?.role === "leader";
+  const canGenerate = Boolean(
+    billing &&
+      ["active", "trialing"].includes(billing.status) &&
+      billing.leads_remaining > 0,
+  );
 
   async function command(
     runtime: BotRuntime,
@@ -64,6 +72,12 @@ export default function Bots() {
 
   async function start() {
     if (!starting || !runnerId) return;
+    if (!canGenerate) {
+      toast.error(
+        "Limite mensal atingido ou assinatura inativa. Faça upgrade para continuar.",
+      );
+      return;
+    }
     try {
       await actions.command.mutateAsync({
         botId: starting.config.id,
@@ -117,6 +131,17 @@ export default function Bots() {
           </Button>
         }
       />
+
+      {billing && !canGenerate && (
+        <Card className="p-4 mb-5 border-warning/40 bg-warning/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <p className="text-sm">
+            Seu plano não possui saldo disponível para uma nova geração.
+          </p>
+          <Button asChild size="sm">
+            <Link to="/billing">Ver planos e fazer upgrade</Link>
+          </Button>
+        </Card>
+      )}
 
       {bots.isLoading ? (
         <Card className="p-10 text-center text-muted-foreground">
@@ -190,7 +215,12 @@ export default function Bots() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setStarting(null)}>Cancelar</Button>
-            <Button onClick={start} disabled={!runnerId || busy}>Iniciar</Button>
+            <Button
+              onClick={start}
+              disabled={!runnerId || busy || !canGenerate}
+            >
+              Iniciar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

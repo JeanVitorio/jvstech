@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_URL,
+  supabase,
+} from "@/integrations/supabase/client";
 import type { Session, User as SupaUser } from "@supabase/supabase-js";
+
+// O schema SaaS será incluído nos tipos gerados após a migration remota.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
 
 export type AppRole = "leader" | "manager" | "collaborator" | "commercial";
 
@@ -14,6 +22,8 @@ export interface AuthUser {
   is_manager: boolean;
   is_leader: boolean;
   is_commercial: boolean;
+  tenant_id: string | null;
+  tenant_role: "owner" | "admin" | "member" | null;
 }
 
 interface AuthState {
@@ -21,6 +31,18 @@ interface AuthState {
   session: Session | null;
   ready: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  signup: (
+    name: string,
+    companyName: string,
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string; confirmation?: boolean }>;
+  requestPasswordReset: (
+    email: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  updatePassword: (
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -28,9 +50,10 @@ interface AuthState {
 const Ctx = createContext<AuthState | null>(null);
 
 async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
-  const [{ data: profile }, { data: roles, error: rolesError }] = await Promise.all([
-    supabase.from("profiles").select("name, avatar_url, position").eq("id", supaUser.id).maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", supaUser.id),
+  const [{ data: profile }, { data: roles, error: rolesError }, tenantResult] = await Promise.all([
+    db.from("profiles").select("name, avatar_url, position, active_tenant_id").eq("id", supaUser.id).maybeSingle(),
+    db.from("user_roles").select("role").eq("user_id", supaUser.id),
+    db.rpc("current_tenant_id"),
   ]);
   if (rolesError) console.error("[AuthContext] user_roles query error:", rolesError);
   const roleList = (roles ?? []).map((roleRow) => roleRow.role as AppRole);
@@ -41,6 +64,15 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     : roleList.includes("commercial")
     ? "commercial"
     : "collaborator";
+  const tenantId = (tenantResult.data as string | null) ?? null;
+  const { data: membership } = tenantId
+    ? await db
+        .from("tenant_memberships")
+        .select("role")
+        .eq("tenant_id", tenantId)
+        .eq("user_id", supaUser.id)
+        .maybeSingle()
+    : { data: null };
   return {
     id: supaUser.id,
     email: supaUser.email ?? "",
@@ -51,7 +83,21 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     is_leader: role === "leader",
     is_manager: role === "manager" || role === "leader",
     is_commercial: role === "commercial",
+    tenant_id: tenantId ?? profile?.active_tenant_id ?? null,
+    tenant_role:
+      (membership?.role as AuthUser["tenant_role"] | undefined) ?? null,
   };
+}
+
+async function syncNativeSession(session: Session | null) {
+  const configure = window.pywebview?.api?.configurar_sessao;
+  if (!session || !configure) return;
+  await configure({
+    supabase_url: SUPABASE_URL,
+    publishable_key: SUPABASE_PUBLISHABLE_KEY,
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+  });
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -62,6 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
+      syncNativeSession(s).catch((error) =>
+        console.error("[AuthContext] native session sync:", error),
+      );
       if (s?.user) {
         // defer profile loading to avoid deadlock with the auth callback
         setTimeout(() => { loadAppUser(s.user).then(setUser); }, 0);
@@ -71,16 +120,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
+      await syncNativeSession(data.session);
       if (data.session?.user) setUser(await loadAppUser(data.session.user));
       setReady(true);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const sync = () => {
+      void syncNativeSession(session);
+    };
+    window.addEventListener("pywebviewready", sync);
+    return () => window.removeEventListener("pywebviewready", sync);
+  }, [session]);
+
   async function login(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
+  }
+
+  async function signup(
+    name: string,
+    companyName: string,
+    email: string,
+    password: string,
+  ) {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: {
+          name: name.trim(),
+          company_name: companyName.trim(),
+        },
+        emailRedirectTo: `${window.location.origin}/LeadFlow/`,
+      },
+    });
+    if (error) return { ok: false, error: error.message };
+    return {
+      ok: true,
+      confirmation: !data.session,
+    };
+  }
+
+  async function requestPasswordReset(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email.trim().toLowerCase(),
+      {
+        redirectTo: `${window.location.origin}/LeadFlow/reset-password`,
+      },
+    );
+    return error
+      ? { ok: false, error: error.message }
+      : { ok: true };
+  }
+
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password });
+    return error
+      ? { ok: false, error: error.message }
+      : { ok: true };
   }
 
   async function logout() {
@@ -92,7 +193,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.user) setUser(await loadAppUser(data.user));
   }
 
-  return <Ctx.Provider value={{ user, session, ready, login, logout, refresh }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{
+    user,
+    session,
+    ready,
+    login,
+    signup,
+    requestPasswordReset,
+    updatePassword,
+    logout,
+    refresh,
+  }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

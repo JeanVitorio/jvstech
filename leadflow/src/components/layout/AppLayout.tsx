@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { Bot, Database, Download, LayoutDashboard, LogOut, Menu, MessageCircle, Moon, Sun, Target, UserCircle2, UserRoundCog, Users } from "lucide-react";
+import { Bot, CreditCard, Database, Download, LayoutDashboard, LogOut, Menu, MessageCircle, Moon, Sun, Target, UserCircle2, UserRoundCog, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/Logo";
@@ -10,6 +10,7 @@ import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
+import { useBilling } from "@/context/BillingContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean };
@@ -21,6 +22,7 @@ const nav: NavItem[] = [
   { to: "/bots", label: "Bots", icon: Bot },
   { to: "/message-bots", label: "Bots de WhatsApp", icon: MessageCircle },
   { to: "/leads", label: "Leads", icon: Users },
+  { to: "/billing", label: "Plano e consumo", icon: CreditCard },
   { to: "/installation", label: "Instalação", icon: Download },
 ];
 
@@ -28,6 +30,7 @@ export function AppLayout() {
   const { theme, toggle } = useTheme();
   const { currentUser, usingBackend } = useApp();
   const { user, logout } = useAuth();
+  const { status: billing } = useBilling();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const visibleNav = user?.is_leader
@@ -133,6 +136,15 @@ export function AppLayout() {
           </div>
         </header>
 
+        {billing && !["active", "trialing"].includes(billing.status) && (
+          <Link
+            to="/billing"
+            className="bg-warning/15 border-b border-warning/30 px-4 py-2 text-sm text-warning-foreground text-center"
+          >
+            Sua assinatura requer atenção. Atualize a forma de pagamento para
+            voltar a gerar leads.
+          </Link>
+        )}
         <main key={location.pathname} className="flex-1 p-0 sm:p-2 lg:p-8 animate-fade-in">
           <Outlet />
         </main>

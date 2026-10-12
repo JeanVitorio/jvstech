@@ -30,21 +30,30 @@ Deno.serve(async (req) => {
       return json({ error: 'Sessão inválida ou expirada' }, 401);
     }
 
-    // A criação de acessos é exclusiva de usuários com papel de líder.
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const { data: roles, error: rolesError } = await admin
-      .from('user_roles')
+    const { data: tenantId, error: tenantError } = await userClient
+      .rpc('current_tenant_id');
+    if (tenantError || !tenantId) {
+      return json({ error: 'Empresa não vinculada ao usuário' }, 403);
+    }
+
+    const { data: membership, error: membershipError } = await admin
+      .from('tenant_memberships')
       .select('role')
-      .eq('user_id', caller.id);
+      .eq('tenant_id', tenantId)
+      .eq('user_id', caller.id)
+      .not('accepted_at', 'is', null)
+      .maybeSingle();
     
-    if (rolesError) {
-      console.error('Error fetching caller roles:', rolesError);
+    if (membershipError) {
+      console.error('Error fetching caller membership:', membershipError);
       return json({ error: 'Erro ao verificar permissões' }, 500);
     }
 
-    const callerRoles = (roles ?? []).map((r: { role: string }) => r.role);
-    if (!callerRoles.includes('leader')) {
-      return json({ error: 'Apenas líderes podem criar usuários' }, 403);
+    if (!membership || !['owner', 'admin'].includes(membership.role)) {
+      return json({
+        error: 'Apenas administradores da empresa podem criar usuários',
+      }, 403);
     }
 
     const body = await req.json();
@@ -76,15 +85,20 @@ Deno.serve(async (req) => {
       email: email.trim().toLowerCase(),
       password,
       email_confirm: true,
-      user_metadata: { name },
+      user_metadata: {
+        name,
+      },
+      app_metadata: {
+        tenant_id: tenantId,
+        app_role: role,
+      },
     });
     if (createErr || !created.user) {
       return json({ error: createErr?.message ?? 'Falha ao criar usuário' }, 400);
     }
     const newUserId = created.user.id;
 
-    // O projeto não possui trigger de criação de profile para novos usuários.
-    // O upsert garante que toda conta do Auth também apareça nas telas da web.
+    // Mantém os dados complementares do perfil criado pelo trigger.
     const { error: profileError } = await admin.from('profiles').upsert({
       id: newUserId,
       email: email.trim().toLowerCase(),
@@ -128,6 +142,7 @@ Deno.serve(async (req) => {
     if (Array.isArray(team_ids) && team_ids.length > 0) {
       const teamRows = team_ids.map((tid: string) => ({
         team_id: tid,
+        tenant_id: tenantId,
         user_id: newUserId,
         role_in_team: role === 'manager' ? 'manager' : 'member',
       }));
