@@ -76,6 +76,17 @@ function jsonResponse(request, body, status = 200) {
     }
   });
 }
+function errorMessage(error, fallback) {
+  if (error instanceof Error && error.message) return error.message;
+  if (error && typeof error === "object") {
+    if (typeof error.message === "string" && error.message) return error.message;
+    if (typeof error.details === "string" && error.details) return error.details;
+    if (typeof error.code === "string" && error.code) {
+      return `${fallback} (c\xF3digo ${error.code})`;
+    }
+  }
+  return fallback;
+}
 
 // supabase/functions/_shared/stripe.ts
 import Stripe from "npm:stripe@18.5.0";
@@ -204,7 +215,10 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error("create-checkout-session:", error);
     const status = error instanceof AuthorizationError ? error.status : 500;
-    const message = error instanceof Error ? error.message : "N\xE3o foi poss\xEDvel iniciar o pagamento";
+    const message = errorMessage(
+      error,
+      "N\xE3o foi poss\xEDvel iniciar o pagamento"
+    );
     return jsonResponse(request, { error: message }, status);
   }
 });

@@ -4,6 +4,27 @@ import { appUrl, configuredPriceId, getStripe } from "../_shared/stripe.ts";
 
 const paidPlans = new Set(["basic", "plus", "pro"]);
 
+function errorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (error && typeof error === "object") {
+    const value = error as {
+      message?: unknown;
+      details?: unknown;
+      code?: unknown;
+    };
+    if (typeof value.message === "string" && value.message) {
+      return value.message;
+    }
+    if (typeof value.details === "string" && value.details) {
+      return value.details;
+    }
+    if (typeof value.code === "string" && value.code) {
+      return `${fallback} (código ${value.code})`;
+    }
+  }
+  return fallback;
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders(request) });
@@ -118,7 +139,7 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error("create-checkout-session:", error);
     const status = error instanceof AuthorizationError ? error.status : 500;
-    const message = error instanceof Error ? error.message : "Não foi possível iniciar o pagamento";
+    const message = errorMessage(error, "Não foi possível iniciar o pagamento");
     return jsonResponse(request, { error: message }, status);
   }
 });
