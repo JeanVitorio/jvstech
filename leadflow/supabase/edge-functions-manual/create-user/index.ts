@@ -90,6 +90,25 @@ Deno.serve(async (req) => {
     if (!["admin", "member"].includes(tenant_role)) {
       return json(req, { error: "N\xEDvel inv\xE1lido" }, 400);
     }
+    const { data: billingStatus, error: billingError } = await userClient.rpc(
+      "prospecta_get_billing_status",
+    );
+    if (billingError) {
+      return json(req, { error: "N\xE3o foi poss\xEDvel validar o limite do plano" }, 500);
+    }
+    if (
+      typeof billingStatus?.user_limit === "number" &&
+      Number(billingStatus.users_used ?? 0) >= billingStatus.user_limit
+    ) {
+      return json(req, { error: "Limite de usu\xE1rios do plano atingido" }, 409);
+    }
+    if (
+      tenant_role === "admin" &&
+      typeof billingStatus?.admin_limit === "number" &&
+      Number(billingStatus.admins_used ?? 0) >= billingStatus.admin_limit
+    ) {
+      return json(req, { error: "Limite de administradores do plano atingido" }, 409);
+    }
     const appRole = tenant_role === "admin" ? "manager" : "collaborator";
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
       email: email.trim().toLowerCase(),

@@ -7,6 +7,35 @@ import type { BillingStatus, PlanCode, SubscriptionPlan } from "@/types/billing"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
+const userLimitsByPlan: Record<PlanCode, Pick<SubscriptionPlan, "user_limit" | "admin_limit">> = {
+  free: { user_limit: 1, admin_limit: 0 },
+  basic: { user_limit: 2, admin_limit: 1 },
+  plus: { user_limit: 5, admin_limit: 2 },
+  pro: { user_limit: 10, admin_limit: 3 },
+};
+
+async function loadPlans(): Promise<SubscriptionPlan[]> {
+  let result = await db
+    .from("subscription_plans")
+    .select("code, name, monthly_price_cents, leads_per_month, user_limit, admin_limit")
+    .eq("active", true)
+    .order("monthly_price_cents");
+
+  if (result.error) {
+    result = await db
+      .from("subscription_plans")
+      .select("code, name, monthly_price_cents, leads_per_month")
+      .eq("active", true)
+      .order("monthly_price_cents");
+  }
+  if (result.error) throw result.error;
+
+  return (result.data ?? []).map((plan: SubscriptionPlan) => ({
+    ...plan,
+    ...userLimitsByPlan[plan.code],
+  }));
+}
+
 function readErrorMessage(value: unknown): string | null {
   if (!value || typeof value !== "object") return null;
   const payload = value as { error?: unknown; message?: unknown };
@@ -82,18 +111,13 @@ export function BillingProvider({ children }: { children: ReactNode }) {
       return;
     }
     setLoading(true);
-    const [statusResult, plansResult] = await Promise.all([
+    const [statusResult, loadedPlans] = await Promise.all([
       db.rpc("prospecta_get_billing_status"),
-      db
-        .from("subscription_plans")
-        .select("code, name, monthly_price_cents, leads_per_month")
-        .eq("active", true)
-        .order("monthly_price_cents"),
+      loadPlans(),
     ]);
     if (statusResult.error) throw statusResult.error;
-    if (plansResult.error) throw plansResult.error;
     setStatus(statusResult.data as BillingStatus | null);
-    setPlans((plansResult.data ?? []) as SubscriptionPlan[]);
+    setPlans(loadedPlans);
     setLoading(false);
   }, [user]);
 

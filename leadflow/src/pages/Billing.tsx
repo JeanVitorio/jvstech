@@ -8,6 +8,7 @@ import {
   Rocket,
   ShieldCheck,
   Sparkles,
+  UsersRound,
   Zap,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
@@ -190,6 +191,17 @@ export default function Billing() {
                 <span>Início do ciclo</span>
                 <span>Renovação mensal</span>
               </div>
+              {typeof status.user_limit === "number" && (
+                <div className="mt-5 flex items-center justify-between rounded-xl border border-border/60 bg-card/40 px-3.5 py-3 text-xs">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <UsersRound className="h-4 w-4 text-primary" />
+                    Usuários da empresa
+                  </span>
+                  <strong>
+                    {status.users_used} de {status.user_limit}
+                  </strong>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -268,9 +280,23 @@ export default function Billing() {
                 <p className="text-[0.65rem] uppercase tracking-[0.12em] text-muted-foreground">
                   Capacidade
                 </p>
-                <p className="mt-1 font-display text-xl font-bold">
-                  {plan.leads_per_month.toLocaleString("pt-BR")} leads
-                </p>
+                <div className="mt-2 space-y-2">
+                  <p className="font-display text-xl font-bold">
+                    {plan.leads_per_month.toLocaleString("pt-BR")} leads
+                  </p>
+                  <div className="h-px bg-border/60" />
+                  <p className="flex items-center gap-2 text-xs font-semibold">
+                    <UsersRound className="h-3.5 w-3.5 text-primary" />
+                    {plan.user_limit} {plan.user_limit === 1 ? "usuário" : "usuários"}
+                  </p>
+                  <p className="text-[0.68rem] text-muted-foreground">
+                    {plan.admin_limit === 0
+                      ? "Somente o Proprietário"
+                      : `Até ${plan.admin_limit} ${
+                          plan.admin_limit === 1 ? "Administrador" : "Administradores"
+                        }`}
+                  </p>
+                </div>
               </div>
 
               <p className="relative mt-5 min-h-16 text-xs leading-relaxed text-muted-foreground">
@@ -280,6 +306,14 @@ export default function Billing() {
               <div className="relative my-5 h-px bg-border/70" />
 
               <div className="relative flex-1 space-y-3">
+                <div className="flex items-start gap-2.5 text-xs">
+                  <span className="mt-px grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/10">
+                    <Check className="h-3 w-3 text-primary" />
+                  </span>
+                  {plan.user_limit === 1
+                    ? "1 Proprietário"
+                    : `${plan.user_limit} usuários no total`}
+                </div>
                 {presentation.features.map((feature) => (
                   <div key={feature} className="flex items-start gap-2.5 text-xs">
                     <span className="mt-px grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/10">

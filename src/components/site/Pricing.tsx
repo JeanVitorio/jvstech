@@ -15,6 +15,7 @@ const tiers = [
     icon: Sparkles,
     marks: [
       "50 leads gerados por mês",
+      "1 usuário: somente o Proprietário",
       "Gestão de leads e funil de vendas",
       "Bot de prospecção configurável",
       "Acesso pelo computador e celular",
@@ -32,6 +33,8 @@ const tiers = [
     icon: Zap,
     marks: [
       "500 leads gerados por mês",
+      "2 usuários no total",
+      "1 vaga para Administrador ou Usuário",
       "Gestão de leads e responsáveis",
       "Funil de vendas integrado",
       "Cobrança mensal recorrente",
@@ -49,6 +52,8 @@ const tiers = [
     icon: Rocket,
     marks: [
       "1.500 leads gerados por mês",
+      "5 usuários • até 2 Administradores",
+      "Até 4 Usuários operacionais",
       "Gestão de equipe e responsáveis",
       "Bots de prospecção e WhatsApp",
       "Troca de plano e cartão online",
@@ -67,6 +72,8 @@ const tiers = [
     icon: Crown,
     marks: [
       "3.000 leads gerados por mês",
+      "10 usuários • até 3 Administradores",
+      "Até 9 Usuários operacionais",
       "Todos os recursos do LeadFlow",
       "Operação centralizada por empresa",
       "Cancelamento online a qualquer momento",

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useBilling } from "@/context/BillingContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,7 @@ const ROLE_LABELS: Record<TenantRole, string> = {
 
 export default function Collaborators() {
   const { user } = useAuth();
+  const { status: billing } = useBilling();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [memberships, setMemberships] = useState<MembershipRow[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -88,6 +90,10 @@ export default function Collaborators() {
   }, [load]);
 
   const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
+  const userLimitReached =
+    typeof billing?.user_limit === "number" && billing.users_used >= billing.user_limit;
+  const adminLimitReached =
+    typeof billing?.admin_limit === "number" && billing.admins_used >= billing.admin_limit;
 
   async function removeCollaborator(uid: string, name: string) {
     if (!confirm(`Remover ${name}? Esta ação é permanente.`)) return;
@@ -143,16 +149,31 @@ export default function Collaborators() {
           <p className="text-sm text-muted-foreground">
             Gerencie somente os usuários vinculados à sua empresa.
           </p>
+          {typeof billing?.user_limit === "number" && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Badge variant="outline">
+                {billing.users_used}/{billing.user_limit} usuários
+              </Badge>
+              <Badge variant="outline">
+                {billing.admins_used}/{billing.admin_limit} administradores
+              </Badge>
+            </div>
+          )}
         </div>
         {canManageTenant && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2 w-full sm:w-auto">
+              <Button
+                className="gap-2 w-full sm:w-auto"
+                disabled={userLimitReached}
+                title={userLimitReached ? "Limite de usuários do plano atingido" : undefined}
+              >
                 <UserPlus className="w-4 h-4" /> Novo usuário
               </Button>
             </DialogTrigger>
             <NewCollaboratorDialog
               teams={teams}
+              adminLimitReached={adminLimitReached}
               onCreated={() => {
                 setOpen(false);
                 load();
@@ -227,7 +248,9 @@ export default function Collaborators() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="member">Usuário</SelectItem>
-                          <SelectItem value="admin">Administrador</SelectItem>
+                          <SelectItem value="admin" disabled={adminLimitReached}>
+                            Administrador
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <button
@@ -273,7 +296,15 @@ export default function Collaborators() {
   );
 }
 
-function NewCollaboratorDialog({ teams, onCreated }: { teams: Team[]; onCreated: () => void }) {
+function NewCollaboratorDialog({
+  teams,
+  adminLimitReached,
+  onCreated,
+}: {
+  teams: Team[];
+  adminLimitReached: boolean;
+  onCreated: () => void;
+}) {
   const { session } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -420,7 +451,9 @@ function NewCollaboratorDialog({ teams, onCreated }: { teams: Team[]; onCreated:
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="member">Usuário</SelectItem>
-                <SelectItem value="admin">Administrador</SelectItem>
+                <SelectItem value="admin" disabled={adminLimitReached}>
+                  Administrador
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
