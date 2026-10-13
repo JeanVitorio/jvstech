@@ -1108,6 +1108,17 @@ grant select, insert, update
 grant usage, select on sequence public.prospecta_bot_events_id_seq
   to authenticated;
 
+grant usage on schema public to service_role;
+grant select on table
+  public.profiles,
+  public.tenant_memberships,
+  public.tenants,
+  public.subscription_plans,
+  public.tenant_subscriptions
+to service_role;
+grant update (stripe_customer_id)
+  on table public.tenants to service_role;
+
 revoke all on function public.current_tenant_id()
   from public, anon;
 revoke all on function public.is_tenant_member(uuid, uuid)
