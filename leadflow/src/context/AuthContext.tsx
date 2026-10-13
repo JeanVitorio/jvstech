@@ -28,10 +28,6 @@ interface AuthState {
   session: Session | null;
   ready: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
-  loginWithGoogle: (
-    companyName?: string,
-    planCode?: PlanCode,
-  ) => Promise<{ ok: boolean; error?: string }>;
   signup: (
     name: string,
     companyName: string,
@@ -46,23 +42,11 @@ interface AuthState {
 }
 
 const Ctx = createContext<AuthState | null>(null);
-const OAUTH_COMPANY_KEY = "leadflow_oauth_company_name";
 
 function planDestination(planCode: PlanCode): string {
   return planCode === "free"
     ? "/LeadFlow/"
     : `/LeadFlow/billing?plan=${encodeURIComponent(planCode)}&onboarding=1`;
-}
-
-async function completeOAuthOnboarding(supaUser: SupaUser): Promise<void> {
-  if (supaUser.app_metadata.provider !== "google") return;
-  const companyName = localStorage.getItem(OAUTH_COMPANY_KEY)?.trim();
-  if (!companyName) return;
-  const { error } = await db.rpc("prospecta_complete_oauth_onboarding", {
-    p_company_name: companyName,
-  });
-  if (error) throw error;
-  localStorage.removeItem(OAUTH_COMPANY_KEY);
 }
 
 async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
@@ -133,9 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (s?.user) {
         // defer profile loading to avoid deadlock with the auth callback
         setTimeout(() => {
-          completeOAuthOnboarding(s.user)
-            .catch((error) => console.error("[AuthContext] OAuth onboarding:", error))
-            .finally(() => loadAppUser(s.user).then(setUser));
+          loadAppUser(s.user).then(setUser);
         }, 0);
       } else {
         setUser(null);
@@ -145,9 +127,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       await syncNativeSession(data.session);
       if (data.session?.user) {
-        await completeOAuthOnboarding(data.session.user).catch((error) =>
-          console.error("[AuthContext] OAuth onboarding:", error),
-        );
         setUser(await loadAppUser(data.session.user));
       }
       setReady(true);
@@ -164,29 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   async function login(email: string, password: string) {
-    localStorage.removeItem(OAUTH_COMPANY_KEY);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) return { ok: false, error: error.message };
-    return { ok: true };
-  }
-
-  async function loginWithGoogle(companyName?: string, planCode: PlanCode = "free") {
-    const normalizedCompany = companyName?.trim();
-    if (normalizedCompany) {
-      localStorage.setItem(OAUTH_COMPANY_KEY, normalizedCompany);
-    } else {
-      localStorage.removeItem(OAUTH_COMPANY_KEY);
-    }
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}${planDestination(planCode)}`,
-      },
-    });
-    if (error) {
-      localStorage.removeItem(OAUTH_COMPANY_KEY);
-      return { ok: false, error: error.message };
-    }
     return { ok: true };
   }
 
@@ -197,7 +155,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     planCode: PlanCode = "free",
   ) {
-    localStorage.removeItem(OAUTH_COMPANY_KEY);
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -244,7 +201,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         ready,
         login,
-        loginWithGoogle,
         signup,
         requestPasswordReset,
         updatePassword,

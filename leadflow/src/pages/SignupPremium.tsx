@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, ArrowRight, Sparkles } from "lucide-react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
-import { AuthShell, GoogleIcon } from "@/components/auth/AuthShell";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,7 @@ const inputClass =
   "h-12 rounded-xl border-white/10 bg-white/[0.06] text-white shadow-none placeholder:text-white/25 focus-visible:border-primary/60 focus-visible:ring-primary/20";
 
 export default function SignupPremium() {
-  const { user, ready, signup, loginWithGoogle } = useAuth();
+  const { user, ready, signup } = useAuth();
   const [searchParams] = useSearchParams();
   const requestedPlan = searchParams.get("plan");
   const selectedPlan: PlanCode =
@@ -33,36 +33,26 @@ export default function SignupPremium() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"google" | "email" | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (!ready) return null;
   if (user) return <Navigate to={destination} replace />;
-
-  async function handleGoogle() {
-    setError(null);
-    if (companyName.trim().length < 2) {
-      setError("Informe o nome da empresa para continuar com o Google.");
-      return;
-    }
-    setBusy("google");
-    const result = await loginWithGoogle(companyName, selectedPlan);
-    if (!result.ok) {
-      setBusy(null);
-      setError(result.error ?? "Não foi possível continuar com o Google.");
-    }
-  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setMessage(null);
+    if (companyName.trim().length < 2) {
+      setError("Informe o nome da empresa.");
+      return;
+    }
     if (password.length < 8) {
       setError("A senha deve ter ao menos 8 caracteres.");
       return;
     }
-    setBusy("email");
+    setBusy(true);
     const result = await signup(name, companyName, email, password, selectedPlan);
-    setBusy(null);
+    setBusy(false);
     if (!result.ok) {
       setError(result.error ?? "Não foi possível criar sua conta.");
       return;
@@ -112,26 +102,7 @@ export default function SignupPremium() {
         />
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleGoogle}
-        disabled={busy !== null}
-        className="mt-4 h-12 w-full gap-3 rounded-xl border-white/15 bg-white text-sm font-semibold text-black shadow-sm transition-transform hover:scale-[1.01] hover:bg-white/90"
-      >
-        <GoogleIcon />
-        {busy === "google" ? "Conectando..." : "Continuar com Google"}
-      </Button>
-
-      <div className="my-6 flex items-center gap-3">
-        <span className="h-px flex-1 bg-white/10" />
-        <span className="text-[0.68rem] uppercase tracking-[0.16em] text-white/30">
-          ou use seu e-mail
-        </span>
-        <span className="h-px flex-1 bg-white/10" />
-      </div>
-
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="mt-6 space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-xs text-white/65">
             Seu nome
@@ -193,9 +164,9 @@ export default function SignupPremium() {
 
         <Button
           className="h-12 w-full gap-2 rounded-xl text-sm font-bold shadow-glow transition-transform hover:scale-[1.01]"
-          disabled={busy !== null}
+          disabled={busy}
         >
-          {busy === "email"
+          {busy
             ? "Criando sua conta..."
             : selectedPlan === "free"
               ? "Criar conta grátis"

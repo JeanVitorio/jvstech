@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
-import { AuthShell, GoogleIcon } from "@/components/auth/AuthShell";
+import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ const inputClass =
   "h-12 rounded-xl border-white/10 bg-white/[0.06] text-white shadow-none placeholder:text-white/25 focus-visible:border-primary/60 focus-visible:ring-primary/20";
 
 export default function LoginPremium() {
-  const { user, ready, login, loginWithGoogle } = useAuth();
+  const { user, ready, login } = useAuth();
   const [searchParams] = useSearchParams();
   const requestedPlan = searchParams.get("plan");
   const paidPlan =
@@ -23,27 +23,17 @@ export default function LoginPremium() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"google" | "email" | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (!ready) return null;
   if (user) return <Navigate to={destination} replace />;
 
-  async function handleGoogle() {
-    setError(null);
-    setBusy("google");
-    const result = await loginWithGoogle(undefined, paidPlan ?? "free");
-    if (!result.ok) {
-      setBusy(null);
-      setError(result.error ?? "Não foi possível entrar com o Google.");
-    }
-  }
-
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    setBusy("email");
+    setBusy(true);
     const result = await login(email, password);
-    setBusy(null);
+    setBusy(false);
     if (!result.ok) setError(result.error ?? "Não foi possível entrar.");
   }
 
@@ -53,25 +43,6 @@ export default function LoginPremium() {
       title="Entre no LeadFlow."
       description="Acesse sua prospecção, acompanhe as oportunidades e continue de onde parou."
     >
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleGoogle}
-        disabled={busy !== null}
-        className="h-12 w-full gap-3 rounded-xl border-white/15 bg-white text-sm font-semibold text-black shadow-sm transition-transform hover:scale-[1.01] hover:bg-white/90"
-      >
-        <GoogleIcon />
-        {busy === "google" ? "Conectando..." : "Continuar com Google"}
-      </Button>
-
-      <div className="my-6 flex items-center gap-3">
-        <span className="h-px flex-1 bg-white/10" />
-        <span className="text-[0.68rem] uppercase tracking-[0.16em] text-white/30">
-          ou entre com e-mail
-        </span>
-        <span className="h-px flex-1 bg-white/10" />
-      </div>
-
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-xs text-white/65">
@@ -128,9 +99,9 @@ export default function LoginPremium() {
         <Button
           type="submit"
           className="h-12 w-full gap-2 rounded-xl text-sm font-bold shadow-glow transition-transform hover:scale-[1.01]"
-          disabled={busy !== null}
+          disabled={busy}
         >
-          {busy === "email" ? "Entrando..." : "Entrar na minha conta"}
+          {busy ? "Entrando..." : "Entrar na minha conta"}
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </form>
