@@ -6,8 +6,8 @@ import {
   ChevronDown,
   Globe2,
   Instagram,
-  Mail,
   MapPin,
+  MessageCircle,
   Search,
   Sparkles,
 } from "lucide-react";
@@ -19,7 +19,7 @@ const assurances = ["50 leads por mês grátis", "Sem cartão de crédito", "Can
 const leadData = [
   { icon: Globe2, label: "Site oficial", value: "Encontrado" },
   { icon: Instagram, label: "Instagram", value: "Encontrado" },
-  { icon: Mail, label: "E-mail comercial", value: "Encontrado" },
+  { icon: MessageCircle, label: "WhatsApp", value: "Encontrado" },
 ];
 
 export function SalesHero() {
@@ -73,7 +73,7 @@ export function SalesHero() {
             Transforme buscas em <span className="text-brand">oportunidades reais.</span>
           </h1>
           <p className="mt-7 max-w-xl text-base leading-relaxed text-foreground/70 md:text-lg">
-            O LeadFlow encontra empresas no Google, enriquece cada contato com site, e-mail e
+            O LeadFlow encontra empresas no Google, enriquece cada contato com site, WhatsApp e
             Instagram e organiza tudo para sua equipe entrar em ação.
           </p>
 

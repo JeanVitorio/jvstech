@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, Check, Crown, Rocket, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const tiers = [
   {
@@ -79,16 +78,9 @@ export function Pricing() {
   const root = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      gsap.from(".price-card", {
-        y: 70,
-        opacity: 0,
-        stagger: 0.16,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: { trigger: ".price-grid", start: "top 88%" },
-      });
+      // Os cards permanecem sempre visíveis, mesmo se animações forem bloqueadas.
+      gsap.set(".price-card", { opacity: 1, y: 0 });
       gsap.to(".price-aura", {
         opacity: 0.9,
         scale: 1.15,
