@@ -1,9 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import {
-  SUPABASE_PUBLISHABLE_KEY,
-  SUPABASE_URL,
-  supabase,
-} from "@/integrations/supabase/client";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabase } from "@/integrations/supabase/client";
 import type { Session, User as SupaUser } from "@supabase/supabase-js";
 import type { PlanCode } from "@/types/billing";
 
@@ -32,6 +28,10 @@ interface AuthState {
   session: Session | null;
   ready: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  loginWithGoogle: (
+    companyName?: string,
+    planCode?: PlanCode,
+  ) => Promise<{ ok: boolean; error?: string }>;
   signup: (
     name: string,
     companyName: string,
@@ -39,21 +39,39 @@ interface AuthState {
     password: string,
     planCode?: PlanCode,
   ) => Promise<{ ok: boolean; error?: string; confirmation?: boolean }>;
-  requestPasswordReset: (
-    email: string,
-  ) => Promise<{ ok: boolean; error?: string }>;
-  updatePassword: (
-    password: string,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  updatePassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthState | null>(null);
+const OAUTH_COMPANY_KEY = "leadflow_oauth_company_name";
+
+function planDestination(planCode: PlanCode): string {
+  return planCode === "free"
+    ? "/LeadFlow/"
+    : `/LeadFlow/billing?plan=${encodeURIComponent(planCode)}&onboarding=1`;
+}
+
+async function completeOAuthOnboarding(supaUser: SupaUser): Promise<void> {
+  if (supaUser.app_metadata.provider !== "google") return;
+  const companyName = localStorage.getItem(OAUTH_COMPANY_KEY)?.trim();
+  if (!companyName) return;
+  const { error } = await db.rpc("prospecta_complete_oauth_onboarding", {
+    p_company_name: companyName,
+  });
+  if (error) throw error;
+  localStorage.removeItem(OAUTH_COMPANY_KEY);
+}
 
 async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
   const [{ data: profile }, { data: roles, error: rolesError }, tenantResult] = await Promise.all([
-    db.from("profiles").select("name, avatar_url, position, active_tenant_id").eq("id", supaUser.id).maybeSingle(),
+    db
+      .from("profiles")
+      .select("name, avatar_url, position, active_tenant_id")
+      .eq("id", supaUser.id)
+      .maybeSingle(),
     db.from("user_roles").select("role").eq("user_id", supaUser.id),
     db.rpc("current_tenant_id"),
   ]);
@@ -62,10 +80,10 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
   const role: AppRole = roleList.includes("leader")
     ? "leader"
     : roleList.includes("manager")
-    ? "manager"
-    : roleList.includes("commercial")
-    ? "commercial"
-    : "collaborator";
+      ? "manager"
+      : roleList.includes("commercial")
+        ? "commercial"
+        : "collaborator";
   const tenantId = (tenantResult.data as string | null) ?? null;
   const { data: membership } = tenantId
     ? await db
@@ -86,8 +104,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     is_manager: role === "manager" || role === "leader",
     is_commercial: role === "commercial",
     tenant_id: tenantId ?? profile?.active_tenant_id ?? null,
-    tenant_role:
-      (membership?.role as AuthUser["tenant_role"] | undefined) ?? null,
+    tenant_role: (membership?.role as AuthUser["tenant_role"] | undefined) ?? null,
   };
 }
 
@@ -115,7 +132,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       if (s?.user) {
         // defer profile loading to avoid deadlock with the auth callback
-        setTimeout(() => { loadAppUser(s.user).then(setUser); }, 0);
+        setTimeout(() => {
+          completeOAuthOnboarding(s.user)
+            .catch((error) => console.error("[AuthContext] OAuth onboarding:", error))
+            .finally(() => loadAppUser(s.user).then(setUser));
+        }, 0);
       } else {
         setUser(null);
       }
@@ -123,7 +144,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
       await syncNativeSession(data.session);
-      if (data.session?.user) setUser(await loadAppUser(data.session.user));
+      if (data.session?.user) {
+        await completeOAuthOnboarding(data.session.user).catch((error) =>
+          console.error("[AuthContext] OAuth onboarding:", error),
+        );
+        setUser(await loadAppUser(data.session.user));
+      }
       setReady(true);
     });
     return () => sub.subscription.unsubscribe();
@@ -138,8 +164,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   async function login(email: string, password: string) {
+    localStorage.removeItem(OAUTH_COMPANY_KEY);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  }
+
+  async function loginWithGoogle(companyName?: string, planCode: PlanCode = "free") {
+    const normalizedCompany = companyName?.trim();
+    if (normalizedCompany) {
+      localStorage.setItem(OAUTH_COMPANY_KEY, normalizedCompany);
+    } else {
+      localStorage.removeItem(OAUTH_COMPANY_KEY);
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}${planDestination(planCode)}`,
+      },
+    });
+    if (error) {
+      localStorage.removeItem(OAUTH_COMPANY_KEY);
+      return { ok: false, error: error.message };
+    }
     return { ok: true };
   }
 
@@ -150,9 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     planCode: PlanCode = "free",
   ) {
-    const redirectPath = planCode === "free"
-      ? "/LeadFlow/"
-      : `/LeadFlow/billing?plan=${encodeURIComponent(planCode)}&onboarding=1`;
+    localStorage.removeItem(OAUTH_COMPANY_KEY);
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -161,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: name.trim(),
           company_name: companyName.trim(),
         },
-        emailRedirectTo: `${window.location.origin}${redirectPath}`,
+        emailRedirectTo: `${window.location.origin}${planDestination(planCode)}`,
       },
     });
     if (error) return { ok: false, error: error.message };
@@ -172,22 +217,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function requestPasswordReset(email: string) {
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email.trim().toLowerCase(),
-      {
-        redirectTo: `${window.location.origin}/LeadFlow/reset-password`,
-      },
-    );
-    return error
-      ? { ok: false, error: error.message }
-      : { ok: true };
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/LeadFlow/reset-password`,
+    });
+    return error ? { ok: false, error: error.message } : { ok: true };
   }
 
   async function updatePassword(password: string) {
     const { error } = await supabase.auth.updateUser({ password });
-    return error
-      ? { ok: false, error: error.message }
-      : { ok: true };
+    return error ? { ok: false, error: error.message } : { ok: true };
   }
 
   async function logout() {
@@ -199,17 +237,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.user) setUser(await loadAppUser(data.user));
   }
 
-  return <Ctx.Provider value={{
-    user,
-    session,
-    ready,
-    login,
-    signup,
-    requestPasswordReset,
-    updatePassword,
-    logout,
-    refresh,
-  }}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider
+      value={{
+        user,
+        session,
+        ready,
+        login,
+        loginWithGoogle,
+        signup,
+        requestPasswordReset,
+        updatePassword,
+        logout,
+        refresh,
+      }}
+    >
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export function useAuth() {
