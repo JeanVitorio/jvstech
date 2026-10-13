@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApp } from "@/store/AppStore";
 import { PageHeader } from "@/components/PageHeader";
@@ -6,12 +6,37 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit2, Phone, Mail, Building, Target, DollarSign, MessageCircle, MapPin, Globe, Instagram } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Edit2,
+  Phone,
+  Mail,
+  Building,
+  Target,
+  DollarSign,
+  MessageCircle,
+  MapPin,
+  Globe,
+  Instagram,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDate } from "@/lib/format";
@@ -71,7 +96,7 @@ export default function Leads() {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   const [form, setForm] = useState<Partial<Lead>>({
     name: "",
     company: "",
@@ -89,23 +114,18 @@ export default function Leads() {
     next_followup_at: "",
   });
 
-  const isLeader = user?.role === "leader";
-  
-  useEffect(() => {
-    loadLeads();
-    loadStages();
-  }, [user?.id]);
+  const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
 
-  async function loadLeads() {
+  const loadLeads = useCallback(async () => {
     setLoading(true);
     try {
       const query = supabase.from("leads").select("*");
-      
-      // Apenas líder inicia com visão geral; demais perfis veem os próprios leads.
-      if (!isLeader) {
+
+      // Gestores veem a empresa; demais usuários veem somente os próprios leads.
+      if (!canManageTenant) {
         query.eq("owner_id", user?.id);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
       setLeads(data || []);
@@ -114,29 +134,36 @@ export default function Leads() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [canManageTenant, user?.id]);
 
-  async function loadStages() {
+  const loadStages = useCallback(async () => {
     try {
       const { data, error } = await supabase.from("lead_stages").select("*").order("position");
       if (error) throw error;
       setStages(data || []);
-      if (data?.length && !form.stage_id) {
-        setForm(f => ({ ...f, stage_id: data[0].id }));
+      if (data?.length) {
+        setForm((current) => (current.stage_id ? current : { ...current, stage_id: data[0].id }));
       }
     } catch (err: unknown) {
       toast.error(errorMessage(err));
     }
-  }
+  }, []);
 
-  const filteredLeads = useMemo(() => 
-    leads.filter(l => 
-      (l.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
-      (l.company?.toLowerCase().includes(search.toLowerCase())) ||
-      (l.email?.toLowerCase().includes(search.toLowerCase())) ||
-      (l.instagram?.toLowerCase().includes(search.toLowerCase()))
-    ),
-    [leads, search]
+  useEffect(() => {
+    void loadLeads();
+    void loadStages();
+  }, [loadLeads, loadStages]);
+
+  const filteredLeads = useMemo(
+    () =>
+      leads.filter(
+        (l) =>
+          (l.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+          l.company?.toLowerCase().includes(search.toLowerCase()) ||
+          l.email?.toLowerCase().includes(search.toLowerCase()) ||
+          l.instagram?.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [leads, search],
   );
 
   function openCreate() {
@@ -189,7 +216,7 @@ export default function Leads() {
         source: form.source?.trim() || null,
         estimated_value: form.estimated_value || 0,
         stage_id: form.stage_id,
-        owner_id: isLeader ? form.owner_id || null : user?.id || null,
+        owner_id: canManageTenant ? form.owner_id || null : user?.id || null,
         notes: form.notes?.trim() || null,
         next_followup_at: form.next_followup_at || null,
       };
@@ -203,7 +230,7 @@ export default function Leads() {
         if (error) throw error;
         toast.success("Lead criado");
       }
-      
+
       setIsOpen(false);
       loadLeads();
     } catch (err: unknown) {
@@ -224,17 +251,17 @@ export default function Leads() {
   }
 
   const getStageColor = (stageId?: string) => {
-    const stage = stages.find(s => s.id === stageId);
+    const stage = stages.find((s) => s.id === stageId);
     return stage?.color || "#FF6500";
   };
 
   const getStageName = (stageId?: string) => {
-    const stage = stages.find(s => s.id === stageId);
+    const stage = stages.find((s) => s.id === stageId);
     return stage?.name || "—";
   };
 
   const getOwnerName = (ownerId?: string) => {
-    const u = users.find(usr => usr.id === ownerId);
+    const u = users.find((usr) => usr.id === ownerId);
     return u?.name || "Não atribuído";
   };
 
@@ -242,7 +269,9 @@ export default function Leads() {
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex items-center justify-between gap-4 mb-6">
         <PageHeader title="Leads" subtitle="Gerencie seus leads e oportunidades de vendas." />
-        <Button onClick={openCreate} className="gap-2"><Plus className="w-4 h-4" /> Novo Lead</Button>
+        <Button onClick={openCreate} className="gap-2">
+          <Plus className="w-4 h-4" /> Novo Lead
+        </Button>
       </div>
 
       <Card className="p-4 mb-6">
@@ -262,9 +291,9 @@ export default function Leads() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredLeads.map(lead => {
-            const owner = users.find(u => u.id === lead.owner_id);
-            const can_edit = isLeader || lead.owner_id === user?.id;
+          {filteredLeads.map((lead) => {
+            const owner = users.find((u) => u.id === lead.owner_id);
+            const can_edit = canManageTenant || lead.owner_id === user?.id;
             const whatsappLink = whatsappWebLink(
               lead.whatsapp || lead.phone,
               lead.first_contact_message,
@@ -277,12 +306,16 @@ export default function Leads() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-lg">{lead.name || lead.company || lead.email || "Lead sem nome"}</h3>
-                      <Badge style={{ backgroundColor: getStageColor(lead.stage_id), color: "white" }}>
+                      <h3 className="font-semibold text-lg">
+                        {lead.name || lead.company || lead.email || "Lead sem nome"}
+                      </h3>
+                      <Badge
+                        style={{ backgroundColor: getStageColor(lead.stage_id), color: "white" }}
+                      >
                         {getStageName(lead.stage_id)}
                       </Badge>
                     </div>
-                    
+
                     <div className="flex gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
                       {lead.company && (
                         <div className="flex items-center gap-1">
@@ -324,7 +357,8 @@ export default function Leads() {
                     <div className="flex gap-4 mt-2 text-sm flex-wrap">
                       {lead.estimated_value && (
                         <div className="flex items-center gap-1 text-success font-semibold">
-                          <DollarSign className="w-3.5 h-3.5" /> R$ {lead.estimated_value.toLocaleString("pt-BR")}
+                          <DollarSign className="w-3.5 h-3.5" /> R${" "}
+                          {lead.estimated_value.toLocaleString("pt-BR")}
                         </div>
                       )}
                       {owner && (
@@ -340,7 +374,9 @@ export default function Leads() {
                     </div>
 
                     {lead.notes && (
-                      <p className="text-xs text-muted-foreground mt-2 line-clamp-1">{lead.notes}</p>
+                      <p className="text-xs text-muted-foreground mt-2 line-clamp-1">
+                        {lead.notes}
+                      </p>
                     )}
                   </div>
 
@@ -483,9 +519,7 @@ export default function Leads() {
             <div className="flex items-center gap-3">
               <Switch
                 checked={!!form.whatsapp_do_not_contact}
-                onCheckedChange={(value) =>
-                  setForm({ ...form, whatsapp_do_not_contact: value })
-                }
+                onCheckedChange={(value) => setForm({ ...form, whatsapp_do_not_contact: value })}
               />
               <Label>Não contatar este lead pelo WhatsApp</Label>
             </div>
@@ -493,25 +527,37 @@ export default function Leads() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Estágio *</Label>
-                <Select value={form.stage_id || ""} onValueChange={(v) => setForm({ ...form, stage_id: v })}>
+                <Select
+                  value={form.stage_id || ""}
+                  onValueChange={(v) => setForm({ ...form, stage_id: v })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {stages.map(s => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    {stages.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Comercial *</Label>
-                {isLeader ? (
-                  <Select value={form.owner_id || ""} onValueChange={(v) => setForm({ ...form, owner_id: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                {canManageTenant ? (
+                  <Select
+                    value={form.owner_id || ""}
+                    onValueChange={(v) => setForm({ ...form, owner_id: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {users.map(u => (
-                        <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      {users.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -526,7 +572,9 @@ export default function Leads() {
               <Input
                 type="number"
                 value={form.estimated_value || 0}
-                onChange={(e) => setForm({ ...form, estimated_value: parseFloat(e.target.value) || 0 })}
+                onChange={(e) =>
+                  setForm({ ...form, estimated_value: parseFloat(e.target.value) || 0 })
+                }
                 placeholder="R$ 0,00"
               />
             </div>
@@ -535,8 +583,13 @@ export default function Leads() {
               <Label>Próximo follow-up</Label>
               <Input
                 type="date"
-                value={form.next_followup_at?.split('T')[0] || ""}
-                onChange={(e) => setForm({ ...form, next_followup_at: e.target.value ? new Date(e.target.value).toISOString() : "" })}
+                value={form.next_followup_at?.split("T")[0] || ""}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    next_followup_at: e.target.value ? new Date(e.target.value).toISOString() : "",
+                  })
+                }
               />
             </div>
 
@@ -552,7 +605,9 @@ export default function Leads() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
+              Cancelar
+            </Button>
             <Button onClick={save}>Salvar</Button>
           </DialogFooter>
         </DialogContent>

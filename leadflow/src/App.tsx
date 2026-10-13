@@ -36,11 +36,13 @@ function Protected({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function LeaderOnly({ children }: { children: ReactNode }) {
+function TenantManagerOnly({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
   if (!ready) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (!user.is_leader) return <Navigate to="/" replace />;
+  if (!["owner", "admin"].includes(user.tenant_role ?? "")) {
+    return <Navigate to="/" replace />;
+  }
   return <>{children}</>;
 }
 
@@ -78,9 +80,9 @@ const App = () => (
                         <Route
                           path="/collaborators"
                           element={
-                            <LeaderOnly>
+                            <TenantManagerOnly>
                               <Collaborators />
-                            </LeaderOnly>
+                            </TenantManagerOnly>
                           }
                         />
                         <Route path="/installation" element={<Installation />} />

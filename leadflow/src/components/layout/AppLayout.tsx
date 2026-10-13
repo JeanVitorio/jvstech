@@ -55,7 +55,8 @@ export function AppLayout() {
   const { status: billing } = useBilling();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const visibleNav = user?.is_leader
+  const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
+  const visibleNav = canManageTenant
     ? [
         ...nav.slice(0, -1),
         { to: "/collaborators", label: "Colaboradores", icon: UserRoundCog },
@@ -174,12 +175,12 @@ export function AppLayout() {
               className="hidden md:inline-flex gap-1 border-accent/40 text-accent"
             >
               <Bot className="w-3 h-3" />{" "}
-              {currentUser.role === "leader"
-                ? "Administrador"
-                : currentUser.role === "commercial"
-                  ? "Comercial"
-                  : currentUser.is_manager
-                    ? "Gerente"
+              {user?.tenant_role === "owner"
+                ? "Proprietário"
+                : user?.tenant_role === "admin"
+                  ? "Administrador"
+                  : currentUser.role === "commercial"
+                    ? "Comercial"
                     : "Usuário"}
             </Badge>
             <Button variant="ghost" size="icon" onClick={toggle} aria-label="Alternar tema">

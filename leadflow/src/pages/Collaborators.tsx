@@ -1,79 +1,109 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Plus, UserPlus, Shield, Crown, Trash2, Pencil, Check, X } from "lucide-react";
+import { UserPlus, Shield, Crown, Trash2, Pencil, Check, X, UserRound } from "lucide-react";
 
 type Profile = {
-  id: string; name: string; email: string; avatar_url: string | null;
-  position: string | null; phone: string | null; is_active: boolean;
-  contract_start: string | null; contract_end: string | null;
+  id: string;
+  name: string;
+  email: string;
+  avatar_url: string | null;
+  position: string | null;
+  phone: string | null;
+  is_active: boolean;
+  contract_start: string | null;
+  contract_end: string | null;
 };
-type Role = "leader" | "manager" | "collaborator" | "commercial";
-type RoleRow = { user_id: string; role: Role };
+type TenantRole = "owner" | "admin" | "member";
+type MembershipRow = { user_id: string; role: TenantRole };
 type Team = { id: string; name: string };
 type FunctionResponse = { error?: string; ok?: boolean; user_id?: string };
 
-const ROLE_LABELS: Record<string, string> = {
-  leader: "Líder",
-  manager: "Gerente",
-  commercial: "Comercial",
-  collaborator: "Colaborador",
+const ROLE_LABELS: Record<TenantRole, string> = {
+  owner: "Proprietário",
+  admin: "Administrador",
+  member: "Usuário",
 };
 
 export default function Collaborators() {
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [roles, setRoles] = useState<RoleRow[]>([]);
+  const [memberships, setMemberships] = useState<MembershipRow[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  // Controle de edição de role inline
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
-  const [pendingRole, setPendingRole] = useState<Role>("collaborator");
+  const [pendingRole, setPendingRole] = useState<Exclude<TenantRole, "owner">>("member");
   const [savingRole, setSavingRole] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
+    if (!user?.tenant_id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const [{ data: p }, { data: r }, { data: t }] = await Promise.all([
-      supabase.from("profiles").select("id,name,email,avatar_url,position,phone,is_active,contract_start,contract_end").order("name"),
-      supabase.from("user_roles").select("user_id,role"),
-      supabase.from("teams").select("id,name").order("name"),
+      supabase
+        .from("profiles")
+        .select("id,name,email,avatar_url,position,phone,is_active,contract_start,contract_end")
+        .eq("active_tenant_id", user.tenant_id)
+        .order("name"),
+      supabase
+        .from("tenant_memberships")
+        .select("user_id,role")
+        .eq("tenant_id", user.tenant_id)
+        .not("accepted_at", "is", null),
+      supabase.from("teams").select("id,name").eq("tenant_id", user.tenant_id).order("name"),
     ]);
     setProfiles((p ?? []) as Profile[]);
-    setRoles((r ?? []) as RoleRow[]);
+    setMemberships((r ?? []) as MembershipRow[]);
     setTeams((t ?? []) as Team[]);
     setLoading(false);
-  }
-  useEffect(() => { load(); }, []);
+  }, [user?.tenant_id]);
 
-  const isLeader = !!user?.is_leader;
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
 
   async function removeCollaborator(uid: string, name: string) {
     if (!confirm(`Remover ${name}? Esta ação é permanente.`)) return;
-    const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: uid } });
+    const { data, error } = await supabase.functions.invoke("delete-user", {
+      body: { user_id: uid },
+    });
     const response = data as FunctionResponse | null;
     if (error || response?.error) {
       return toast.error(response?.error ?? error?.message ?? "Erro");
     }
-    toast.success("Colaborador removido");
+    toast.success("Usuário removido");
     load();
   }
 
-  function roleOf(uid: string): Role {
-    const rs = roles.filter(x => x.user_id === uid).map(x => x.role);
-    if (rs.includes("leader")) return "leader";
-    if (rs.includes("manager")) return "manager";
-    if (rs.includes("commercial")) return "commercial";
-    return "collaborator";
+  function roleOf(uid: string): TenantRole {
+    return memberships.find((membership) => membership.user_id === uid)?.role ?? "member";
   }
 
   function startEditRole(uid: string) {
@@ -88,11 +118,13 @@ export default function Collaborators() {
   async function saveRole(uid: string) {
     setSavingRole(true);
     try {
-      // Remove todas as roles existentes do usuário e insere a nova
-      const { error: delErr } = await supabase.from("user_roles").delete().eq("user_id", uid);
-      if (delErr) throw delErr;
-      const { error: insErr } = await supabase.from("user_roles").insert({ user_id: uid, role: pendingRole });
-      if (insErr) throw insErr;
+      const { data, error } = await supabase.functions.invoke("update-user-role", {
+        body: { user_id: uid, tenant_role: pendingRole },
+      });
+      const response = data as FunctionResponse | null;
+      if (error || response?.error) {
+        throw new Error(response?.error ?? error?.message ?? "Não foi possível alterar o nível");
+      }
       toast.success(`Nível alterado para ${ROLE_LABELS[pendingRole]}`);
       setEditingRoleId(null);
       load();
@@ -107,18 +139,24 @@ export default function Collaborators() {
     <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display font-bold text-2xl sm:text-3xl">Colaboradores</h1>
-          <p className="text-sm text-muted-foreground">Gerencie sua equipe, cargos e contratos.</p>
+          <h1 className="font-display font-bold text-2xl sm:text-3xl">Usuários da empresa</h1>
+          <p className="text-sm text-muted-foreground">
+            Gerencie somente os usuários vinculados à sua empresa.
+          </p>
         </div>
-        {isLeader && (
+        {canManageTenant && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2 w-full sm:w-auto"><UserPlus className="w-4 h-4" /> Novo colaborador</Button>
+              <Button className="gap-2 w-full sm:w-auto">
+                <UserPlus className="w-4 h-4" /> Novo usuário
+              </Button>
             </DialogTrigger>
             <NewCollaboratorDialog
               teams={teams}
-              canCreateManagers
-              onCreated={() => { setOpen(false); load(); }}
+              onCreated={() => {
+                setOpen(false);
+                load();
+              }}
             />
           </Dialog>
         )}
@@ -128,12 +166,12 @@ export default function Collaborators() {
         <p className="text-sm text-muted-foreground">Carregando...</p>
       ) : profiles.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">
-          Nenhum colaborador cadastrado ainda. Crie o primeiro com o botão acima.
+          Nenhum usuário cadastrado ainda. Crie o primeiro com o botão acima.
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {profiles.map(p => {
-            const r = roleOf(p.id);
+          {profiles.map((p) => {
+            const tenantRole = roleOf(p.id);
             const isEditing = editingRoleId === p.id;
             return (
               <Card key={p.id} className="p-4 flex items-start gap-3">
@@ -146,11 +184,22 @@ export default function Collaborators() {
                     <p className="font-semibold truncate">{p.name}</p>
                     {!isEditing && (
                       <>
-                        {r === "leader"       && <Badge variant="default"  className="gap-1"><Crown className="w-3 h-3" />Líder</Badge>}
-                        {r === "manager"      && <Badge variant="secondary" className="gap-1"><Shield className="w-3 h-3" />Gerente</Badge>}
-                        {r === "collaborator" && <Badge variant="outline">Colaborador</Badge>}
-                        {r === "commercial"   && <Badge variant="outline" className="border-accent/40 text-accent">Comercial</Badge>}
-                        {isLeader && p.id !== user?.id && (
+                        {tenantRole === "owner" && (
+                          <Badge variant="default" className="gap-1">
+                            <Crown className="w-3 h-3" /> Proprietário
+                          </Badge>
+                        )}
+                        {tenantRole === "admin" && (
+                          <Badge variant="secondary" className="gap-1">
+                            <Shield className="w-3 h-3" /> Administrador
+                          </Badge>
+                        )}
+                        {tenantRole === "member" && (
+                          <Badge variant="outline" className="gap-1">
+                            <UserRound className="w-3 h-3" /> Usuário
+                          </Badge>
+                        )}
+                        {canManageTenant && tenantRole !== "owner" && p.id !== user?.id && (
                           <button
                             onClick={() => startEditRole(p.id)}
                             className="text-muted-foreground hover:text-accent transition-colors"
@@ -166,15 +215,19 @@ export default function Collaborators() {
                   {/* Editor inline de role */}
                   {isEditing && (
                     <div className="flex items-center gap-2 mt-1.5">
-                      <Select value={pendingRole} onValueChange={v => setPendingRole(v as Role)} disabled={savingRole}>
+                      <Select
+                        value={pendingRole}
+                        onValueChange={(value) =>
+                          setPendingRole(value as Exclude<TenantRole, "owner">)
+                        }
+                        disabled={savingRole}
+                      >
                         <SelectTrigger className="h-7 text-xs w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="collaborator">Colaborador</SelectItem>
-                          <SelectItem value="commercial">Comercial</SelectItem>
-                          <SelectItem value="manager">Gerente</SelectItem>
-                          <SelectItem value="leader">Líder</SelectItem>
+                          <SelectItem value="member">Usuário</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
                         </SelectContent>
                       </Select>
                       <button
@@ -196,11 +249,18 @@ export default function Collaborators() {
                     </div>
                   )}
 
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{p.position ?? "—"}</p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    {p.position ?? "—"}
+                  </p>
                   <p className="text-xs text-muted-foreground truncate">{p.email}</p>
                 </div>
-                {isLeader && p.id !== user?.id && !isEditing && (
-                  <Button size="icon" variant="ghost" onClick={() => removeCollaborator(p.id, p.name)} title="Remover">
+                {canManageTenant && tenantRole !== "owner" && p.id !== user?.id && !isEditing && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => removeCollaborator(p.id, p.name)}
+                    title="Remover"
+                  >
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 )}
@@ -213,16 +273,14 @@ export default function Collaborators() {
   );
 }
 
-function NewCollaboratorDialog({
-  teams, canCreateManagers, onCreated,
-}: { teams: Team[]; canCreateManagers: boolean; onCreated: () => void }) {
+function NewCollaboratorDialog({ teams, onCreated }: { teams: Team[]; onCreated: () => void }) {
   const { session } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [position, setPosition] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<Role>("collaborator");
+  const [tenantRole, setTenantRole] = useState<Exclude<TenantRole, "owner">>("member");
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -249,20 +307,20 @@ function NewCollaboratorDialog({
     setBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { 
-          name: name.trim(), 
-          email: email.trim(), 
-          password, 
-          position: position.trim(), 
-          phone: phone.trim(), 
-          role, 
-          team_ids: teamIds 
+        body: {
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          position: position.trim(),
+          phone: phone.trim(),
+          tenant_role: tenantRole,
+          team_ids: teamIds,
         },
       });
 
       if (error) {
         console.error("Function invocation error:", error);
-        let message = error.message || "Erro ao criar colaborador";
+        let message = error.message || "Erro ao criar usuário";
         if ("context" in error && error.context instanceof Response) {
           const response = await error.context.json().catch(() => null);
           if (response?.error) message = response.error;
@@ -278,49 +336,91 @@ function NewCollaboratorDialog({
         return;
       }
 
-      toast.success("Colaborador criado com sucesso!");
+      toast.success("Usuário criado com sucesso!");
       // Reset form
       setName("");
       setEmail("");
       setPassword("");
       setPosition("");
       setPhone("");
-      setRole("collaborator");
+      setTenantRole("member");
       setTeamIds([]);
       onCreated();
     } catch (err: unknown) {
       console.error("Unexpected error:", err);
-      toast.error(
-        err instanceof Error ? err.message : "Erro inesperado ao criar colaborador",
-      );
+      toast.error(err instanceof Error ? err.message : "Erro inesperado ao criar usuário");
     } finally {
       setBusy(false);
     }
   }
 
   function toggleTeam(id: string) {
-    setTeamIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setTeamIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
   return (
     <DialogContent className="max-w-lg">
-      <DialogHeader><DialogTitle>Novo colaborador</DialogTitle></DialogHeader>
+      <DialogHeader>
+        <DialogTitle>Novo usuário</DialogTitle>
+      </DialogHeader>
       <form onSubmit={submit} className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><Label>Nome*</Label><Input value={name} onChange={e => setName(e.target.value)} required disabled={busy} /></div>
-          <div><Label>E-mail*</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} required disabled={busy} /></div>
-          <div><Label>Senha* (mín 6)</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} disabled={busy} /></div>
-          <div><Label>Cargo</Label><Input value={position} onChange={e => setPosition(e.target.value)} placeholder="Ex: Designer" disabled={busy} /></div>
-          <div><Label>Telefone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} disabled={busy} /></div>
           <div>
-            <Label>Nível*</Label>
-            <Select value={role} onValueChange={v => setRole(v as Role)} disabled={busy}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Label>Nome*</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={busy}
+            />
+          </div>
+          <div>
+            <Label>E-mail*</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={busy}
+            />
+          </div>
+          <div>
+            <Label>Senha* (mín 6)</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              disabled={busy}
+            />
+          </div>
+          <div>
+            <Label>Cargo</Label>
+            <Input
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
+              placeholder="Ex: Designer"
+              disabled={busy}
+            />
+          </div>
+          <div>
+            <Label>Telefone</Label>
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={busy} />
+          </div>
+          <div>
+            <Label>Nível de acesso*</Label>
+            <Select
+              value={tenantRole}
+              onValueChange={(value) => setTenantRole(value as Exclude<TenantRole, "owner">)}
+              disabled={busy}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="collaborator">Colaborador</SelectItem>
-                {canCreateManagers && <SelectItem value="commercial">Comercial</SelectItem>}
-                {canCreateManagers && <SelectItem value="manager">Gerente</SelectItem>}
-                {canCreateManagers && <SelectItem value="leader">Líder</SelectItem>}
+                <SelectItem value="member">Usuário</SelectItem>
+                <SelectItem value="admin">Administrador</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -328,20 +428,26 @@ function NewCollaboratorDialog({
         <div>
           <Label>Times (pode participar de vários)</Label>
           <div className="flex flex-wrap gap-2 mt-2">
-            {teams.length === 0 && <p className="text-xs text-muted-foreground">Nenhum time criado ainda.</p>}
-            {teams.map(t => (
+            {teams.length === 0 && (
+              <p className="text-xs text-muted-foreground">Nenhum time criado ainda.</p>
+            )}
+            {teams.map((t) => (
               <button
                 type="button"
                 key={t.id}
                 onClick={() => toggleTeam(t.id)}
                 disabled={busy}
                 className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${teamIds.includes(t.id) ? "bg-primary text-primary-foreground border-primary" : "border-border"} ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
-              >{t.name}</button>
+              >
+                {t.name}
+              </button>
             ))}
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" disabled={busy} className="w-full sm:w-auto">{busy ? "Criando..." : "Criar colaborador"}</Button>
+          <Button type="submit" disabled={busy} className="w-full sm:w-auto">
+            {busy ? "Criando..." : "Criar usuário"}
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

@@ -77,6 +77,8 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
         .eq("user_id", supaUser.id)
         .maybeSingle()
     : { data: null };
+  const tenantRole = (membership?.role as AuthUser["tenant_role"] | undefined) ?? null;
+  const canManageTenant = tenantRole === "owner" || tenantRole === "admin";
   return {
     id: supaUser.id,
     email: supaUser.email ?? "",
@@ -84,11 +86,11 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     avatar_url: profile?.avatar_url,
     position: profile?.position,
     role,
-    is_leader: role === "leader",
-    is_manager: role === "manager" || role === "leader",
+    is_leader: canManageTenant || role === "leader",
+    is_manager: canManageTenant || role === "manager" || role === "leader",
     is_commercial: role === "commercial",
     tenant_id: tenantId ?? profile?.active_tenant_id ?? null,
-    tenant_role: (membership?.role as AuthUser["tenant_role"] | undefined) ?? null,
+    tenant_role: tenantRole,
   };
 }
 
