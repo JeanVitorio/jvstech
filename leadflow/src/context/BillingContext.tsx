@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import type { BillingStatus, PlanCode, SubscriptionPlan } from "@/types/billing";
 
@@ -17,33 +17,44 @@ function readErrorMessage(value: unknown): string | null {
   return null;
 }
 
-async function getFunctionErrorMessage(
-  error: unknown,
-  responseData: unknown,
-  fallback: string,
-): Promise<string> {
-  const dataMessage = readErrorMessage(responseData);
-  if (dataMessage) return dataMessage;
+interface BillingFunctionResponse {
+  url?: string;
+  error?: string;
+  message?: string;
+}
 
-  const errorMessage = readErrorMessage(error);
-  const context = (error as { context?: unknown } | null)?.context;
-  const contextMessage = readErrorMessage(context);
-  if (contextMessage) return contextMessage;
-
-  if (
-    context &&
-    typeof context === "object" &&
-    "json" in context &&
-    typeof context.json === "function"
-  ) {
+async function invokeBillingFunction(
+  functionName: string,
+  accessToken: string,
+  body?: Record<string, unknown>,
+): Promise<BillingFunctionResponse> {
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const responseText = await response.text();
+  let payload: BillingFunctionResponse = {};
+  if (responseText) {
     try {
-      const payloadMessage = readErrorMessage(await context.json());
-      if (payloadMessage) return payloadMessage;
+      payload = JSON.parse(responseText) as BillingFunctionResponse;
     } catch {
-      // Mantém a mensagem original quando a resposta não contém JSON.
+      payload = {};
     }
   }
-  return errorMessage ?? fallback;
+  if (!response.ok) {
+    const shortResponse = responseText.trim().slice(0, 300);
+    throw new Error(
+      readErrorMessage(payload) ||
+        shortResponse ||
+        `A função de pagamento respondeu com status ${response.status}.`,
+    );
+  }
+  return payload;
 }
 
 interface BillingState {
@@ -99,16 +110,10 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     if (!accessToken) {
       throw new Error("Sua sessão expirou. Entre novamente para assinar.");
     }
-    const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-      body: { plan_code: plan },
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const data = await invokeBillingFunction("create-checkout-session", accessToken, {
+      plan_code: plan,
     });
-    if (error) {
-      throw new Error(
-        await getFunctionErrorMessage(error, data, "Não foi possível iniciar o pagamento."),
-      );
-    }
-    if (!data?.url) throw new Error(data?.error ?? "Checkout indisponível");
+    if (!data.url) throw new Error(data.error ?? "Checkout indisponível");
     window.location.assign(data.url);
   }, []);
 
@@ -118,15 +123,8 @@ export function BillingProvider({ children }: { children: ReactNode }) {
     if (!accessToken) {
       throw new Error("Sua sessão expirou. Entre novamente para continuar.");
     }
-    const { data, error } = await supabase.functions.invoke("create-portal-session", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (error) {
-      throw new Error(
-        await getFunctionErrorMessage(error, data, "Não foi possível abrir o portal de cobrança."),
-      );
-    }
-    if (!data?.url) throw new Error(data?.error ?? "Portal indisponível");
+    const data = await invokeBillingFunction("create-portal-session", accessToken);
+    if (!data.url) throw new Error(data.error ?? "Portal indisponível");
     window.location.assign(data.url);
   }, []);
 
