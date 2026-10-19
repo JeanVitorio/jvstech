@@ -1,0 +1,23 @@
+REPOSITÓRIO: WEB E SAAS LEADFLOW
+
+O que é:
+Este é o repositório da página comercial da JVS Tech e da aplicação web
+do LeadFlow. Ele concentra a apresentação do produto, criação e acesso
+às contas, escolha dos planos e as telas utilizadas pelos clientes para
+administrar leads, funil, bots, equipe e assinatura.
+
+Principais responsabilidades:
+- Publicar a página comercial do LeadFlow.
+- Permitir cadastro e login dos clientes.
+- Disponibilizar o LeadFlow pela web e pelo celular.
+- Exibir e gerenciar leads, funil de vendas, bots e colaboradores.
+- Integrar autenticação, dados e assinaturas com Supabase e Stripe.
+- Servir como base web utilizada pelo aplicativo instalado.
+
+Projeto no GitHub:
+https://github.com/JeanVitorio/jvstech
+
+Projeto no Netlify:
+https://app.netlify.com/projects/jvssolucoes/overview
+
+Duvida sobre o Netlify e acessos na pasta de Hospedagem

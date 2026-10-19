@@ -24,8 +24,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/SignupPremium";
 import Collaborators from "./pages/Collaborators";
+import WhatsAppSettings from "./pages/WhatsAppSettings";
 import NotFound from "./pages/NotFound.tsx";
 import type { ReactNode } from "react";
+import { useMessageBotPermission } from "@/hooks/useWhatsAppMeta";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,13 @@ function TenantManagerOnly({ children }: { children: ReactNode }) {
   if (!["owner", "admin"].includes(user.tenant_role ?? "")) {
     return <Navigate to="/" replace />;
   }
+  return <>{children}</>;
+}
+
+function MessageBotsOnly({ children }: { children: ReactNode }) {
+  const permission = useMessageBotPermission();
+  if (permission.isLoading) return null;
+  if (permission.data !== true) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -73,7 +82,24 @@ const App = () => (
                         <Route path="/" element={<SalesDashboard />} />
                         <Route path="/dashboard-bots" element={<Dashboard />} />
                         <Route path="/bots" element={<Bots />} />
-                        <Route path="/message-bots" element={<MessageBots />} />
+                        <Route
+                          path="/message-bots"
+                          element={
+                            <MessageBotsOnly>
+                              <MessageBots />
+                            </MessageBotsOnly>
+                          }
+                        />
+                        <Route
+                          path="/whatsapp-settings"
+                          element={
+                            <TenantManagerOnly>
+                              <MessageBotsOnly>
+                                <WhatsAppSettings />
+                              </MessageBotsOnly>
+                            </TenantManagerOnly>
+                          }
+                        />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/sales" element={<SalesFunnel />} />
                         <Route path="/leads" element={<Leads />} />

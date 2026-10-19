@@ -31,11 +31,6 @@ const plans = [
     ],
   },
   {
-    title: "Bots de WhatsApp",
-    desc: "Apoie o primeiro contato com mensagens organizadas e uma operação integrada à prospecção.",
-    marks: ["Configuração por nicho", "Agenda semanal de execução", "Acompanhamento pelo painel"],
-  },
-  {
     title: "Equipe e permissões",
     desc: "Distribua oportunidades entre colaboradores e mantenha cada usuário com o acesso adequado.",
     marks: [

@@ -11,6 +11,7 @@ import {
   Menu,
   MessageCircle,
   Moon,
+  Settings,
   Sun,
   Target,
   UserCircle2,
@@ -26,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
+import { useMessageBotPermission } from "@/hooks/useWhatsAppMeta";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,16 +55,24 @@ export function AppLayout() {
   const { currentUser, usingBackend } = useApp();
   const { user, logout } = useAuth();
   const { status: billing } = useBilling();
+  const messageBotPermission = useMessageBotPermission();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
+  const canUseMessageBots = messageBotPermission.data === true;
+  const authorizedNav = nav.filter(
+    (item) => item.to !== "/message-bots" || canUseMessageBots,
+  );
   const visibleNav = canManageTenant
     ? [
-        ...nav.slice(0, -1),
+        ...authorizedNav.slice(0, -1),
+        ...(canUseMessageBots
+          ? [{ to: "/whatsapp-settings", label: "Configuração WhatsApp", icon: Settings }]
+          : []),
         { to: "/collaborators", label: "Colaboradores", icon: UserRoundCog },
-        nav[nav.length - 1],
+        authorizedNav[authorizedNav.length - 1],
       ]
-    : nav;
+    : authorizedNav;
 
   const SidebarContent = (
     <>

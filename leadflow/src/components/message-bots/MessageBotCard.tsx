@@ -1,5 +1,6 @@
 import {
   Clock,
+  Cloud,
   MessageCircle,
   Pause,
   Pencil,
@@ -19,6 +20,7 @@ import type {
 interface Props {
   item: MessageBotRuntime;
   busy?: boolean;
+  canUseUnofficial: boolean;
   onStart: () => void;
   onCommand: (command: MessageBotCommand) => void;
   onEdit: () => void;
@@ -41,12 +43,14 @@ const statusLabels: Record<string, string> = {
 export function MessageBotCard({
   item,
   busy,
+  canUseUnofficial,
   onStart,
   onCommand,
   onEdit,
   onDelete,
 }: Props) {
   const { config, session, runtime, control } = item;
+  const isMeta = session.provider === "meta_cloud_api";
   const status = runtime?.status ?? "idle";
   const active = Boolean(
     runtime?.heartbeat_at &&
@@ -68,14 +72,19 @@ export function MessageBotCard({
 
       <div className="grid sm:grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg bg-muted/40 p-3">
-          <p className="text-xs text-muted-foreground">Sessão WhatsApp</p>
-          <p className="font-medium mt-1">
-            {session.name} · {session.status}
+          <p className="text-xs text-muted-foreground">
+            {isMeta ? "Conexão oficial" : "Sessão WhatsApp"}
           </p>
-          {session.connected_number && (
+          <p className="font-medium mt-1">
+            {session.name} · {isMeta ? (session.credential_status ?? session.status) : session.status}
+          </p>
+          {(session.display_phone_number || session.connected_number) && (
             <p className="text-xs text-muted-foreground">
-              +{session.connected_number}
+              {session.display_phone_number ?? `+${session.connected_number}`}
             </p>
+          )}
+          {isMeta && session.verified_name && (
+            <p className="text-xs text-muted-foreground">{session.verified_name}</p>
           )}
         </div>
         <div className="rounded-lg bg-muted/40 p-3">
@@ -89,7 +98,7 @@ export function MessageBotCard({
         </div>
       </div>
 
-      {session.qr_code_data_url && session.status === "qr_pending" && (
+      {!isMeta && session.qr_code_data_url && session.status === "qr_pending" && (
         <div className="rounded-lg border p-4 text-center">
           <p className="text-sm font-medium mb-3">
             Escaneie no WhatsApp para conectar
@@ -102,7 +111,7 @@ export function MessageBotCard({
         </div>
       )}
 
-      {session.status === "ready" && (
+      {!isMeta && session.status === "ready" && (
         <div className="rounded-lg border bg-muted/20 p-4 text-center">
           <p className="text-sm font-medium mb-3">WhatsApp conectado</p>
           <img
@@ -113,7 +122,7 @@ export function MessageBotCard({
         </div>
       )}
 
-      {session.status !== "ready" && !session.qr_code_data_url && (
+      {!isMeta && session.status !== "ready" && !session.qr_code_data_url && (
         <div className="rounded-lg border bg-muted/20 p-4 text-center">
           <p className="text-sm font-medium mb-3">WhatsApp não conectado</p>
           <img
@@ -125,6 +134,19 @@ export function MessageBotCard({
       )}
 
       <div className="space-y-1 text-sm">
+        {isMeta && (
+          <div className="mb-3 rounded-lg border border-success/25 bg-success/5 p-3">
+            <p className="flex items-center gap-2 font-medium text-success">
+              <Cloud className="h-4 w-4" /> Envio pela API oficial Meta
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Template: {config.meta_template_name} · {config.meta_template_language}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Parâmetros: {config.meta_template_parameters?.join(" → ") || "sem parâmetros"}
+            </p>
+          </div>
+        )}
         <p className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
           Intervalo de {formatSeconds(config.min_interval_seconds)} a{" "}
@@ -143,9 +165,11 @@ export function MessageBotCard({
       </div>
 
       <div className="flex flex-wrap gap-2 pt-2 border-t">
-        <Button size="sm" onClick={onStart} disabled={active || busy}>
-          <Play className="w-3.5 h-3.5 mr-1" /> Iniciar/conectar
-        </Button>
+        {(isMeta || canUseUnofficial) && (
+          <Button size="sm" onClick={onStart} disabled={active || busy}>
+            <Play className="w-3.5 h-3.5 mr-1" /> {isMeta ? "Iniciar" : "Iniciar/conectar"}
+          </Button>
+        )}
         <Button
           size="sm"
           variant="outline"
@@ -170,7 +194,7 @@ export function MessageBotCard({
         >
           <Square className="w-3.5 h-3.5 mr-1" /> Parar
         </Button>
-        <Button size="sm" variant="ghost" onClick={onEdit} disabled={active}>
+        <Button size="sm" variant="ghost" onClick={onEdit} disabled={active || (!isMeta && !canUseUnofficial)}>
           <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
         </Button>
         <Button
@@ -183,7 +207,8 @@ export function MessageBotCard({
           <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
         </Button>
         <Badge variant="secondary" className="ml-auto">
-          <MessageCircle className="w-3 h-3 mr-1" /> WhatsApp Web
+          {isMeta ? <Cloud className="w-3 h-3 mr-1" /> : <MessageCircle className="w-3 h-3 mr-1" />}
+          {isMeta ? "Meta Cloud API" : "WhatsApp Web"}
         </Badge>
       </div>
     </Card>

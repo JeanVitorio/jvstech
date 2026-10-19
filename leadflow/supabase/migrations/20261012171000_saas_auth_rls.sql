@@ -284,19 +284,19 @@ begin
     values
       (
         new_tenant_id, 'todo', 'A Fazer',
-        'bg-muted-foreground', 0, 'todo'
+        'bg-muted-foreground', 0, null
       ),
       (
         new_tenant_id, 'in_progress', 'Em Andamento',
-        'bg-primary', 1, 'in_progress'
+        'bg-primary', 1, null
       ),
       (
         new_tenant_id, 'review', 'Em Revisão',
-        'bg-warning', 2, 'review'
+        'bg-warning', 2, null
       ),
       (
         new_tenant_id, 'done', 'Concluído',
-        'bg-success', 3, 'done'
+        'bg-success', 3, null
       );
   end if;
 

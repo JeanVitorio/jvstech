@@ -1,4 +1,6 @@
 export type MessageBotCommand = "rodando" | "pausado" | "parado";
+export type MessageBotProvider = "whatsapp_web" | "meta_cloud_api";
+export type MetaTemplateParameter = "nome" | "empresa" | "nicho";
 export type WhatsAppSessionStatus =
   | "disconnected"
   | "connecting"
@@ -26,6 +28,7 @@ export interface WhatsAppSession {
   id: string;
   name: string;
   owner_id: string;
+  provider: MessageBotProvider;
   status: WhatsAppSessionStatus;
   runner_id: string | null;
   connected_number: string | null;
@@ -35,6 +38,11 @@ export interface WhatsAppSession {
   last_seen_at: string | null;
   version: number;
   deleted_at: string | null;
+  credential_status?: string | null;
+  display_phone_number?: string | null;
+  verified_name?: string | null;
+  quality_rating?: string | null;
+  last_verified_at?: string | null;
 }
 
 export interface MessageBotConfig {
@@ -48,6 +56,9 @@ export interface MessageBotConfig {
   source_stage_id: string;
   target_stage_id: string;
   message_template: string;
+  meta_template_name: string | null;
+  meta_template_language: string | null;
+  meta_template_parameters: MetaTemplateParameter[];
   min_interval_seconds: number;
   max_interval_seconds: number;
   max_messages_per_hour: number;
@@ -90,6 +101,7 @@ export interface MessageBotRuntime {
 export interface MessageBotFormData {
   slug: string;
   name: string;
+  provider: MessageBotProvider;
   lead_owner_id: string;
   whatsapp_session_id: string;
   new_session_name?: string;
@@ -97,6 +109,9 @@ export interface MessageBotFormData {
   source_stage_id: string;
   target_stage_id: string;
   message_template: string;
+  meta_template_name?: string;
+  meta_template_language?: string;
+  meta_template_parameters: MetaTemplateParameter[];
   min_interval_seconds: number;
   max_interval_seconds: number;
   max_messages_per_hour: number;

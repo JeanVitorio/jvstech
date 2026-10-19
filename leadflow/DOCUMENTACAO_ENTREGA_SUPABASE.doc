@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="ProgId" content="Word.Document">
+  <meta name="Generator" content="Microsoft Word compatible HTML">
+  <title>Manual de Entrega e Recriação - JVS Tech LeadFlow</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body {
+      font-family: Arial, sans-serif;
+      color: #202124;
+      font-size: 10.5pt;
+      line-height: 1.45;
+      max-width: 900px;
+      margin: 0 auto;
+    } 
+    h1 { color: #b54600; font-size: 24pt; page-break-before: always; }
+    h1:first-of-type { page-break-before: auto; }
+    h2 { color: #d45500; font-size: 16pt; margin-top: 24px; }
+    h3 { color: #333; font-size: 12.5pt; margin-top: 18px; }
+    h4 { font-size: 11pt; margin-bottom: 4px; }
+    p { margin: 7px 0; }
+    li { margin: 4px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #bbb; padding: 7px; vertical-align: top; }
+    th { background: #f5e6dc; text-align: left; }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: #f3f3f3;
+      padding: 1px 3px;
+    }
+    pre {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.5pt;
+      line-height: 1.3;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .cover {
+      text-align: center;
+      padding-top: 150px;
+      page-break-after: always;
+    }
+    .cover h1 { font-size: 30pt; page-break-before: auto; }
+    .warning {
+      border-left: 5px solid #d97706;
+      background: #fff8e6;
+      padding: 10px 14px;
+      margin: 12px 0;
+    }
+    .danger {
+      border-left: 5px solid #b91c1c;
+      background: #fff0f0;
+      padding: 10px 14px;
+      margin: 12px 0;
+    }
+    .success {
+      border-left: 5px solid #15803d;
+      background: #effdf3;
+      padding: 10px 14px;
+      margin: 12px 0;
+    }
+    .small { color: #555; font-size: 9pt; }
+    .checklist li { list-style-type: none; }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Manual de Entrega e Recriação</h1>
+  <h2>JVS Tech / LeadFlow</h2>
+  <p>Supabase, autenticação, Edge Functions, frontend e robôs</p>
+  <p><strong>Versão:</strong> 1.0</p>
+  <p><strong>Data:</strong> 05/10/2026</p>
+  <p class="small">Documento operacional para implantação em um projeto Supabase novo.</p>
+</div>
+
+<h1>1. Objetivo e escopo</h1>
+
+<p>
+  Este documento descreve como reconstruir o ambiente do LeadFlow para um novo
+  cliente, desde a criação do projeto Supabase até a publicação do frontend e a
+  ativação dos processos externos. O procedimento usa um único SQL consolidado,
+  cria o primeiro usuário <strong>leader</strong> e preserva o modelo de acesso
+  utilizado pela aplicação.
+</p>
+
+<p>O provisionamento contempla:</p>
+<ul>
+  <li>autenticação Supabase por e-mail e senha;</li>
+  <li>perfil, papéis leader/manager/collaborator/commercial e RLS;</li>
+  <li>times, clientes, serviços, tarefas, Kanban, horas e notificações;</li>
+  <li>financeiro, estúdio e CRM comercial;</li>
+  <li>prospecção, robôs de mensagens e sessões WhatsApp;</li>
+  <li>Storage para avatares e publicação Realtime;</li>
+  <li>RPCs utilizadas pelo frontend para controlar e acompanhar os robôs;</li>
+  <li>Edge Functions administrativas para criar e excluir usuários.</li>
+</ul>
+
+<div class="warning">
+  <strong>Limite importante:</strong> o SQL cria toda a infraestrutura do banco,
+  mas não substitui os executores externos dos robôs. Scrapers, importadores e
+  gateway WhatsApp devem ser copiados e executados separadamente, usando a
+  chave <code>service_role</code> somente no ambiente de backend.
+</div>
+
+<h2>1.1 Arquivos oficiais desta entrega</h2>
+
+<table>
+  <tr>
+    <th>Arquivo/pasta</th>
+    <th>Finalidade</th>
+  </tr>
+  <tr>
+    <td><code>leadflow/supabase/PROVISIONAMENTO_COMPLETO.sql</code></td>
+    <td>Fonte única para criar o banco, o Storage, o Realtime e o leader inicial.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/supabase/functions/create-user/index.ts</code></td>
+    <td>Edge Function para o leader criar usuários pelo sistema.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/supabase/functions/delete-user/index.ts</code></td>
+    <td>Edge Function para o leader remover usuários.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/supabase/config.toml</code></td>
+    <td>Configuração local das duas Edge Functions.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/src/</code></td>
+    <td>Código do frontend React/Vite.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/scripts/importar_leads_veiculos.py</code></td>
+    <td>Importador/monitor de leads do nicho de veículos.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/scripts/importar_leads_imobiliarias.py</code></td>
+    <td>Importador/monitor de leads do nicho de imobiliárias.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/scripts/.env.example</code></td>
+    <td>Modelo das variáveis dos importadores Python.</td>
+  </tr>
+  <tr>
+    <td><code>leadflow/DOCUMENTACAO_ENTREGA_SUPABASE.doc</code></td>
+    <td>Este manual.</td>
+  </tr>
+</table>
+
+<div class="danger">
+  Não use <code>versatil_digital_schema.sql</code>,
+  <code>MIGRATION_LATEST_CHANGES.sql</code> nem as migrações antigas para criar
+  um cliente novo. Esses arquivos representam fases históricas incompatíveis
+  entre si. Para uma instalação nova, use apenas
+  <code>PROVISIONAMENTO_COMPLETO.sql</code>.
+</div>
+
+<h1>2. Pré-requisitos</h1>
+
+<ul>
+  <li>conta com permissão para criar projetos no Supabase;</li>
+  <li>Node.js 20 ou superior e npm;</li>
+  <li>Git, quando a entrega for feita por repositório;</li>
+  <li>Python 3.10 ou superior para os importadores;</li>
+  <li>acesso ao provedor de hospedagem do frontend;</li>
+  <li>código e ambiente operacional dos executores dos robôs;</li>
+  <li>nome, e-mail, senha temporária, cargo e telefone do leader do cliente.</li>
+</ul>
+
+<h2>2.1 Informações que devem ser registradas</h2>
+
+<table>
+  <tr><th>Informação</th><th>Onde obter</th><th>Uso</th></tr>
+  <tr>
+    <td>Project Reference</td>
+    <td>Supabase &gt; Project Settings &gt; General</td>
+    <td>Deploy das Edge Functions e CLI.</td>
+  </tr>
+  <tr>
+    <td>Project URL</td>
+    <td>Supabase &gt; Project Settings &gt; API</td>
+    <td>Frontend, importadores e executores.</td>
+  </tr>
+  <tr>
+    <td>Publishable key ou anon key</td>
+    <td>Supabase &gt; Project Settings &gt; API</td>
+    <td>Somente frontend.</td>
+  </tr>
+  <tr>
+    <td>service_role key</td>
+    <td>Supabase &gt; Project Settings &gt; API</td>
+    <td>Somente backend, scripts e executores.</td>
+  </tr>
+</table>
+
+<div class="danger">
+  A chave <code>service_role</code> ignora RLS. Nunca coloque essa chave no
+  frontend, no Git, em arquivos públicos ou em mensagens de suporte. Ela deve
+  existir apenas em secrets do backend.
+</div>
+
+<h1>3. Criação do projeto Supabase</h1>
+
+<ol>
+  <li>Acesse <code>https://supabase.com/dashboard</code>.</li>
+  <li>Crie uma nova organização ou escolha a organização do cliente.</li>
+  <li>Clique em <strong>New project</strong>.</li>
+  <li>Escolha uma região próxima dos usuários do cliente.</li>
+  <li>Defina e guarde a senha do banco em um cofre corporativo.</li>
+  <li>Aguarde o projeto ficar com status saudável.</li>
+  <li>Registre Project Reference, URL, publishable/anon key e service_role.</li>
+</ol>
+
+<h2>3.1 Configuração de autenticação</h2>
+
+<ol>
+  <li>Abra <strong>Authentication &gt; Providers &gt; Email</strong>.</li>
+  <li>Mantenha o provider de e-mail habilitado.</li>
+  <li>
+    Desabilite cadastro público quando somente leaders puderem criar usuários.
+    A criação administrativa continuará funcionando pela Edge Function.
+  </li>
+  <li>
+    Em <strong>Authentication &gt; URL Configuration</strong>, informe a URL
+    pública do frontend e os redirects autorizados.
+  </li>
+  <li>
+    Para desenvolvimento, adicione a URL local usada pelo Vite, por exemplo
+    <code>http://localhost:8080/**</code>.
+  </li>
+</ol>
+
+<h1>4. Execução do SQL único</h1>
+
+<h2>4.1 Preparar o leader</h2>
+
+<p>
+  Abra <code>leadflow/supabase/PROVISIONAMENTO_COMPLETO.sql</code> e altere
+  somente o bloco <strong>CONFIGURACAO</strong> no início:
+</p>
+
+<pre>
+insert into _leadflow_config (
+  leader_name,
+  leader_email,
+  leader_password,
+  leader_position,
+  leader_phone
+) values (
+  'Nome do responsável',
+  'responsavel@cliente.com.br',
+  'Senha-Temporaria-Forte-2026!',
+  'Diretor(a)',
+  '+55 11 99999-9999'
+);</pre>
+
+<ul>
+  <li>use um e-mail real e exclusivo;</li>
+  <li>a senha precisa ter pelo menos 12 caracteres;</li>
+  <li>não deixe a senha de exemplo;</li>
+  <li>use <code>null</code> para cargo ou telefone não informado;</li>
+  <li>não altere nenhuma outra parte do arquivo.</li>
+</ul>
+
+<h2>4.2 Executar</h2>
+
+<ol>
+  <li>Abra <strong>SQL Editor &gt; New query</strong>.</li>
+  <li>Copie o conteúdo completo de <code>PROVISIONAMENTO_COMPLETO.sql</code>.</li>
+  <li>Cole no editor sem dividir o arquivo.</li>
+  <li>Clique em <strong>Run</strong>.</li>
+  <li>Aguarde o resultado final.</li>
+</ol>
+
+<p>O último resultado deve retornar <code>ok</code> para:</p>
+<ul>
+  <li><code>leader</code>;</li>
+  <li><code>tabelas_publicas</code>;</li>
+  <li><code>bucket_avatars</code>;</li>
+  <li><code>rpc_prospeccao</code>;</li>
+  <li><code>rpc_whatsapp</code>;</li>
+  <li><code>rpc_checkpoint_runner</code>;</li>
+  <li><code>rpc_entrega_whatsapp</code>.</li>
+</ul>
+
+<div class="success">
+  Depois da execução, acesse <strong>Authentication &gt; Users</strong> e
+  confirme que o e-mail do leader aparece como confirmado. Faça também o
+  primeiro login no sistema antes de prosseguir.
+</div>
+
+<h2>4.3 O que o SQL cria</h2>
+
+<p>O arquivo consolidado cria 43 tabelas públicas, incluindo:</p>
+<ul>
+  <li>
+    <strong>Base:</strong> profiles, user_roles, teams, team_members, clients,
+    services e relacionamentos.
+  </li>
+  <li>
+    <strong>Operação:</strong> tasks, kanban_columns, comments, time_entries e
+    notifications.
+  </li>
+  <li>
+    <strong>Financeiro:</strong> expenses, cash_adjustments, finance_settings,
+    extra_services e team_notes.
+  </li>
+  <li>
+    <strong>Comercial:</strong> lead_stages, leads, lead_activities,
+    sales_events, sales_tiles e lead_script_flows.
+  </li>
+  <li>
+    <strong>Estúdio:</strong> studio_sessions, studio_expenses,
+    studio_clients, studio_shoots e studio_followups.
+  </li>
+  <li>
+    <strong>Robôs:</strong> configurações, controles, checkpoints, runners,
+    eventos, sessões WhatsApp, runtime e entregas de mensagens.
+  </li>
+</ul>
+
+<p>
+  Também cria índices, constraints, triggers, funções RBAC, políticas RLS,
+  dados iniciais do Kanban, etapas do funil, configurações financeiras, bucket
+  de avatares, publicação Realtime e RPCs.
+</p>
+
+<h2>4.4 Alternativa se a criação interna do Auth mudar</h2>
+
+<p>
+  O provisionamento cria o leader diretamente nas estruturas oficiais do Auth
+  existentes no projeto Supabase. Caso uma versão futura altere essas
+  estruturas e somente a etapa do leader falhe:
+</p>
+
+<ol>
+  <li>não execute migrações antigas;</li>
+  <li>abra <strong>Authentication &gt; Users &gt; Add user</strong>;</li>
+  <li>crie o usuário com e-mail confirmado;</li>
+  <li>execute o SQL abaixo, substituindo o e-mail e os dados:</li>
+</ol>
+
+<pre>
+insert into public.profiles (id, name, email, position, is_active)
+select
+  id,
+  'Nome do responsável',
+  email,
+  'Diretor(a)',
+  true
+from auth.users
+where lower(email) = lower('responsavel@cliente.com.br')
+on conflict (id) do update
+set name = excluded.name,
+    email = excluded.email,
+    position = excluded.position,
+    is_active = true;
+
+insert into public.user_roles (user_id, role)
+select id, 'leader'::public.app_role
+from auth.users
+where lower(email) = lower('responsavel@cliente.com.br')
+on conflict (user_id) do update set role = 'leader';</pre>
+
+<h1>5. Edge Functions</h1>
+
+<h2>5.1 Funções obrigatórias</h2>
+
+<table>
+  <tr><th>Nome no Supabase</th><th>Código que deve ser copiado integralmente</th></tr>
+  <tr>
+    <td><code>create-user</code></td>
+    <td><code>leadflow/supabase/functions/create-user/index.ts</code></td>
+  </tr>
+  <tr>
+    <td><code>delete-user</code></td>
+    <td><code>leadflow/supabase/functions/delete-user/index.ts</code></td>
+  </tr>
+</table>
+
+<p>
+  Copie as pastas completas, preservando exatamente os nomes. Não renomeie os
+  diretórios, pois o frontend invoca esses nomes por
+  <code>supabase.functions.invoke()</code>.
+</p>
+
+<h2>5.2 Deploy pela CLI</h2>
+
+<p>No PowerShell, dentro da pasta <code>leadflow</code>:</p>
+
+<pre>
+npx supabase login
+npx supabase link --project-ref SEU_PROJECT_REF
+npx supabase functions deploy create-user --project-ref SEU_PROJECT_REF --no-verify-jwt
+npx supabase functions deploy delete-user --project-ref SEU_PROJECT_REF --no-verify-jwt</pre>
+
+<p>
+  O gateway fica com verificação JWT desabilitada porque o próprio código das
+  funções valida o Bearer token com <code>auth.getUser()</code> e depois
+  confirma o papel <code>leader</code> no banco. Não remova essas validações.
+</p>
+
+<h2>5.3 Variáveis das Edge Functions</h2>
+
+<p>O ambiente hospedado do Supabase fornece automaticamente:</p>
+<ul>
+  <li><code>SUPABASE_URL</code>;</li>
+  <li><code>SUPABASE_ANON_KEY</code>;</li>
+  <li><code>SUPABASE_SERVICE_ROLE_KEY</code>.</li>
+</ul>
+
+<p>
+  Não coloque essas chaves dentro dos arquivos TypeScript. Se a plataforma
+  exigir secrets adicionais no futuro, use:
+</p>
+
+<pre>
+npx supabase secrets set NOME_DO_SECRET="valor" --project-ref SEU_PROJECT_REF</pre>
+
+<h2>5.4 Teste das Edge Functions</h2>
+
+<ol>
+  <li>Faça login como leader.</li>
+  <li>Abra a tela de colaboradores.</li>
+  <li>Crie um usuário de teste com papel collaborator.</li>
+  <li>Confirme o registro em Authentication, profiles e user_roles.</li>
+  <li>Exclua o usuário de teste pela interface.</li>
+  <li>Confirme a remoção em Authentication.</li>
+</ol>
+
+<p>Consultas de apoio:</p>
+
+<pre>
+select p.id, p.name, p.email, r.role
+from public.profiles p
+join public.user_roles r on r.user_id = p.id
+order by p.name;
+
+select id, email, email_confirmed_at
+from auth.users
+order by created_at desc;</pre>
+
+<h1>6. Configuração e publicação do frontend</h1>
+
+<h2>6.1 Arquivos a copiar</h2>
+
+<p>
+  Para entregar a aplicação web, copie a pasta <code>leadflow</code> preservando
+  sua estrutura. Não copie <code>node_modules</code>, <code>dist</code>,
+  <code>.env</code>, logs, sessões ou chaves.
+</p>
+
+<h2>6.2 Variáveis locais</h2>
+
+<p>
+  Crie manualmente <code>leadflow/.env.local</code>. Não sobrescreva um arquivo
+  de ambiente já existente sem conferir o conteúdo.
+</p>
+
+<pre>
+VITE_SUPABASE_URL=https://SEU_PROJECT_REF.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=SUA_PUBLISHABLE_KEY</pre>
+
+<p>
+  Em projetos antigos, pode-se usar <code>VITE_SUPABASE_ANON_KEY</code> no lugar
+  de <code>VITE_SUPABASE_PUBLISHABLE_KEY</code>. Nunca use
+  <code>SUPABASE_SERVICE_ROLE_KEY</code> no Vite.
+</p>
+
+<h2>6.3 Instalação e testes</h2>
+
+<pre>
+cd leadflow
+npm ci
+npm run test
+npm run build
+npm run dev</pre>
+
+<p>
+  O servidor local está configurado para a porta 8080. A build pronta fica em
+  <code>leadflow/dist</code>.
+</p>
+
+<h2>6.4 Publicação</h2>
+
+<p>Configuração de referência:</p>
+<table>
+  <tr><th>Campo</th><th>Valor</th></tr>
+  <tr><td>Base directory</td><td><code>leadflow</code></td></tr>
+  <tr><td>Build command</td><td><code>npm ci &amp;&amp; npm run build</code></td></tr>
+  <tr><td>Publish directory</td><td><code>leadflow/dist</code> ou <code>dist</code> quando a base já for leadflow</td></tr>
+  <tr><td>SPA fallback</td><td><code>/* -&gt; /index.html (HTTP 200)</code></td></tr>
+</table>
+
+<div class="warning">
+  O <code>vite.config.ts</code> atual usa <code>base: "/LeadFlow/"</code>.
+  A hospedagem deve disponibilizar a aplicação nesse caminho. Para hospedar
+  diretamente na raiz do domínio, essa base precisa ser revisada e a build deve
+  ser gerada novamente.
+</div>
+
+<h1>7. Importadores Python</h1>
+
+<h2>7.1 Arquivos necessários</h2>
+
+<ul>
+  <li><code>scripts/importar_leads_veiculos.py</code>;</li>
+  <li><code>scripts/importar_leads_imobiliarias.py</code>;</li>
+  <li><code>scripts/.env.example</code> como modelo;</li>
+  <li>CSV correspondente gerado pelo scraper.</li>
+</ul>
+
+<h2>7.2 Instalação</h2>
+
+<pre>
+cd leadflow/scripts
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install supabase python-dotenv watchdog</pre>
+
+<h2>7.3 Ambiente</h2>
+
+<p>Crie <code>leadflow/scripts/.env</code>:</p>
+
+<pre>
+SUPABASE_URL=https://SEU_PROJECT_REF.supabase.co
+SUPABASE_SERVICE_KEY=SUA_SERVICE_ROLE_KEY
+OWNER_EMAIL=responsavel.pelos.leads@cliente.com.br</pre>
+
+<p>
+  <code>OWNER_EMAIL</code> precisa existir em <code>public.profiles</code>. Para
+  cada cliente, ajuste também nicho, ticket estimado e caminho do CSV somente
+  quando esses parâmetros de negócio forem diferentes.
+</p>
+
+<h2>7.4 Execução</h2>
+
+<pre>
+python importar_leads_veiculos.py
+python importar_leads_imobiliarias.py</pre>
+
+<p>
+  Cada processo monitora seu CSV enquanto estiver aberto. Na operação local
+  definida para esta entrega, inicie-o somente quando precisar importar e
+  encerre-o ao finalizar. Não configure serviço nem inicialização automática.
+</p>
+
+<h1>8. Robôs de prospecção e WhatsApp</h1>
+
+<h2>8.1 Contratos criados no banco</h2>
+
+<p>O provisionamento disponibiliza os seguintes contratos:</p>
+<ul>
+  <li><code>prospecta_bot_configs</code> para configuração da prospecção;</li>
+  <li><code>prospecta_bot_checkpoints</code> para estado e retomada;</li>
+  <li><code>prospecta_bot_controls</code> para comandos;</li>
+  <li><code>prospecta_bot_runners</code> para heartbeat dos executores;</li>
+  <li><code>prospecta_bot_events</code> para auditoria operacional;</li>
+  <li><code>prospecta_whatsapp_sessions</code> para sessões WhatsApp;</li>
+  <li><code>prospecta_message_bot_configs</code> para configuração de envio;</li>
+  <li><code>prospecta_message_bot_controls</code> para comandos;</li>
+  <li><code>prospecta_message_bot_runtime</code> para estado corrente;</li>
+  <li><code>prospecta_message_deliveries</code> para lease e resultado dos envios.</li>
+</ul>
+
+<h2>8.2 RPCs consumidas pelo frontend</h2>
+
+<ul>
+  <li><code>prospecta_list_bot_runtimes()</code>;</li>
+  <li><code>prospecta_get_bot_runtime(bot)</code>;</li>
+  <li><code>prospecta_get_bot_events(bot, limite)</code>;</li>
+  <li><code>prospecta_get_recent_bot_events(limite)</code>;</li>
+  <li><code>prospecta_list_runners()</code>;</li>
+  <li><code>prospecta_request_command(bot, comando, runner)</code>;</li>
+  <li><code>prospecta_delete_bot(bot, versão)</code>;</li>
+  <li><code>prospecta_list_message_bot_runtimes()</code>;</li>
+  <li><code>prospecta_list_message_niches(owner)</code>;</li>
+  <li><code>prospecta_request_message_bot_command(bot, comando, runner)</code>.</li>
+</ul>
+
+<h3>RPCs reservadas aos executores com service_role</h3>
+<ul>
+  <li><code>prospecta_claim_checkpoint(bot, processo, runner, lease)</code>;</li>
+  <li><code>prospecta_save_checkpoint(...)</code>;</li>
+  <li><code>prospecta_release_checkpoint(...)</code>;</li>
+  <li><code>prospecta_claim_message_lead(bot, runner, lease)</code>;</li>
+  <li><code>prospecta_finalize_message_delivery(...)</code>;</li>
+  <li><code>prospecta_message_sent_last_hour(bot)</code>.</li>
+</ul>
+
+<h2>8.3 Regras obrigatórias para os executores</h2>
+
+<ul>
+  <li>usar somente URL e <code>service_role</code> no backend;</li>
+  <li>registrar heartbeat periódico em <code>prospecta_bot_runners</code>;</li>
+  <li>respeitar <code>request_id</code> e preencher <code>acknowledged_at</code>;</li>
+  <li>atualizar checkpoints de forma atômica;</li>
+  <li>não gravar QR Code, tokens ou credenciais em logs;</li>
+  <li>respeitar leases de mensagens para impedir envios duplicados;</li>
+  <li>respeitar agenda semanal, timezone e limite por hora;</li>
+  <li>nunca executar o mesmo perfil WhatsApp simultaneamente em dois hosts.</li>
+</ul>
+
+<h2>8.4 Variáveis mínimas do backend dos robôs</h2>
+
+<pre>
+SUPABASE_URL=https://SEU_PROJECT_REF.supabase.co
+SUPABASE_SERVICE_KEY=SUA_SERVICE_ROLE_KEY
+PROSPECTA_RUNNER_ID=identificador-unico-do-host
+PROSPECTA_RUNNER_NAME=nome-amigavel
+PROSPECTA_RUNNER_ENV=production
+PROSPECTA_WEB_URL=https://URL-DO-PAINEL/
+WHATSAPP_GATEWAY_PORT=32145</pre>
+
+<p>
+  O executor usa oficialmente <code>SUPABASE_SERVICE_KEY</code>. Não confunda
+  esse nome com a variável automática
+  <code>SUPABASE_SERVICE_ROLE_KEY</code> das Edge Functions.
+  <code>WHATSAPP_GATEWAY_TOKEN</code> é gerado automaticamente pelo runner e não
+  deve ser fixado em documentação ou commitado.
+</p>
+
+<h2>8.5 Instalação e operação manual no computador Windows do cliente</h2>
+
+<p>
+  A própria aplicação aponta para o instalador oficial empacotado, que inclui
+  Python, Node.js e dependências do executor:
+</p>
+
+<pre>
+https://github.com/JeanVitorio/prospecta-flow-robot/releases/latest
+
+Download direto:
+https://github.com/JeanVitorio/prospecta-flow-robot/releases/latest/download/ProspectaFlowSetup.exe</pre>
+
+<ol>
+  <li>Baixe <code>ProspectaFlowSetup.exe</code> no computador Windows 10/11 64 bits do cliente.</li>
+  <li>Valide a origem do arquivo e a versão publicada antes de executar.</li>
+  <li>Execute o instalador com o usuário que utilizará o aplicativo.</li>
+  <li>
+    Na janela local de configuração, informe a URL do novo Supabase e a
+    <code>service_role</code> recebida por canal seguro.
+  </li>
+  <li>Defina um identificador de runner exclusivo para esse computador.</li>
+  <li>Abra o aplicativo para iniciar o runner e confirme o heartbeat na tela de robôs.</li>
+  <li>Envie os comandos pausar, rodar e parar como teste.</li>
+  <li>Feche o aplicativo e confirme que o runner ficou offline.</li>
+</ol>
+
+<div class="warning">
+  O runner não é um serviço do Windows e não deve iniciar automaticamente.
+  Quando o cliente quiser executar os robôs, deve abrir o aplicativo. Quando
+  quiser interromper a operação, deve fechar o aplicativo. A configuração do
+  Supabase e do identificador do runner é feita somente na primeira instalação
+  ou quando houver mudança de ambiente.
+</div>
+
+<div class="warning">
+  O instalador é a forma operacional de entrega. Quando o contrato exigir
+  entrega de código-fonte, copie também o repositório
+  <code>prospecta-flow-robot</code>, excluindo <code>.env</code>, dados de
+  sessão, QR Codes, logs, CSVs, builds e <code>node_modules</code>. O arquivo
+  <code>SQL copiado do supabase</code> é apenas referência histórica; para o
+  cliente novo use o SQL consolidado desta entrega.
+</div>
+
+<h2>8.6 Execução pelo código-fonte</h2>
+
+<p>
+  A raiz operacional é
+  <code>D:\tmp\SquadJean\J\prospecta-flow-robot</code>. O entrypoint único é
+  <code>prospecta_app.py</code>; a versão analisada é <code>1.0.11</code>.
+</p>
+
+<pre>
+cd D:\tmp\SquadJean\J\prospecta-flow-robot
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+
+cd whatsapp_gateway
+npm ci --omit=dev
+cd ..
+
+python prospecta_app.py --configure
+python prospecta_app.py --runner
+python prospecta_app.py --panel
+python prospecta_app.py --version</pre>
+
+<p>
+  A execução pelo código-fonte também é manual. Use o modo necessário,
+  mantenha a janela do aplicativo aberta durante a operação e feche-a para
+  encerrar o runner. Não cadastre esse entrypoint como serviço ou tarefa de
+  inicialização do Windows.
+</p>
+
+<table>
+  <tr><th>Arquivo</th><th>Responsabilidade</th></tr>
+  <tr><td><code>prospecta_app.py</code></td><td>Entrada única do aplicativo e workers.</td></tr>
+  <tr><td><code>runner_remoto.py</code></td><td>Heartbeat, comandos, workers, gateway e atualização.</td></tr>
+  <tr><td><code>bot_dinamico.py</code></td><td>Executa scraper, importador e mensageiro por slug.</td></tr>
+  <tr><td><code>bot_repository.py</code></td><td>Persistência, comandos, eventos e checkpoints.</td></tr>
+  <tr><td><code>message_repository.py</code></td><td>Lease e finalização das mensagens.</td></tr>
+  <tr><td><code>scraper_maps.py</code></td><td>Coleta no Google Maps.</td></tr>
+  <tr><td><code>importador_compartilhado.py</code></td><td>Importa os resultados para leads.</td></tr>
+  <tr><td><code>mensageiro_whatsapp.py</code></td><td>Agenda e envia mensagens iniciais.</td></tr>
+  <tr><td><code>whatsapp_gateway/server.js</code></td><td>Gateway HTTP local usando whatsapp-web.js.</td></tr>
+  <tr><td><code>atualizador.py</code></td><td>Atualização automática validada por SHA-256.</td></tr>
+</table>
+
+<p>Dependências oficiais:</p>
+<ul>
+  <li>Python: selenium, supabase, python-dotenv, tzdata e pywebview;</li>
+  <li>Node: whatsapp-web.js e qrcode;</li>
+  <li>Chrome e ChromeDriver, incluídos no pacote de produção.</li>
+</ul>
+
+<h2>8.7 Build do instalador</h2>
+
+<pre>
+cd D:\tmp\SquadJean\J\prospecta-flow-robot
+powershell -File packaging\build.ps1 -Version 1.0.11</pre>
+
+<p>Saídas esperadas:</p>
+<ul>
+  <li><code>release\ProspectaFlowSetup.exe</code>;</li>
+  <li><code>release\ProspectaFlow-1.0.11-portable.zip</code>;</li>
+  <li><code>release\version.json</code>.</li>
+</ul>
+
+<h2>8.8 Itens que não devem ser entregues</h2>
+
+<ul>
+  <li><code>.env</code> real;</li>
+  <li><code>dados_bots/</code>, <code>dados_mensagens/</code> e <code>dados_whatsapp/</code>;</li>
+  <li>QR Codes, sessões WhatsApp, CSVs, logs e screenshots;</li>
+  <li><code>node_modules/</code>, <code>__pycache__/</code>, <code>build/</code> e caches;</li>
+  <li>a cópia redundante e gitignored em <code>web/prospecta-flow-interface-web</code>.</li>
+</ul>
+
+<h1>9. Segurança e operação</h1>
+
+<ul>
+  <li>troque a senha temporária do leader no primeiro acesso;</li>
+  <li>ative MFA para contas administrativas quando disponível;</li>
+  <li>desabilite cadastro público;</li>
+  <li>use um cofre de secrets para service_role e credenciais WhatsApp;</li>
+  <li>não compartilhe dumps contendo dados de clientes;</li>
+  <li>mantenha RLS habilitado em todas as tabelas públicas;</li>
+  <li>revogue imediatamente chaves expostas e gere novas;</li>
+  <li>configure backup e teste restauração periodicamente;</li>
+  <li>acompanhe logs de Auth, Postgres, Realtime e Edge Functions;</li>
+  <li>mantenha relógio e timezone dos runners sincronizados.</li>
+</ul>
+
+<h2>9.1 Matriz resumida de acesso</h2>
+
+<table>
+  <tr>
+    <th>Papel</th>
+    <th>Acesso principal</th>
+  </tr>
+  <tr>
+    <td>leader</td>
+    <td>Administração, financeiro, estúdio, usuários, times, CRM e robôs.</td>
+  </tr>
+  <tr>
+    <td>manager</td>
+    <td>Times, clientes, tarefas e visão operacional/comercial conforme RLS.</td>
+  </tr>
+  <tr>
+    <td>commercial</td>
+    <td>Leads, funil, agenda e registros comerciais permitidos.</td>
+  </tr>
+  <tr>
+    <td>collaborator</td>
+    <td>Tarefas, comentários, horas, perfil e notificações relacionadas.</td>
+  </tr>
+</table>
+
+<h1>10. Validação de entrega</h1>
+
+<h2>10.1 Banco e autenticação</h2>
+<ul class="checklist">
+  <li>☐ SQL finalizou sem erro.</li>
+  <li>☐ As sete validações finais retornaram <code>ok</code>.</li>
+  <li>☐ Leader aparece em Authentication.</li>
+  <li>☐ Leader possui profile e papel leader.</li>
+  <li>☐ Login com e-mail e senha funciona.</li>
+  <li>☐ Cadastro público está conforme a política do cliente.</li>
+</ul>
+
+<h2>10.2 Aplicação</h2>
+<ul class="checklist">
+  <li>☐ <code>npm run test</code> passou.</li>
+  <li>☐ <code>npm run build</code> passou.</li>
+  <li>☐ Dashboard abre sem erros no console.</li>
+  <li>☐ Perfil envia avatar para o bucket correto.</li>
+  <li>☐ Kanban cria, edita, move e remove tarefas.</li>
+  <li>☐ Comentários e apontamentos de tempo persistem.</li>
+  <li>☐ Clientes, serviços, times e colaboradores funcionam.</li>
+  <li>☐ Financeiro fica oculto para não leaders.</li>
+  <li>☐ Funil, leads e agenda comercial funcionam.</li>
+  <li>☐ Notificações Realtime são recebidas.</li>
+</ul>
+
+<h2>10.3 Edge Functions e robôs</h2>
+<ul class="checklist">
+  <li>☐ create-user cria Auth, profile e role.</li>
+  <li>☐ delete-user remove o usuário e os vínculos em cascata.</li>
+  <li>☐ Usuário sem papel leader recebe HTTP 403 nas funções administrativas.</li>
+  <li>☐ Runner aparece online na tela de robôs.</li>
+  <li>☐ Comandos rodando/pausado/parado são reconhecidos.</li>
+  <li>☐ Eventos aparecem em ordem cronológica.</li>
+  <li>☐ Sessão WhatsApp registra seu estado sem expor secrets.</li>
+  <li>☐ Lease impede envio duplicado.</li>
+</ul>
+
+<h2>10.4 Consulta de saúde</h2>
+
+<pre>
+select
+  (select count(*) from public.profiles) as profiles,
+  (select count(*) from public.user_roles) as roles,
+  (select count(*) from public.lead_stages) as lead_stages,
+  (select count(*) from public.kanban_columns) as kanban_columns,
+  (select count(*) from storage.buckets where id = 'avatars') as avatars_bucket;
+
+select p.email, r.role
+from public.profiles p
+join public.user_roles r on r.user_id = p.id
+where r.role = 'leader';
+
+select schemaname, tablename, policyname
+from pg_policies
+where schemaname in ('public', 'storage')
+order by schemaname, tablename, policyname;</pre>
+
+<h1>11. Troubleshooting</h1>
+
+<h2>11.1 “CONFIGURACAO: troque a senha de exemplo”</h2>
+<p>
+  Edite <code>leader_password</code> no início do SQL. A proteção existe para
+  impedir a entrega de uma credencial pública conhecida.
+</p>
+
+<h2>11.2 Login inválido</h2>
+<ul>
+  <li>confirme o e-mail em Authentication &gt; Users;</li>
+  <li>confira se não há espaços no e-mail;</li>
+  <li>redefina a senha pelo Dashboard;</li>
+  <li>confira as URLs e a chave do frontend;</li>
+  <li>limpe a sessão local e faça login novamente.</li>
+</ul>
+
+<h2>11.3 Edge Function retorna 401</h2>
+<ul>
+  <li>confirme que o frontend enviou o Bearer token;</li>
+  <li>faça logout e login para renovar a sessão;</li>
+  <li>confira URL e anon/publishable key;</li>
+  <li>verifique logs em Edge Functions;</li>
+  <li>confirme que o deploy usou <code>--no-verify-jwt</code>.</li>
+</ul>
+
+<h2>11.4 Edge Function retorna 403</h2>
+<p>Confirme o papel:</p>
+<pre>
+select p.email, r.role
+from public.profiles p
+join public.user_roles r on r.user_id = p.id
+where lower(p.email) = lower('EMAIL_DO_USUARIO');</pre>
+
+<h2>11.5 Erro de RLS</h2>
+<ul>
+  <li>não desabilite RLS como correção;</li>
+  <li>confirme se o usuário está autenticado;</li>
+  <li>confira seu papel e os IDs de owner/created_by/assignee;</li>
+  <li>consulte os logs Postgres para identificar a operação bloqueada.</li>
+</ul>
+
+<h2>11.6 Avatar não carrega</h2>
+<ul>
+  <li>confirme o bucket público <code>avatars</code>;</li>
+  <li>o caminho deve começar com o UUID do próprio usuário;</li>
+  <li>confira as policies de <code>storage.objects</code>.</li>
+</ul>
+
+<h2>11.7 Runner não aparece online</h2>
+<ul>
+  <li>confirme que o aplicativo está aberto no computador do cliente;</li>
+  <li>confira service_role e URL no host;</li>
+  <li>confirme que o heartbeat é atualizado em menos de 90 segundos;</li>
+  <li>confira <code>PROSPECTA_RUNNER_ID</code> único;</li>
+  <li>verifique data, hora e timezone do host;</li>
+  <li>consulte <code>prospecta_bot_runners</code> pelo SQL Editor.</li>
+</ul>
+
+<h2>11.8 Frontend publicado abre página em branco</h2>
+<ul>
+  <li>confira o caminho <code>/LeadFlow/</code>;</li>
+  <li>confira o fallback SPA;</li>
+  <li>verifique se os assets retornam HTTP 200;</li>
+  <li>confira as variáveis VITE durante a build, não depois dela.</li>
+</ul>
+
+<h1>12. Backup, restauração e handoff</h1>
+
+<h2>12.1 Antes da entrega</h2>
+<ul>
+  <li>gere uma build reproduzível com <code>npm ci</code>;</li>
+  <li>registre versões de Node e Python;</li>
+  <li>confirme que nenhum secret está no Git;</li>
+  <li>entregue credenciais por cofre seguro e canal separado;</li>
+  <li>registre que o runner é iniciado e encerrado manualmente pelo aplicativo;</li>
+  <li>registre domínio, Project Reference e responsáveis técnicos;</li>
+  <li>teste recuperação de senha e restauração de backup.</li>
+</ul>
+
+<h2>12.2 Pacote de entrega</h2>
+<ul>
+  <li>repositório ou arquivo compactado sem secrets e sem dependências geradas;</li>
+  <li>SQL único de provisionamento;</li>
+  <li>pastas das Edge Functions;</li>
+  <li>código dos executores e seus modelos de ambiente;</li>
+  <li>este documento;</li>
+  <li>registro separado das URLs, contas e acessos transferidos.</li>
+</ul>
+
+<h2>12.3 Critério de aceite</h2>
+<p>
+  A entrega está concluída quando um responsável do cliente consegue: entrar
+  como leader, criar um colaborador, cadastrar um cliente, criar e mover uma
+  tarefa, registrar um lead, consultar as áreas permitidas, acompanhar os robôs
+  e repetir o processo em um projeto de homologação seguindo somente este
+  manual e os arquivos entregues.
+</p>
+
+<div class="success">
+  <strong>Fonte de verdade para nova instalação:</strong><br>
+  <code>leadflow/supabase/PROVISIONAMENTO_COMPLETO.sql</code>
+</div>
+
+</body>
+</html>

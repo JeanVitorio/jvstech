@@ -55,7 +55,7 @@ const tiers = [
       "5 usuários • até 2 Administradores",
       "Até 4 Usuários operacionais",
       "Gestão de equipe e responsáveis",
-      "Bots de prospecção e WhatsApp",
+      "Bots de prospecção e funil integrado",
       "Troca de plano e cartão online",
     ],
     featured: true,

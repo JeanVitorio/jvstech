@@ -73,12 +73,19 @@ export async function saveMessageBot(
   current?: MessageBotConfig,
 ): Promise<void> {
   let sessionId = form.whatsapp_session_id;
-  if (sessionId === "new") {
+  if (form.provider === "meta_cloud_api" && sessionId === "new") {
+    throw new Error("Selecione uma conexão oficial Meta ativa.");
+  }
+  if (form.provider === "whatsapp_web" && sessionId === "new") {
     const sessionName = form.new_session_name?.trim();
     if (!sessionName) throw new Error("Informe o nome da nova sessão.");
     const { data, error } = await db
       .from("prospecta_whatsapp_sessions")
-      .insert({ name: sessionName, owner_id: createdBy })
+      .insert({
+        name: sessionName,
+        owner_id: createdBy,
+        provider: "whatsapp_web",
+      })
       .select("id")
       .single();
     if (error) throw error;
@@ -94,7 +101,20 @@ export async function saveMessageBot(
     niche: form.niche,
     source_stage_id: form.source_stage_id,
     target_stage_id: form.target_stage_id,
-    message_template: form.message_template,
+    // A coluna legada continua obrigatória; no provider oficial o runtime usa
+    // exclusivamente os campos de template Meta.
+    message_template: form.provider === "meta_cloud_api"
+      ? form.meta_template_name
+      : form.message_template,
+    meta_template_name: form.provider === "meta_cloud_api"
+      ? form.meta_template_name
+      : null,
+    meta_template_language: form.provider === "meta_cloud_api"
+      ? form.meta_template_language
+      : null,
+    meta_template_parameters: form.provider === "meta_cloud_api"
+      ? form.meta_template_parameters
+      : [],
     min_interval_seconds: form.min_interval_seconds,
     max_interval_seconds: form.max_interval_seconds,
     max_messages_per_hour: form.max_messages_per_hour,

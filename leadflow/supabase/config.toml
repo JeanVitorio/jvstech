@@ -14,3 +14,12 @@ verify_jwt = true
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.whatsapp-meta-config]
+verify_jwt = true
+
+[functions.whatsapp-meta-send]
+verify_jwt = true
+
+[functions.whatsapp-meta-webhook]
+verify_jwt = false
