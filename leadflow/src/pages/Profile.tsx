@@ -61,7 +61,7 @@ export default function Profile() {
 
   async function changePassword() {
     if (!user?.email) return;
-    if (pwd.next.length < 6) return toast.error("A nova senha precisa ter no mínimo 6 caracteres");
+    if (pwd.next.length < 8) return toast.error("A nova senha precisa ter no mínimo 8 caracteres");
     if (pwd.next !== pwd.confirm) return toast.error("As senhas não coincidem");
     setChangingPwd(true);
     // valida senha atual

@@ -30,6 +30,9 @@ Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders(request) });
   }
+  if (request.method !== "POST") {
+    return jsonResponse(request, { error: "M\xE9todo n\xE3o permitido" }, 405);
+  }
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -71,7 +74,7 @@ Deno.serve(async (request) => {
     }
     const body = await request.json();
     const userId = body.user_id;
-    if (!userId) {
+    if (typeof userId !== "string" || !/^[0-9a-f-]{36}$/i.test(userId)) {
       return jsonResponse(
         request,
         { error: "user_id \xE9 obrigat\xF3rio" },
@@ -100,19 +103,26 @@ Deno.serve(async (request) => {
         400
       );
     }
+    // Usuário vinculado a outras empresas perde apenas o acesso a esta.
+    const { count: otherMemberships, error: otherError } = await admin.from("tenant_memberships").select("tenant_id", { count: "exact", head: true }).eq("user_id", userId).neq("tenant_id", tenantId);
+    if (otherError) throw otherError;
+    if ((otherMemberships ?? 0) > 0) {
+      const { error: unlinkError } = await admin.from("tenant_memberships").delete().eq("tenant_id", tenantId).eq("user_id", userId);
+      if (unlinkError) throw unlinkError;
+      return jsonResponse(request, { ok: true, removed_from_tenant_only: true });
+    }
     const { error } = await admin.auth.admin.deleteUser(userId);
     if (error) {
+      console.error("delete-user auth:", error);
       return jsonResponse(
         request,
-        { error: error.message || "Falha ao remover usu\xE1rio" },
+        { error: "Falha ao remover usu\xE1rio" },
         400
       );
     }
     return jsonResponse(request, { ok: true });
   } catch (error) {
     console.error("delete-user:", error);
-    return jsonResponse(request, {
-      error: error instanceof Error ? error.message : "Erro interno do servidor"
-    }, 500);
+    return jsonResponse(request, { error: "Erro interno do servidor" }, 500);
   }
 });

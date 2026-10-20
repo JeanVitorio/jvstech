@@ -124,7 +124,7 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error("create-portal-session:", error);
     const status = error instanceof AuthorizationError ? error.status : 500;
-    const message = error instanceof Error ? error.message : "N\xE3o foi poss\xEDvel abrir o portal";
+    const message = error instanceof AuthorizationError ? error.message : "N\xE3o foi poss\xEDvel abrir o portal";
     return jsonResponse(request, { error: message }, status);
   }
 });

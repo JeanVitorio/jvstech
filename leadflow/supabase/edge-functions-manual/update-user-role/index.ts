@@ -88,12 +88,6 @@ Deno.serve(async (request) => {
     return jsonResponse(request, { ok: true });
   } catch (error) {
     console.error("update-user-role:", error);
-    return jsonResponse(
-      request,
-      {
-        error: error instanceof Error ? error.message : "Erro interno do servidor",
-      },
-      500,
-    );
+    return jsonResponse(request, { error: "Erro interno do servidor" }, 500);
   }
 });

@@ -330,8 +330,8 @@ function NewCollaboratorDialog({
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("Senha deve ter no mínimo 6 caracteres");
+    if (password.length < 8) {
+      toast.error("Senha deve ter no mínimo 8 caracteres");
       return;
     }
 
@@ -422,7 +422,7 @@ function NewCollaboratorDialog({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               disabled={busy}
             />
           </div>

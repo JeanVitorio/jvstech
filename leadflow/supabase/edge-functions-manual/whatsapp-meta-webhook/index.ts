@@ -71,15 +71,15 @@ Deno.serve(async (req) => {
     const raw = new Uint8Array(await req.arrayBuffer());
     const payload = JSON.parse(new TextDecoder().decode(raw));
     const { phoneIds, statuses } = collect(payload);
-    if (phoneIds.length !== 1) return reply("Not Found", 404);
+    if (phoneIds.length !== 1) return reply("Unauthorized", 401);
     const admin = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
     const { data: credential, error } = await admin.from("prospecta_whatsapp_cloud_credentials")
       .select("tenant_id, whatsapp_session_id, app_secret_ciphertext, app_secret_iv, status")
       .eq("phone_number_id", phoneIds[0]).eq("status", "active").maybeSingle();
     if (error) throw error;
-    if (!credential) return reply("Not Found", 404);
-    if (!credential.app_secret_ciphertext || !credential.app_secret_iv) {
-      return reply("Webhook credentials incomplete", 503);
+    // Resposta idêntica para número inexistente ou assinatura inválida.
+    if (!credential || !credential.app_secret_ciphertext || !credential.app_secret_iv) {
+      return reply("Unauthorized", 401);
     }
     const secret = await decrypt(credential.app_secret_ciphertext, credential.app_secret_iv);
     if (!await validSignature(raw, secret, req.headers.get("X-Hub-Signature-256"))) {

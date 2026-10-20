@@ -18,6 +18,17 @@ interface Lead { id: string; name: string; }
 
 type FilterPreset = "today" | "week" | "month" | "custom";
 
+// Bloqueia esquemas como javascript: em links cadastrados por usuários
+const externalHttpUrl = (value?: string | null) => {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+};
+
 // Retorna datetime-local no fuso do usuário (YYYY-MM-DDTHH:MM)
 function localDateTimeStr(date = new Date()) {
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -270,7 +281,7 @@ export default function SalesAgenda() {
                           </span>
                           {lead && <Badge variant="outline" className="text-[10px]">{lead.name}</Badge>}
                           {e.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{e.location}</span>}
-                          {e.link && <a href={e.link} target="_blank" rel="noreferrer" className="text-accent underline">link</a>}
+                          {externalHttpUrl(e.link) && <a href={externalHttpUrl(e.link)!} target="_blank" rel="noopener noreferrer" className="text-accent underline">link</a>}
                         </p>
                         {e.notes && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{e.notes}</p>}
                       </div>

@@ -84,8 +84,14 @@ Deno.serve(async (req) => {
     if (!email || !password || !name) {
       return json(req, { error: "Campos obrigat\xF3rios: email, password, name" }, 400);
     }
-    if (password.length < 6) {
-      return json(req, { error: "Senha deve ter no m\xEDnimo 6 caracteres" }, 400);
+    if (typeof email !== "string" || typeof password !== "string" || typeof name !== "string") {
+      return json(req, { error: "Dados inv\xE1lidos" }, 400);
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return json(req, { error: "E-mail inv\xE1lido" }, 400);
+    }
+    if (password.length < 8) {
+      return json(req, { error: "Senha deve ter no m\xEDnimo 8 caracteres" }, 400);
     }
     if (!["admin", "member"].includes(tenant_role)) {
       return json(req, { error: "N\xEDvel inv\xE1lido" }, 400);
@@ -124,7 +130,13 @@ Deno.serve(async (req) => {
       },
     });
     if (createErr || !created.user) {
-      return json(req, { error: createErr?.message ?? "Falha ao criar usu\xE1rio" }, 400);
+      console.error("Error creating auth user:", createErr);
+      const duplicated = /already|registered|exists/i.test(createErr?.message ?? "");
+      return json(
+        req,
+        { error: duplicated ? "Este e-mail j\xE1 est\xE1 cadastrado" : "Falha ao criar usu\xE1rio" },
+        400,
+      );
     }
     const newUserId = created.user.id;
     const { error: profileError } = await admin.from("profiles").upsert(
@@ -182,13 +194,7 @@ Deno.serve(async (req) => {
     return json(req, { ok: true, user_id: newUserId });
   } catch (e) {
     console.error("Unexpected error in create-user:", e);
-    return json(
-      req,
-      {
-        error: e instanceof Error ? e.message : "Erro interno do servidor",
-      },
-      500,
-    );
+    return json(req, { error: "Erro interno do servidor" }, 500);
   }
 });
 function json(request, b, status = 200) {

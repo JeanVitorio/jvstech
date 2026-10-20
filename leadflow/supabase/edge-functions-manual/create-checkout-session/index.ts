@@ -215,10 +215,11 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error("create-checkout-session:", error);
     const status = error instanceof AuthorizationError ? error.status : 500;
-    const message = errorMessage(
+    // Detalhes internos (Stripe/banco) ficam apenas nos logs.
+    const message = error instanceof AuthorizationError ? errorMessage(
       error,
       "N\xE3o foi poss\xEDvel iniciar o pagamento"
-    );
+    ) : "N\xE3o foi poss\xEDvel iniciar o pagamento";
     return jsonResponse(request, { error: message }, status);
   }
 });
