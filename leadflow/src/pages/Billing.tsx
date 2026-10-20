@@ -65,6 +65,7 @@ export default function Billing() {
   const onboardingStarted = useRef(false);
   const canManage = user?.tenant_role === "owner" || user?.tenant_role === "admin";
   const usagePercent = useMemo(() => {
+    if (status?.is_unlimited) return 0;
     if (!status?.leads_limit) return 0;
     return Math.min(100, Math.round((status.leads_used / status.leads_limit) * 100));
   }, [status]);
@@ -154,11 +155,19 @@ export default function Billing() {
                 </div>
               </div>
               <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Você ainda tem{" "}
-                <strong className="font-semibold text-foreground">
-                  {status.leads_remaining.toLocaleString("pt-BR")} leads
-                </strong>{" "}
-                disponíveis neste ciclo.
+                {status.is_unlimited ? (
+                  <strong className="font-semibold text-foreground">
+                    Sua conta administrativa possui geração ilimitada de leads.
+                  </strong>
+                ) : (
+                  <>
+                    Você ainda tem{" "}
+                    <strong className="font-semibold text-foreground">
+                      {status.leads_remaining.toLocaleString("pt-BR")} leads
+                    </strong>{" "}
+                    disponíveis neste ciclo.
+                  </>
+                )}
               </p>
               {canManage && status.plan_code !== "free" && (
                 <Button
@@ -178,12 +187,13 @@ export default function Billing() {
                 <div>
                   <p className="text-xs text-muted-foreground">Consumo mensal</p>
                   <p className="mt-1 font-display text-3xl font-bold tracking-tight">
-                    {usagePercent}%
+                    {status.is_unlimited ? "Ilimitado" : `${usagePercent}%`}
                   </p>
                 </div>
                 <p className="text-right text-xs text-muted-foreground">
-                  {status.leads_used.toLocaleString("pt-BR")} de{" "}
-                  {status.leads_limit.toLocaleString("pt-BR")} por mês
+                  {status.is_unlimited
+                    ? "Sem limite mensal"
+                    : `${status.leads_used.toLocaleString("pt-BR")} de ${status.leads_limit.toLocaleString("pt-BR")} por mês`}
                 </p>
               </div>
               <Progress value={usagePercent} className="h-3 bg-muted/70" />

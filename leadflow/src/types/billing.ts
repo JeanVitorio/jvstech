@@ -18,6 +18,7 @@ export interface BillingStatus {
   leads_limit: number;
   leads_used: number;
   leads_remaining: number;
+  is_unlimited: boolean;
   user_limit: number;
   users_used: number;
   users_remaining: number;

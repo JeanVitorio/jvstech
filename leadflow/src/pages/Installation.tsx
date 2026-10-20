@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 const appDownloadUrl =
-  "https://github.com/JeanVitorio/prospecta-flow-robot/releases/latest/download/ProspectaFlowSetup.exe";
+  "https://github.com/JeanVitorio/prospecta-flow-robot/releases/latest/download/LeadFlowSetup.exe";
 const releaseUrl =
   "https://github.com/JeanVitorio/prospecta-flow-robot/releases/latest";
 const releaseApiUrl =
@@ -23,7 +23,7 @@ const releaseApiUrl =
 const steps = [
   {
     title: "Baixe o instalador",
-    description: "Clique no botão de download e aguarde o arquivo ProspectaFlowSetup.exe.",
+    description: "Clique no botão de download e aguarde o arquivo LeadFlowSetup.exe.",
   },
   {
     title: "Instale no servidor",

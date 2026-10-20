@@ -120,21 +120,25 @@ export function AppLayout() {
               <CreditCard className="h-3.5 w-3.5 text-primary" />
             </div>
             <p className="mt-2 text-sm font-semibold">
-              {billing.leads_remaining.toLocaleString("pt-BR")} leads restantes
+              {billing.is_unlimited
+                ? "Leads ilimitados"
+                : `${billing.leads_remaining.toLocaleString("pt-BR")} leads restantes`}
             </p>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full gradient-primary"
                 style={{
-                  width: `${Math.max(
-                    3,
-                    Math.min(
-                      100,
-                      billing.leads_limit > 0
-                        ? (billing.leads_used / billing.leads_limit) * 100
-                        : 0,
-                    ),
-                  )}%`,
+                  width: billing.is_unlimited
+                    ? "100%"
+                    : `${Math.max(
+                        3,
+                        Math.min(
+                          100,
+                          billing.leads_limit > 0
+                            ? (billing.leads_used / billing.leads_limit) * 100
+                            : 0,
+                        ),
+                      )}%`,
                 }}
               />
             </div>

@@ -51,7 +51,7 @@ export default function Bots() {
   const canGenerate = Boolean(
     billing &&
       ["active", "trialing"].includes(billing.status) &&
-      billing.leads_remaining > 0,
+      (billing.is_unlimited || billing.leads_remaining > 0),
   );
 
   async function command(
