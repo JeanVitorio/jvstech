@@ -24,10 +24,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/SignupPremium";
 import Collaborators from "./pages/Collaborators";
-import WhatsAppSettings from "./pages/WhatsAppSettings";
 import NotFound from "./pages/NotFound.tsx";
 import type { ReactNode } from "react";
-import { useMessageBotPermission } from "@/hooks/useWhatsAppMeta";
+import { useMessageBotPermission } from "@/hooks/useMessageBots";
 
 const queryClient = new QueryClient();
 
@@ -80,26 +79,21 @@ const App = () => (
                         }
                       >
                         <Route path="/" element={<SalesDashboard />} />
-                        <Route path="/dashboard-bots" element={<Dashboard />} />
-                        <Route path="/bots" element={<Bots />} />
+                        <Route path="/dashboard-agentes" element={<Dashboard />} />
+                        <Route path="/agentes" element={<Bots />} />
                         <Route
-                          path="/message-bots"
+                          path="/agentes-whatsapp"
                           element={
                             <MessageBotsOnly>
                               <MessageBots />
                             </MessageBotsOnly>
                           }
                         />
-                        <Route
-                          path="/whatsapp-settings"
-                          element={
-                            <TenantManagerOnly>
-                              <MessageBotsOnly>
-                                <WhatsAppSettings />
-                              </MessageBotsOnly>
-                            </TenantManagerOnly>
-                          }
-                        />
+                        {/* Links antigos continuam funcionando */}
+                        <Route path="/dashboard-bots" element={<Navigate to="/dashboard-agentes" replace />} />
+                        <Route path="/bots" element={<Navigate to="/agentes" replace />} />
+                        <Route path="/message-bots" element={<Navigate to="/agentes-whatsapp" replace />} />
+                        <Route path="/whatsapp-settings" element={<Navigate to="/agentes-whatsapp" replace />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/sales" element={<SalesFunnel />} />
                         <Route path="/leads" element={<Leads />} />

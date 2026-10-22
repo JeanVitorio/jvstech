@@ -95,7 +95,7 @@ export async function saveBotConfig(
   if (error) throw error;
   if (!data) {
     throw new Error(
-      "O bot foi alterado por outro usuário. Atualize a página e tente novamente.",
+      "O agente foi alterado por outro usuário. Atualize a página e tente novamente.",
     );
   }
 }
@@ -106,7 +106,7 @@ export async function deleteBotConfig(config: BotConfig): Promise<void> {
     p_expected_version: config.version,
   });
   if (error) throw error;
-  if (!data?.length) throw new Error("O bot já foi alterado ou removido.");
+  if (!data?.length) throw new Error("O agente já foi alterado ou removido.");
 }
 
 function normalizeFilterWord(value: string): string {

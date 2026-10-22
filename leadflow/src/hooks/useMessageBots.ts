@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  canUseMessageBots,
   deleteMessageBot,
   listLeadStages,
   listMessageBotRuntimes,
@@ -22,6 +23,15 @@ export function useMessageBots() {
     refetchInterval: 30_000,
     refetchIntervalInBackground: false,
     retry: 1,
+  });
+}
+
+export function useMessageBotPermission() {
+  return useQuery({
+    queryKey: ["whatsapp", "message-bot-permission"],
+    queryFn: canUseMessageBots,
+    staleTime: 5 * 60_000,
+    retry: false,
   });
 }
 

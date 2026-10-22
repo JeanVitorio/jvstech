@@ -39,7 +39,7 @@ const planPresentation = {
     tagline: "Para acelerar de verdade",
     description: "Mais oportunidades para equipes que querem ampliar o ritmo de vendas.",
     icon: Rocket,
-    features: ["Bots de prospecção", "Funil de vendas", "Gestão de equipe"],
+    features: ["Agentes de prospecção", "Funil de vendas", "Gestão de equipe"],
   },
   pro: {
     tagline: "Para máxima escala",

@@ -91,18 +91,18 @@ export default function Dashboard() {
             </h1>
             <p className="text-muted-foreground mt-2 max-w-2xl">
               {user?.role === "leader"
-                ? "Acompanhe todos os executores, bots e leads da operação."
-                : "Acompanhe seus bots e os leads gerados pela prospecção."}
+                ? "Acompanhe todos os executores, agentes e leads da operação."
+                : "Acompanhe seus agentes e os leads gerados pela prospecção."}
             </p>
           </div>
-          <Button onClick={() => navigate("/bots")}>
-            <Bot className="w-4 h-4 mr-2" /> Abrir painel dos bots
+          <Button onClick={() => navigate("/agentes")}>
+            <Bot className="w-4 h-4 mr-2" /> Abrir painel dos agentes
           </Button>
         </div>
       </Card>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Metric icon={Bot} label="Bots disponíveis" value={stats.total} />
+        <Metric icon={Bot} label="Agentes disponíveis" value={stats.total} />
         <Metric icon={Play} label="Em execução" value={stats.running} tone="success" />
         <Metric
           icon={AlertTriangle}
@@ -117,12 +117,12 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="font-display text-xl font-semibold">Bots ativos</h2>
+              <h2 className="font-display text-xl font-semibold">Agentes ativos</h2>
               <p className="text-sm text-muted-foreground">
                 {stats.verified} empresas verificadas · {stats.paused} pausado(s)
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate("/bots")}>
+            <Button variant="outline" size="sm" onClick={() => navigate("/agentes")}>
               Ver todos
             </Button>
           </div>
@@ -136,7 +136,7 @@ export default function Dashboard() {
               return (
                 <button
                   key={runtime.config.id}
-                  onClick={() => navigate("/bots")}
+                  onClick={() => navigate("/agentes")}
                   className="w-full text-left rounded-xl border border-border p-4 hover:bg-muted/40 transition"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -164,7 +164,7 @@ export default function Dashboard() {
             {!bots.isLoading && !activeBots.length && (
               <div className="py-10 text-center text-muted-foreground">
                 <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-success" />
-                Nenhum bot em execução neste momento.
+                Nenhum agente em execução neste momento.
               </div>
             )}
           </div>
@@ -172,7 +172,7 @@ export default function Dashboard() {
 
         <Card className="p-6">
           <h2 className="font-display text-xl font-semibold">Atividade recente</h2>
-          <p className="text-sm text-muted-foreground mb-5">Eventos dos bots visíveis</p>
+          <p className="text-sm text-muted-foreground mb-5">Eventos dos agentes visíveis</p>
           <div className="space-y-4">
             {(events.data ?? []).slice(0, 8).map((event) => (
               <div key={event.event_id} className="flex gap-3">

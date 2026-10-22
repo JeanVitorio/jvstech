@@ -11,7 +11,6 @@ import {
   Menu,
   MessageCircle,
   Moon,
-  Settings,
   Sun,
   Target,
   UserCircle2,
@@ -27,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
-import { useMessageBotPermission } from "@/hooks/useWhatsAppMeta";
+import { useMessageBotPermission } from "@/hooks/useMessageBots";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,10 +40,10 @@ type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean };
 
 const nav: NavItem[] = [
   { to: "/", label: "Dashboard de Vendas", icon: LayoutDashboard, end: true },
-  { to: "/dashboard-bots", label: "Dashboard dos Bots", icon: Bot },
+  { to: "/dashboard-agentes", label: "Dashboard dos Agentes", icon: Bot },
   { to: "/sales", label: "Funil de Vendas", icon: Target },
-  { to: "/bots", label: "Bots", icon: Bot },
-  { to: "/message-bots", label: "Bots de WhatsApp", icon: MessageCircle },
+  { to: "/agentes", label: "Agentes de Prospecção", icon: Bot },
+  { to: "/agentes-whatsapp", label: "Agentes de WhatsApp", icon: MessageCircle },
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/billing", label: "Plano e consumo", icon: CreditCard },
   { to: "/installation", label: "Instalação", icon: Download },
@@ -61,14 +60,11 @@ export function AppLayout() {
   const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
   const canUseMessageBots = messageBotPermission.data === true;
   const authorizedNav = nav.filter(
-    (item) => item.to !== "/message-bots" || canUseMessageBots,
+    (item) => item.to !== "/agentes-whatsapp" || canUseMessageBots,
   );
   const visibleNav = canManageTenant
     ? [
         ...authorizedNav.slice(0, -1),
-        ...(canUseMessageBots
-          ? [{ to: "/whatsapp-settings", label: "Configuração WhatsApp", icon: Settings }]
-          : []),
         { to: "/collaborators", label: "Colaboradores", icon: UserRoundCog },
         authorizedNav[authorizedNav.length - 1],
       ]

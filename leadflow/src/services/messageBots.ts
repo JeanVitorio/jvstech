@@ -8,7 +8,7 @@ import type {
   WhatsAppSession,
 } from "@/types/messageBots";
 
-// As tabelas são instaladas pelo SQL separado dos bots de WhatsApp.
+// As tabelas são instaladas pelo SQL separado dos agentes de WhatsApp.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
@@ -73,10 +73,7 @@ export async function saveMessageBot(
   current?: MessageBotConfig,
 ): Promise<void> {
   let sessionId = form.whatsapp_session_id;
-  if (form.provider === "meta_cloud_api" && sessionId === "new") {
-    throw new Error("Selecione uma conexão oficial Meta ativa.");
-  }
-  if (form.provider === "whatsapp_web" && sessionId === "new") {
+  if (sessionId === "new") {
     const sessionName = form.new_session_name?.trim();
     if (!sessionName) throw new Error("Informe o nome da nova sessão.");
     const { data, error } = await db
@@ -101,20 +98,7 @@ export async function saveMessageBot(
     niche: form.niche,
     source_stage_id: form.source_stage_id,
     target_stage_id: form.target_stage_id,
-    // A coluna legada continua obrigatória; no provider oficial o runtime usa
-    // exclusivamente os campos de template Meta.
-    message_template: form.provider === "meta_cloud_api"
-      ? form.meta_template_name
-      : form.message_template,
-    meta_template_name: form.provider === "meta_cloud_api"
-      ? form.meta_template_name
-      : null,
-    meta_template_language: form.provider === "meta_cloud_api"
-      ? form.meta_template_language
-      : null,
-    meta_template_parameters: form.provider === "meta_cloud_api"
-      ? form.meta_template_parameters
-      : [],
+    message_template: form.message_template,
     min_interval_seconds: form.min_interval_seconds,
     max_interval_seconds: form.max_interval_seconds,
     max_messages_per_hour: form.max_messages_per_hour,
@@ -138,9 +122,16 @@ export async function saveMessageBot(
   if (error) throw error;
   if (!data) {
     throw new Error(
-      "O bot foi alterado por outro usuário. Atualize e tente novamente.",
+      "O agente foi alterado por outro usuário. Atualize e tente novamente.",
     );
   }
+}
+
+export async function canUseMessageBots(): Promise<boolean> {
+  // A permissão é sempre decidida pela RPC segura; qualquer falha nega o acesso.
+  const { data, error } = await db.rpc("prospecta_can_use_message_bots");
+  if (error) return false;
+  return data === true;
 }
 
 export async function deleteMessageBot(
@@ -154,5 +145,5 @@ export async function deleteMessageBot(
     .select("id")
     .maybeSingle();
   if (error) throw error;
-  if (!data) throw new Error("O bot já foi alterado ou removido.");
+  if (!data) throw new Error("O agente já foi alterado ou removido.");
 }

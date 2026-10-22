@@ -296,7 +296,7 @@ export function Overhead() {
 
           {[
             ["Leads", "centralizados no painel"],
-            ["Bots", "configurados por estratégia"],
+            ["Agentes", "configurados por estratégia"],
             ["Funil", "organizado por etapa"],
             ["Equipe", "com acessos e responsáveis"],
           ].map(([a, b]) => (

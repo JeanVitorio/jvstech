@@ -64,7 +64,7 @@ export default function Bots() {
         command: value,
         runnerId: runtime.control?.target_runner_id,
       });
-      toast.success("Comando enviado ao bot.");
+      toast.success("Comando enviado ao agente.");
     } catch (error: unknown) {
       toast.error(errorMessage(error, "Não foi possível enviar o comando."));
     }
@@ -88,38 +88,38 @@ export default function Bots() {
       setStarting(null);
       setRunnerId("");
     } catch (error: unknown) {
-      toast.error(errorMessage(error, "Não foi possível iniciar o bot."));
+      toast.error(errorMessage(error, "Não foi possível iniciar o agente."));
     }
   }
 
   async function save(form: BotFormData) {
     try {
       await actions.save.mutateAsync({ form, current: editing });
-      toast.success(editing ? "Bot atualizado." : "Bot criado.");
+      toast.success(editing ? "Agente atualizado." : "Agente criado.");
       setFormOpen(false);
       setEditing(undefined);
     } catch (error: unknown) {
-      toast.error(errorMessage(error, "Não foi possível salvar o bot."));
+      toast.error(errorMessage(error, "Não foi possível salvar o agente."));
     }
   }
 
   async function remove() {
-    if (!editing || !confirm(`Excluir o bot "${editing.name}"?`)) return;
+    if (!editing || !confirm(`Excluir o agente "${editing.name}"?`)) return;
     try {
       await actions.remove.mutateAsync(editing);
-      toast.success("Bot excluído.");
+      toast.success("Agente excluído.");
       setFormOpen(false);
       setEditing(undefined);
     } catch (error: unknown) {
-      toast.error(errorMessage(error, "Não foi possível excluir o bot."));
+      toast.error(errorMessage(error, "Não foi possível excluir o agente."));
     }
   }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
-        title="Bots"
-        subtitle="Acompanhe e controle suas prospecções em tempo real."
+        title="Agentes de Prospecção"
+        subtitle="Acompanhe e controle suas prospecções em tempo real. Só são salvos leads cujo número abre conversa no WhatsApp."
         actions={
           <Button
             onClick={() => {
@@ -127,7 +127,7 @@ export default function Bots() {
               setFormOpen(true);
             }}
           >
-            <Plus className="w-4 h-4 mr-2" /> Novo bot
+            <Plus className="w-4 h-4 mr-2" /> Novo agente
           </Button>
         }
       />
@@ -145,18 +145,18 @@ export default function Bots() {
 
       {bots.isLoading ? (
         <Card className="p-10 text-center text-muted-foreground">
-          Carregando bots...
+          Carregando agentes...
         </Card>
       ) : bots.isError ? (
         <Card className="p-10 text-center text-destructive">
-          Não foi possível carregar os bots. Verifique as políticas do Supabase.
+          Não foi possível carregar os agentes. Verifique as políticas do Supabase.
         </Card>
       ) : !bots.data?.length ? (
         <Card className="p-10 text-center">
           <Bot className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <p className="font-medium">Nenhum bot disponível.</p>
+          <p className="font-medium">Nenhum agente disponível.</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Crie o primeiro bot para começar.
+            Crie o primeiro agente para começar.
           </p>
         </Card>
       ) : (
@@ -193,7 +193,7 @@ export default function Bots() {
 
       <Dialog open={Boolean(starting)} onOpenChange={(open) => !open && setStarting(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Iniciar bot</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Iniciar agente</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">
             Escolha o executor que realizará a prospecção.
           </p>
@@ -210,7 +210,7 @@ export default function Bots() {
           {!runners.isLoading && !runners.data?.length && (
             <p className="text-sm text-warning">
               Nenhum executor online. Inicie `python runner_remoto.py` na máquina
-              que executará o bot.
+              que executará o agente.
             </p>
           )}
           <DialogFooter>

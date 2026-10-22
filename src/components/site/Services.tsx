@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 const plans = [
   {
     title: "Prospecção automatizada",
-    desc: "Defina o perfil ideal de empresa e deixe os bots buscarem novas oportunidades para sua equipe.",
+    desc: "Defina o perfil ideal de empresa e deixe os agentes buscarem novas oportunidades para sua equipe.",
     marks: [
       "Filtros por segmento e localização",
       "Execução contínua no aplicativo",

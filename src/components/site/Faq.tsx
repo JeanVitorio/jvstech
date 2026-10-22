@@ -8,7 +8,7 @@ import {
 const faqs = [
   {
     q: "O que é o JVS LeadFlow?",
-    a: "É uma plataforma de prospecção que reúne bots, leads, colaboradores e funil de vendas para organizar a operação comercial em um único lugar.",
+    a: "É uma plataforma de prospecção que reúne agentes de prospecção, leads, colaboradores e funil de vendas para organizar a operação comercial em um único lugar.",
   },
   {
     q: "Como os leads são encontrados?",
@@ -16,11 +16,11 @@ const faqs = [
   },
   {
     q: "Posso distribuir leads entre colaboradores?",
-    a: "Sim. O líder pode criar usuários, definir acessos e indicar o responsável por cada bot ou oportunidade.",
+    a: "Sim. O líder pode criar usuários, definir acessos e indicar o responsável por cada agente ou oportunidade.",
   },
   {
     q: "Preciso instalar alguma coisa?",
-    a: "O painel funciona pela web. Para executar os bots de prospecção, o aplicativo do JVS LeadFlow deve ser instalado em um computador ou servidor Windows.",
+    a: "O painel funciona pela web. Para executar os agentes de prospecção, o aplicativo do JVS LeadFlow deve ser instalado em um computador ou servidor Windows.",
   },
   {
     q: "Preciso cadastrar cartão para testar?",

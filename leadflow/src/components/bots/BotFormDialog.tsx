@@ -139,7 +139,7 @@ export function BotFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{current ? "Editar bot" : "Novo bot"}</DialogTitle>
+          <DialogTitle>{current ? "Editar agente" : "Novo agente"}</DialogTitle>
         </DialogHeader>
 
         <div className="grid sm:grid-cols-2 gap-4">

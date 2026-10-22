@@ -2,7 +2,7 @@ const items = [
   "Geração automática de leads",
   "Funil de vendas visual",
   "Gestão de colaboradores",
-  "Bots de prospecção",
+  "Agentes de prospecção",
   "Dados centralizados",
 ];
 
