@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import type { PlanCode } from "@/types/billing";
+import { formatBrazilianPhoneInput, isValidBrazilianWhatsapp } from "@/lib/whatsapp";
 
 const planDetails: Record<PlanCode, { name: string; price: string }> = {
   free: { name: "LeadFlow Free", price: "50 leads por mês" },
@@ -30,6 +31,7 @@ export default function SignupPremium() {
   const [name, setName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -46,12 +48,16 @@ export default function SignupPremium() {
       setError("Informe o nome da empresa.");
       return;
     }
+    if (!isValidBrazilianWhatsapp(whatsapp)) {
+      setError("Informe um WhatsApp válido com DDD. Ex.: (11) 99999-9999.");
+      return;
+    }
     if (password.length < 8) {
       setError("A senha deve ter ao menos 8 caracteres.");
       return;
     }
     setBusy(true);
-    const result = await signup(name, companyName, email, password, selectedPlan);
+    const result = await signup(name, companyName, email, password, whatsapp, selectedPlan);
     setBusy(false);
     if (!result.ok) {
       setError(result.error ?? "Não foi possível criar sua conta.");
@@ -112,6 +118,25 @@ export default function SignupPremium() {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Como podemos chamar você?"
+            className={inputClass}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="signup-whatsapp" className="text-xs text-white/65">
+            WhatsApp
+          </Label>
+          <Input
+            id="signup-whatsapp"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel-national"
+            value={whatsapp}
+            onChange={(event) => {
+              setWhatsapp(formatBrazilianPhoneInput(event.target.value));
+              setError(null);
+            }}
+            placeholder="(11) 99999-9999"
             className={inputClass}
             required
           />

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabase } from "@/integrations/supabase/client";
 import type { Session, User as SupaUser } from "@supabase/supabase-js";
 import type { PlanCode } from "@/types/billing";
+import { isValidBrazilianWhatsapp, normalizeBrazilianPhone } from "@/lib/whatsapp";
 
 // O schema SaaS será incluído nos tipos gerados após a migration remota.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,6 +16,7 @@ export interface AuthUser {
   name: string;
   avatar_url?: string | null;
   position?: string | null;
+  phone?: string | null;
   role: AppRole;
   is_manager: boolean;
   is_leader: boolean;
@@ -33,8 +35,10 @@ interface AuthState {
     companyName: string,
     email: string,
     password: string,
+    whatsapp: string,
     planCode?: PlanCode,
   ) => Promise<{ ok: boolean; error?: string; confirmation?: boolean }>;
+  updateWhatsapp: (whatsapp: string) => Promise<{ ok: boolean; error?: string }>;
   requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string }>;
   updatePassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -53,7 +57,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
   const [{ data: profile }, { data: roles, error: rolesError }, tenantResult] = await Promise.all([
     db
       .from("profiles")
-      .select("name, avatar_url, position, active_tenant_id")
+      .select("name, avatar_url, position, phone, active_tenant_id")
       .eq("id", supaUser.id)
       .maybeSingle(),
     db.from("user_roles").select("role").eq("user_id", supaUser.id),
@@ -85,6 +89,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     name: profile?.name ?? supaUser.email?.split("@")[0] ?? "Usuário",
     avatar_url: profile?.avatar_url,
     position: profile?.position,
+    phone: profile?.phone ?? null,
     role,
     is_leader: canManageTenant || role === "leader",
     is_manager: canManageTenant || role === "manager" || role === "leader",
@@ -155,8 +160,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     companyName: string,
     email: string,
     password: string,
+    whatsapp: string,
     planCode: PlanCode = "free",
   ) {
+    if (!isValidBrazilianWhatsapp(whatsapp)) {
+      return { ok: false, error: "Informe um WhatsApp válido com DDD." };
+    }
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -164,6 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           name: name.trim(),
           company_name: companyName.trim(),
+          whatsapp: normalizeBrazilianPhone(whatsapp),
         },
         emailRedirectTo: `${window.location.origin}${planDestination(planCode)}`,
       },
@@ -187,6 +197,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return error ? { ok: false, error: error.message } : { ok: true };
   }
 
+  async function updateWhatsapp(whatsapp: string) {
+    if (!user) return { ok: false, error: "Sessão expirada. Entre novamente." };
+    if (!isValidBrazilianWhatsapp(whatsapp)) {
+      return { ok: false, error: "Informe um WhatsApp válido com DDD." };
+    }
+    const { error } = await db
+      .from("profiles")
+      .update({ phone: normalizeBrazilianPhone(whatsapp) })
+      .eq("id", user.id);
+    if (error) return { ok: false, error: "Não foi possível salvar seu WhatsApp. Tente novamente." };
+    setUser({ ...user, phone: normalizeBrazilianPhone(whatsapp) });
+    return { ok: true };
+  }
+
   async function logout() {
     await supabase.auth.signOut();
   }
@@ -204,6 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ready,
         login,
         signup,
+        updateWhatsapp,
         requestPasswordReset,
         updatePassword,
         logout,
