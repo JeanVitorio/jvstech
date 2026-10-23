@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_FIRST_CONTACT_MESSAGE } from "@/lib/whatsapp";
@@ -32,6 +33,8 @@ import type {
 interface BotFormDialogProps {
   open: boolean;
   current?: BotConfig;
+  // Leads já gerados pelo agente em edição.
+  generatedLeads?: number;
   saving?: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (form: BotFormData) => void;
@@ -41,9 +44,19 @@ interface BotFormDialogProps {
 const lines = (value: string) =>
   [...new Set(value.split(/\r?\n|;/).map((item) => item.trim()).filter(Boolean))];
 
+// Faixa da barra de limite de leads por agente.
+const LEAD_LIMIT_MIN = 10;
+const LEAD_LIMIT_MAX = 2000;
+const LEAD_LIMIT_STEP = 10;
+const LEAD_LIMIT_DEFAULT = 100;
+
+const clampLeadLimit = (value: number) =>
+  Math.min(LEAD_LIMIT_MAX, Math.max(LEAD_LIMIT_MIN, Math.round(value) || LEAD_LIMIT_DEFAULT));
+
 export function BotFormDialog({
   open,
   current,
+  generatedLeads = 0,
   saving,
   onOpenChange,
   onSave,
@@ -73,6 +86,8 @@ export function BotFormDialog({
   const [excludedEnabled, setExcludedEnabled] = useState(true);
   const [ticket, setTicket] = useState(0);
   const [maxScrolls, setMaxScrolls] = useState(10);
+  const [maxLeadsEnabled, setMaxLeadsEnabled] = useState(true);
+  const [maxLeads, setMaxLeads] = useState(LEAD_LIMIT_DEFAULT);
   const [headless, setHeadless] = useState(true);
 
   useEffect(() => {
@@ -96,6 +111,9 @@ export function BotFormDialog({
     setExcludedEnabled(current?.excluded_words_enabled ?? true);
     setTicket(Number(current?.estimated_ticket ?? 0));
     setMaxScrolls(current?.max_scrolls ?? 10);
+    // Agente novo começa limitado; agente existente sem limite continua sem limite.
+    setMaxLeadsEnabled(current ? current.max_leads != null : true);
+    setMaxLeads(clampLeadLimit(current?.max_leads ?? LEAD_LIMIT_DEFAULT));
     setHeadless(current?.headless ?? true);
   }, [current, open, user?.id]);
 
@@ -128,6 +146,7 @@ export function BotFormDialog({
       phone_filter: phoneFilter,
       headless,
       max_scrolls: Math.max(1, maxScrolls),
+      max_leads: maxLeadsEnabled ? clampLeadLimit(maxLeads) : null,
       excluded_words: lines(excluded),
       excluded_words_enabled: excludedEnabled,
       included_words: lines(included),
@@ -271,6 +290,37 @@ export function BotFormDialog({
           <div className="flex items-center gap-3 pt-6">
             <Switch checked={headless} onCheckedChange={setHeadless} />
             <Label>Executar navegador em modo headless</Label>
+          </div>
+          <div className="sm:col-span-2 rounded-xl border border-border bg-muted/30 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="bot-max-leads">Limite de leads do agente</Label>
+              <Switch
+                checked={maxLeadsEnabled}
+                onCheckedChange={setMaxLeadsEnabled}
+                aria-label="Limitar a quantidade de leads"
+              />
+            </div>
+            <div className="mt-4 flex items-center gap-4">
+              <Slider
+                id="bot-max-leads"
+                min={LEAD_LIMIT_MIN}
+                max={LEAD_LIMIT_MAX}
+                step={LEAD_LIMIT_STEP}
+                value={[maxLeads]}
+                disabled={!maxLeadsEnabled}
+                onValueChange={([value]) => setMaxLeads(value)}
+                className="flex-1"
+              />
+              <span className="min-w-[6.5rem] rounded-lg bg-background px-3 py-1.5 text-center text-sm font-semibold tabular-nums shadow-sm">
+                {maxLeadsEnabled ? `${maxLeads.toLocaleString("pt-BR")} leads` : "Sem limite"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {maxLeadsEnabled
+                ? "O agente para sozinho ao salvar essa quantidade de leads. Para continuar depois, aumente o limite."
+                : "O agente gera leads até concluir as cidades ou atingir o limite mensal do plano."}
+              {current && ` Este agente já gerou ${generatedLeads.toLocaleString("pt-BR")} lead(s).`}
+            </p>
           </div>
           <div className="sm:col-span-2">
             <Label>Cidades — uma por linha</Label>

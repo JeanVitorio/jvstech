@@ -40,6 +40,18 @@ export async function listRecentBotEvents(limit = 20): Promise<BotEvent[]> {
   return (data ?? []) as BotEvent[];
 }
 
+// Total de leads já gerados por agente (bot_id -> quantidade).
+export async function listBotLeadCounts(): Promise<Record<string, number>> {
+  const { data, error } = await db.rpc("prospecta_get_bot_lead_counts");
+  if (error) throw error;
+  return Object.fromEntries(
+    (data ?? []).map((row: { bot_id: string; generated_leads: number }) => [
+      row.bot_id,
+      Number(row.generated_leads) || 0,
+    ]),
+  );
+}
+
 export async function listOnlineRunners(): Promise<BotRunner[]> {
   const { data, error } = await db.rpc("prospecta_list_runners");
   if (error) throw error;

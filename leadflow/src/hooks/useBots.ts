@@ -3,6 +3,7 @@ import {
   deleteBotConfig,
   getAppInstallationStatus,
   listBotEvents,
+  listBotLeadCounts,
   listBotRuntimes,
   listOnlineRunners,
   requestBotCommand,
@@ -28,6 +29,17 @@ export function useBotEvents(botId?: string) {
     enabled: Boolean(botId),
     staleTime: 30_000,
     refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+    retry: 1,
+  });
+}
+
+export function useBotLeadCounts() {
+  return useQuery({
+    queryKey: ["bots", "lead-counts"],
+    queryFn: listBotLeadCounts,
+    staleTime: 15_000,
+    refetchInterval: 30_000,
     refetchIntervalInBackground: false,
     retry: 1,
   });

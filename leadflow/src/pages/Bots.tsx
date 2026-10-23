@@ -22,6 +22,7 @@ import {
   useAppInstallation,
   useBotActions,
   useBotEvents,
+  useBotLeadCounts,
   useBots,
 } from "@/hooks/useBots";
 import type { BotConfig, BotFormData, BotRuntime } from "@/types/bots";
@@ -33,6 +34,7 @@ export default function Bots() {
   const { user } = useAuth();
   const { status: billing } = useBilling();
   const bots = useBots();
+  const leadCounts = useBotLeadCounts();
   const installation = useAppInstallation();
   const actions = useBotActions();
   const [editing, setEditing] = useState<BotConfig | undefined>();
@@ -51,10 +53,24 @@ export default function Bots() {
       (billing.is_unlimited || billing.leads_remaining > 0),
   );
 
+  const generatedLeads = (botId?: string) =>
+    (botId && leadCounts.data?.[botId]) || 0;
+  // Sem a contagem (falha na consulta) não bloqueia: o banco também aplica o limite.
+  const leadLimitReached = (config: BotConfig) =>
+    config.max_leads != null &&
+    Boolean(leadCounts.data) &&
+    generatedLeads(config.id) >= config.max_leads;
+  const leadLimitMessage =
+    "Este agente atingiu o limite de leads. Edite o agente e aumente o limite para continuar.";
+
   async function command(
     runtime: BotRuntime,
     value: "pausado" | "rodando" | "parado",
   ) {
+    if (value === "rodando" && leadLimitReached(runtime.config)) {
+      toast.error(leadLimitMessage);
+      return;
+    }
     try {
       await actions.command.mutateAsync({
         botId: runtime.config.id,
@@ -73,6 +89,10 @@ export default function Bots() {
       toast.error(
         "Limite mensal atingido ou assinatura inativa. Faça upgrade para continuar.",
       );
+      return;
+    }
+    if (leadLimitReached(starting.config)) {
+      toast.error(leadLimitMessage);
       return;
     }
     try {
@@ -188,9 +208,16 @@ export default function Bots() {
             <BotCard
               key={runtime.config.id}
               runtime={runtime}
+              generatedLeads={leadCounts.data ? generatedLeads(runtime.config.id) : undefined}
               busy={busy}
               showOwner={isAdmin}
-              onStart={() => setStarting(runtime)}
+              onStart={() => {
+                if (leadLimitReached(runtime.config)) {
+                  toast.error(leadLimitMessage);
+                  return;
+                }
+                setStarting(runtime);
+              }}
               onCommand={(value) => command(runtime, value)}
               onEdit={() => {
                 setEditing(runtime.config);
@@ -205,6 +232,7 @@ export default function Bots() {
       <BotFormDialog
         open={formOpen}
         current={editing}
+        generatedLeads={generatedLeads(editing?.id)}
         saving={actions.save.isPending || actions.remove.isPending}
         onOpenChange={(open) => {
           setFormOpen(open);

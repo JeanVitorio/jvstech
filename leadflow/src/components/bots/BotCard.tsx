@@ -22,6 +22,8 @@ import type { BotRuntime } from "@/types/bots";
 
 interface BotCardProps {
   runtime: BotRuntime;
+  // Leads já gerados pelo agente; undefined enquanto a contagem não carregou.
+  generatedLeads?: number;
   busy?: boolean;
   showOwner?: boolean;
   onStart: () => void;
@@ -43,6 +45,7 @@ const statusClass = {
 
 export function BotCard({
   runtime,
+  generatedLeads,
   busy,
   showOwner,
   onStart,
@@ -63,6 +66,12 @@ export function BotCard({
     state.total_itens || state.ultima_cidade_total_empresas || 0,
   );
   const progress = cityTotal ? Math.round((cityIndex / cityTotal) * 100) : 0;
+  const maxLeads = config.max_leads;
+  const leadsGenerated = generatedLeads ?? 0;
+  const leadProgress = maxLeads
+    ? Math.min(100, Math.round((leadsGenerated / maxLeads) * 100))
+    : 0;
+  const leadLimitReached = maxLeads != null && leadsGenerated >= maxLeads;
 
   return (
     <Card className="p-5 space-y-5 hover:shadow-lift transition-shadow">
@@ -93,6 +102,25 @@ export function BotCard({
         </div>
         <Progress value={progress} className="h-2" />
       </div>
+
+      {generatedLeads !== undefined && (
+        <div>
+          <div className="flex justify-between text-xs mb-2">
+            <span className="text-muted-foreground">Leads gerados</span>
+            <span className={`font-semibold ${leadLimitReached ? "text-warning" : ""}`}>
+              {maxLeads
+                ? `${leadsGenerated.toLocaleString("pt-BR")} de ${maxLeads.toLocaleString("pt-BR")}`
+                : `${leadsGenerated.toLocaleString("pt-BR")} · sem limite`}
+            </span>
+          </div>
+          {maxLeads != null && <Progress value={leadProgress} className="h-2" />}
+          {leadLimitReached && (
+            <p className="mt-1.5 text-xs text-warning">
+              Limite atingido. Edite o agente para aumentar o limite.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg bg-muted/40 p-3">

@@ -17,6 +17,8 @@ export interface BotConfig {
   phone_filter: BotPresenceFilter;
   headless: boolean;
   max_scrolls: number;
+  // Máximo de leads que o agente pode gerar; null = sem limite.
+  max_leads: number | null;
   excluded_words: string[];
   excluded_words_enabled: boolean;
   included_words: string[];
