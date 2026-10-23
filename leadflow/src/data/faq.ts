@@ -39,7 +39,7 @@ export const faqItems: FaqItem[] = [
     category: "start",
     question: "Por onde eu começo?",
     answer:
-      "São três passos: 1) instale o app no PC pela página Instalação; 2) entre no app com o mesmo e-mail e senha da Web; 3) crie seu primeiro agente em Agentes de Prospecção e clique em Iniciar.",
+      "1) Instale o app no PC pela página Instalação; 2) entre no app com o mesmo e-mail e senha da Web; 3) em Agentes de Prospecção, conecte o WhatsApp de validação pelo QR Code; 4) crie seu primeiro agente e clique em Iniciar.",
   },
   {
     id: "why-app",
@@ -123,7 +123,21 @@ export const faqItems: FaqItem[] = [
     category: "leads",
     question: "Todos os leads têm WhatsApp?",
     answer:
-      "Sim. Antes de salvar, o LeadFlow confere se o número abre conversa no WhatsApp. Empresas sem telefone ou com número que não está no WhatsApp são descartadas e não contam no seu plano.",
+      "Todo lead salvo com telefone tem WhatsApp: antes de salvar, o app confere se o número abre conversa. Números sem WhatsApp são descartados e não contam no seu plano. Se o agente estiver em \"Com ou sem telefone\", empresas sem telefone também são salvas.",
+  },
+  {
+    id: "validation-whatsapp",
+    category: "leads",
+    question: "Como conecto o WhatsApp que confere os números?",
+    answer:
+      "Em Agentes de Prospecção, no quadro \"WhatsApp de validação\", clique em \"Conectar WhatsApp\" no seu PC e leia o QR Code com o celular em Aparelhos conectados. Ele só confere números e nunca envia mensagens. Prefira um número secundário.",
+  },
+  {
+    id: "validation-offline",
+    category: "leads",
+    question: "E se o WhatsApp do PC desconectar?",
+    answer:
+      "Os leads encontrados ficam guardados no PC, aguardando. Assim que você conectar o WhatsApp de novo, o app confere os números e salva os leads aprovados.",
   },
   {
     id: "lead-contact",

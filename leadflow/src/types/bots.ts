@@ -97,6 +97,24 @@ export interface AppInstallationStatus {
   lastSeenAt: string | null;
 }
 
+export type WhatsappSessionStatus =
+  | "disconnected"
+  | "connecting"
+  | "qr_pending"
+  | "ready"
+  | "error";
+
+// Sessão de WhatsApp de um PC; "validation" confere números, "message" envia mensagens.
+export interface WhatsappRunnerSession {
+  id: string;
+  runner_id: string | null;
+  purpose: "validation" | "message";
+  status: WhatsappSessionStatus;
+  connected_number: string | null;
+  qr_code_data_url: string | null;
+  last_error: string | null;
+}
+
 export interface BotRuntime {
   config: BotConfig;
   control: BotControl | null;

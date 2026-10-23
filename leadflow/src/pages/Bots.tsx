@@ -5,23 +5,17 @@ import { toast } from "sonner";
 import { AppRequiredDialog } from "@/components/bots/AppRequiredDialog";
 import { BotCard } from "@/components/bots/BotCard";
 import { BotFormDialog } from "@/components/bots/BotFormDialog";
+import { StartBotDialog } from "@/components/bots/StartBotDialog";
+import { WhatsappValidationPanel } from "@/components/bots/WhatsappValidationPanel";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
 import {
@@ -29,7 +23,6 @@ import {
   useBotActions,
   useBotEvents,
   useBots,
-  useOnlineRunners,
 } from "@/hooks/useBots";
 import type { BotConfig, BotFormData, BotRuntime } from "@/types/bots";
 
@@ -40,7 +33,6 @@ export default function Bots() {
   const { user } = useAuth();
   const { status: billing } = useBilling();
   const bots = useBots();
-  const runners = useOnlineRunners();
   const installation = useAppInstallation();
   const actions = useBotActions();
   const [editing, setEditing] = useState<BotConfig | undefined>();
@@ -49,7 +41,6 @@ export default function Bots() {
   // Em caso de falha na consulta, não bloqueia: o início do agente já exige executor online.
   const appMissing = installation.data?.installed === false;
   const [starting, setStarting] = useState<BotRuntime | null>(null);
-  const [runnerId, setRunnerId] = useState("");
   const [eventsBot, setEventsBot] = useState<BotRuntime | null>(null);
   const events = useBotEvents(eventsBot?.config.id);
   const busy = actions.command.isPending;
@@ -76,7 +67,7 @@ export default function Bots() {
     }
   }
 
-  async function start() {
+  async function start(runnerId: string) {
     if (!starting || !runnerId) return;
     if (!canGenerate) {
       toast.error(
@@ -92,7 +83,6 @@ export default function Bots() {
       });
       toast.success("Inicialização solicitada.");
       setStarting(null);
-      setRunnerId("");
     } catch (error: unknown) {
       toast.error(errorMessage(error, "Não foi possível iniciar o agente."));
     }
@@ -125,7 +115,7 @@ export default function Bots() {
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Agentes de Prospecção"
-        subtitle="Acompanhe e controle suas prospecções em tempo real. Só são salvos leads cujo número abre conversa no WhatsApp."
+        subtitle="Acompanhe e controle suas prospecções em tempo real. Leads com telefone só são salvos quando o número tem WhatsApp."
         actions={
           <Button
             disabled={installation.isLoading}
@@ -153,6 +143,8 @@ export default function Bots() {
           </Button>
         </Card>
       )}
+
+      {installation.data?.installed && <WhatsappValidationPanel />}
 
       {bots.isLoading ? (
         <Card className="p-10 text-center text-muted-foreground">
@@ -224,42 +216,13 @@ export default function Bots() {
 
       <AppRequiredDialog open={appRequiredOpen} onOpenChange={setAppRequiredOpen} />
 
-      <Dialog open={Boolean(starting)} onOpenChange={(open) => !open && setStarting(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Iniciar agente</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Escolha o executor que realizará a prospecção.
-          </p>
-          <Select value={runnerId} onValueChange={setRunnerId}>
-            <SelectTrigger><SelectValue placeholder="Selecione um executor online" /></SelectTrigger>
-            <SelectContent>
-              {(runners.data ?? []).map((runner) => (
-                <SelectItem key={runner.id} value={runner.id}>
-                  {runner.name} · {runner.environment}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {!runners.isLoading && !runners.data?.length && (
-            <p className="text-sm text-warning">
-              Nenhum PC com o app LeadFlow aberto agora. Abra o app no computador que vai
-              executar o agente.{" "}
-              <Link to="/installation" className="font-semibold underline underline-offset-2">
-                Ver instalação
-              </Link>
-            </p>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setStarting(null)}>Cancelar</Button>
-            <Button
-              onClick={start}
-              disabled={!runnerId || busy || !canGenerate}
-            >
-              Iniciar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <StartBotDialog
+        runtime={starting}
+        busy={busy}
+        canGenerate={canGenerate}
+        onClose={() => setStarting(null)}
+        onStart={start}
+      />
 
       <Dialog open={Boolean(eventsBot)} onOpenChange={(open) => !open && setEventsBot(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
