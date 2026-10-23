@@ -3,15 +3,19 @@ import {
   CheckCircle2,
   Download,
   ExternalLink,
-  Monitor,
+  Laptop,
   PackageCheck,
+  Power,
   RefreshCw,
   ShieldCheck,
+  Wifi,
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { AppStatusCard } from "@/components/installation/AppStatusCard";
+import { InstallSteps } from "@/components/installation/InstallSteps";
 
 const appDownloadUrl =
   "https://github.com/JeanVitorio/prospecta-flow-robot/releases/latest/download/LeadFlowSetup.exe";
@@ -20,19 +24,10 @@ const releaseUrl =
 const releaseApiUrl =
   "https://api.github.com/repos/JeanVitorio/prospecta-flow-robot/releases/latest";
 
-const steps = [
-  {
-    title: "Baixe o instalador",
-    description: "Clique no botão de download e aguarde o arquivo LeadFlowSetup.exe.",
-  },
-  {
-    title: "Instale no servidor",
-    description: "Execute o arquivo e avance pelas etapas mantendo a inicialização com o Windows marcada.",
-  },
-  {
-    title: "Configure e use",
-    description: "Abra o aplicativo e faça login normalmente. O banco SaaS e a Web já vêm configurados.",
-  },
+const requirements = [
+  { icon: Laptop, title: "PC com Windows", text: "Windows 10 ou 11, 64 bits." },
+  { icon: Wifi, title: "Internet estável", text: "Os agentes buscam empresas on-line." },
+  { icon: Power, title: "App aberto", text: "Os agentes trabalham enquanto o app estiver aberto." },
 ];
 
 export default function Installation() {
@@ -86,97 +81,108 @@ export default function Installation() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6">
+    <div className="mx-auto max-w-5xl p-4 sm:p-6">
       <PageHeader
         title="Instalação"
-        subtitle="Baixe e instale o JVS LeadFlow no servidor sem configurar Python, Node.js ou bibliotecas."
+        subtitle="Seus agentes trabalham no app LeadFlow para Windows. Instale uma vez no seu PC e acompanhe tudo por aqui."
       />
 
-      <Card className="relative overflow-hidden p-6 sm:p-8 mb-6">
-        <div className="absolute inset-0 gradient-glow opacity-50 pointer-events-none" />
-        <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section className="relative mb-10 overflow-hidden rounded-[2rem] border border-border/70 p-6 shadow-elegant sm:p-10">
+        <div className="pointer-events-none absolute inset-0 gradient-glow opacity-60" />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative grid gap-8 lg:grid-cols-[1fr_19rem] lg:items-center">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground shadow-glow">
-                <Monitor className="w-6 h-6" />
-              </div>
+            <div className="flex items-center gap-4">
+              <span className="grid h-20 w-20 shrink-0 place-items-center rounded-[1.6rem] bg-card shadow-lift ring-1 ring-border/70">
+                <Logo size={56} className="rounded-2xl" />
+              </span>
               <div>
-                <h2 className="font-display text-2xl font-bold">JVS LeadFlow para Windows</h2>
-                <p className="text-sm text-muted-foreground">Instalador completo para Windows 10 e 11 — 64 bits</p>
-                <Badge variant="outline" className="mt-2 border-accent/40 text-accent">
-                  Versão atual: {appVersion}
-                </Badge>
+                <h2 className="font-display text-2xl font-bold sm:text-3xl">LeadFlow para Windows</h2>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="rounded-full border-accent/40 text-accent">
+                    Versão {appVersion}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">Gratuito · cerca de 210 MB</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
-                <PackageCheck className="w-4 h-4 text-success" />
-                Dependências incluídas
+                <PackageCheck className="h-4 w-4 text-success" /> Tudo incluído, sem configurar nada
               </span>
               <span className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-success" />
-                Atualização automática
+                <ShieldCheck className="h-4 w-4 text-success" /> Atualiza sozinho
               </span>
               <span className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-success" />
-                Inicialização com o Windows
+                <CheckCircle2 className="h-4 w-4 text-success" /> Inicia com o Windows
               </span>
+            </div>
+
+            <div className="mt-7">
+              {nativeUpdateAvailable ? (
+                <Button
+                  size="lg"
+                  className="h-12 w-full gap-2 rounded-2xl px-7 font-semibold shadow-glow sm:w-auto"
+                  disabled={updating}
+                  onClick={updateInstalledApp}
+                >
+                  <RefreshCw className={`h-5 w-5 ${updating ? "animate-spin" : ""}`} />
+                  {updating ? "Verificando..." : "Buscar atualização agora"}
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 w-full gap-2 rounded-2xl px-7 font-semibold shadow-glow transition-transform hover:scale-[1.02] sm:w-auto"
+                >
+                  <a href={appDownloadUrl}>
+                    <Download className="h-5 w-5" /> Baixar aplicativo
+                  </a>
+                </Button>
+              )}
+              {updateMessage && (
+                <p className="mt-3 text-sm text-muted-foreground">{updateMessage}</p>
+              )}
             </div>
           </div>
 
-          {nativeUpdateAvailable ? (
-            <Button
-              size="lg"
-              className="gap-2 w-full lg:w-auto"
-              disabled={updating}
-              onClick={updateInstalledApp}
-            >
-              <RefreshCw className={`w-5 h-5 ${updating ? "animate-spin" : ""}`} />
-              {updating ? "Verificando..." : "Buscar atualização agora"}
-            </Button>
-          ) : (
-            <Button asChild size="lg" className="gap-2 w-full lg:w-auto">
-              <a href={appDownloadUrl}>
-                <Download className="w-5 h-5" />
-                Baixar aplicativo
-              </a>
-            </Button>
-          )}
+          <AppStatusCard />
         </div>
-        {updateMessage && (
-          <p className="relative mt-4 text-sm text-muted-foreground">
-            {updateMessage}
-          </p>
-        )}
-      </Card>
+      </section>
 
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
-        {steps.map((step, index) => (
-          <Card key={step.title} className="p-5">
-            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-display font-bold mb-4">
-              {index + 1}
-            </div>
-            <h3 className="font-display font-semibold mb-2">{step.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-          </Card>
+      <div className="mb-6">
+        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-primary">Passo a passo</p>
+        <h2 className="mt-1 font-display text-2xl font-bold">Como instalar em 4 passos</h2>
+      </div>
+      <InstallSteps />
+
+      <div className="mt-10 grid gap-3 sm:grid-cols-3">
+        {requirements.map(({ icon: Icon, title, text }) => (
+          <div key={title} className="premium-panel rounded-3xl p-5">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <Icon className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="mt-3 font-display font-semibold">{title}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+          </div>
         ))}
       </div>
 
-      <Card className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="premium-panel mt-6 flex flex-col justify-between gap-4 rounded-3xl p-5 sm:flex-row sm:items-center">
         <div>
           <h3 className="font-display font-semibold">Já possui uma versão instalada?</h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             O aplicativo verifica novas versões automaticamente a cada quatro horas.
           </p>
         </div>
-        <Button asChild variant="outline" className="gap-2 shrink-0">
+        <Button asChild variant="outline" className="shrink-0 gap-2 rounded-2xl">
           <a href={releaseUrl} target="_blank" rel="noreferrer">
             Ver versão {appVersion}
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="h-4 w-4" />
           </a>
         </Button>
-      </Card>
+      </div>
     </div>
   );
 }

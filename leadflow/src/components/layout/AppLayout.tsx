@@ -2,7 +2,9 @@ import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
+  ArrowRight,
   Bot,
+  CircleHelp,
   CreditCard,
   Database,
   Download,
@@ -27,6 +29,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
 import { useMessageBotPermission } from "@/hooks/useMessageBots";
+import { useAppInstallation } from "@/hooks/useBots";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,18 +40,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean };
+// "tour" identifica o item destacado pelo tour do primeiro acesso.
+type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean; tour?: string };
 
 const nav: NavItem[] = [
   { to: "/", label: "Dashboard de Vendas", icon: LayoutDashboard, end: true },
   { to: "/dashboard-agentes", label: "Dashboard dos Agentes", icon: Bot },
   { to: "/sales", label: "Funil de Vendas", icon: Target },
-  { to: "/agentes", label: "Agentes de Prospecção", icon: Bot },
+  { to: "/agentes", label: "Agentes de Prospecção", icon: Bot, tour: "agentes" },
   { to: "/agentes-whatsapp", label: "Agentes de WhatsApp", icon: MessageCircle },
-  { to: "/leads", label: "Leads", icon: Users },
+  { to: "/leads", label: "Leads", icon: Users, tour: "leads" },
   { to: "/billing", label: "Plano e consumo", icon: CreditCard },
-  { to: "/installation", label: "Instalação", icon: Download },
+  { to: "/installation", label: "Instalação", icon: Download, tour: "installation" },
+  { to: "/duvidas", label: "Dúvidas", icon: CircleHelp, tour: "duvidas" },
 ];
+
+const collaboratorsItem: NavItem = {
+  to: "/collaborators",
+  label: "Colaboradores",
+  icon: UserRoundCog,
+};
 
 export function AppLayout() {
   const { theme, toggle } = useTheme();
@@ -55,6 +67,7 @@ export function AppLayout() {
   const { user, logout } = useAuth();
   const { status: billing } = useBilling();
   const messageBotPermission = useMessageBotPermission();
+  const installation = useAppInstallation();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
@@ -62,13 +75,17 @@ export function AppLayout() {
   const authorizedNav = nav.filter(
     (item) => item.to !== "/agentes-whatsapp" || canUseMessageBots,
   );
+  const installationIndex = authorizedNav.findIndex((item) => item.to === "/installation");
   const visibleNav = canManageTenant
     ? [
-        ...authorizedNav.slice(0, -1),
-        { to: "/collaborators", label: "Colaboradores", icon: UserRoundCog },
-        authorizedNav[authorizedNav.length - 1],
+        ...authorizedNav.slice(0, installationIndex),
+        collaboratorsItem,
+        ...authorizedNav.slice(installationIndex),
       ]
     : authorizedNav;
+  const appStatus = installation.data;
+  const showInstallBanner =
+    appStatus?.installed === false && location.pathname !== "/installation";
 
   const SidebarContent = (
     <>
@@ -83,11 +100,12 @@ export function AppLayout() {
       </div>
 
       <nav className="space-y-1 flex-1">
-        {visibleNav.map(({ to, label, icon: Icon, end }) => (
+        {visibleNav.map(({ to, label, icon: Icon, end, tour }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
+            data-tour={tour}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
               `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
@@ -138,6 +156,27 @@ export function AppLayout() {
                 }}
               />
             </div>
+          </Link>
+        )}
+        {appStatus && (
+          <Link
+            to="/installation"
+            className="flex items-center gap-2 rounded-xl px-2 py-1.5 text-xs text-muted-foreground transition hover:bg-sidebar-accent/60"
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                appStatus.online
+                  ? "bg-success shadow-[0_0_0_3px_hsl(var(--success)/0.18)]"
+                  : appStatus.installed
+                    ? "bg-warning"
+                    : "bg-muted-foreground/50"
+              }`}
+            />
+            {appStatus.online
+              ? "App conectado"
+              : appStatus.installed
+                ? "App instalado, fora do ar"
+                : "App não instalado"}
           </Link>
         )}
         <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground">
@@ -249,10 +288,32 @@ export function AppLayout() {
             Sua assinatura requer atenção. Atualize a forma de pagamento para voltar a gerar leads.
           </Link>
         )}
+        {showInstallBanner && (
+          <Link
+            to="/installation"
+            className="group mx-3 mt-3 flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.07] px-4 py-3 text-sm backdrop-blur-xl transition hover:border-primary/40 hover:bg-primary/[0.11]"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl gradient-primary text-primary-foreground">
+              <Download className="h-4 w-4" />
+            </span>
+            <span className="flex-1">
+              <strong className="font-semibold">Instale o app no seu PC</strong>
+              <span className="hidden text-muted-foreground sm:inline">
+                {" "}
+                para seus agentes começarem a gerar leads.
+              </span>
+            </span>
+            <span className="flex items-center gap-1 font-semibold text-primary">
+              Instalar
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </Link>
+        )}
         <main key={location.pathname} className="flex-1 animate-fade-in p-2 pt-5 sm:p-5 lg:p-8">
           <Outlet />
         </main>
       </div>
+      <OnboardingTour />
     </div>
   );
 }

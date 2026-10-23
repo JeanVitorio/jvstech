@@ -90,6 +90,13 @@ export interface BotRunner {
   heartbeat_at: string;
 }
 
+export interface AppInstallationStatus {
+  installed: boolean;
+  online: boolean;
+  runnerName: string | null;
+  lastSeenAt: string | null;
+}
+
 export interface BotRuntime {
   config: BotConfig;
   control: BotControl | null;

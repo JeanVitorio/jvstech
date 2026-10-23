@@ -17,6 +17,7 @@ export interface AuthUser {
   avatar_url?: string | null;
   position?: string | null;
   phone?: string | null;
+  onboarding_done: boolean;
   role: AppRole;
   is_manager: boolean;
   is_leader: boolean;
@@ -39,6 +40,7 @@ interface AuthState {
     planCode?: PlanCode,
   ) => Promise<{ ok: boolean; error?: string; confirmation?: boolean }>;
   updateWhatsapp: (whatsapp: string) => Promise<{ ok: boolean; error?: string }>;
+  completeOnboarding: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string }>;
   updatePassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -46,6 +48,9 @@ interface AuthState {
 }
 
 const Ctx = createContext<AuthState | null>(null);
+
+// Guardado no user_metadata para o tour aparecer uma única vez, em qualquer dispositivo.
+const ONBOARDING_METADATA_KEY = "onboarding_tour_done_at";
 
 function planDestination(planCode: PlanCode): string {
   return planCode === "free"
@@ -90,6 +95,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     avatar_url: profile?.avatar_url,
     position: profile?.position,
     phone: profile?.phone ?? null,
+    onboarding_done: Boolean(supaUser.user_metadata?.[ONBOARDING_METADATA_KEY]),
     role,
     is_leader: canManageTenant || role === "leader",
     is_manager: canManageTenant || role === "manager" || role === "leader",
@@ -211,6 +217,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   }
 
+  async function completeOnboarding() {
+    if (!user || user.onboarding_done) return;
+    setUser({ ...user, onboarding_done: true });
+    const { error } = await supabase.auth.updateUser({
+      data: { [ONBOARDING_METADATA_KEY]: new Date().toISOString() },
+    });
+    if (error) console.error("[AuthContext] onboarding:", error);
+  }
+
   async function logout() {
     await supabase.auth.signOut();
   }
@@ -229,6 +244,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         updateWhatsapp,
+        completeOnboarding,
         requestPasswordReset,
         updatePassword,
         logout,

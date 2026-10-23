@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Bot, Plus } from "lucide-react";
+import { ArrowRight, Bot, Download, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { AppRequiredDialog } from "@/components/bots/AppRequiredDialog";
 import { BotCard } from "@/components/bots/BotCard";
 import { BotFormDialog } from "@/components/bots/BotFormDialog";
 import { PageHeader } from "@/components/PageHeader";
@@ -24,6 +25,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
 import {
+  useAppInstallation,
   useBotActions,
   useBotEvents,
   useBots,
@@ -39,9 +41,13 @@ export default function Bots() {
   const { status: billing } = useBilling();
   const bots = useBots();
   const runners = useOnlineRunners();
+  const installation = useAppInstallation();
   const actions = useBotActions();
   const [editing, setEditing] = useState<BotConfig | undefined>();
   const [formOpen, setFormOpen] = useState(false);
+  const [appRequiredOpen, setAppRequiredOpen] = useState(false);
+  // Em caso de falha na consulta, não bloqueia: o início do agente já exige executor online.
+  const appMissing = installation.data?.installed === false;
   const [starting, setStarting] = useState<BotRuntime | null>(null);
   const [runnerId, setRunnerId] = useState("");
   const [eventsBot, setEventsBot] = useState<BotRuntime | null>(null);
@@ -122,7 +128,12 @@ export default function Bots() {
         subtitle="Acompanhe e controle suas prospecções em tempo real. Só são salvos leads cujo número abre conversa no WhatsApp."
         actions={
           <Button
+            disabled={installation.isLoading}
             onClick={() => {
+              if (appMissing) {
+                setAppRequiredOpen(true);
+                return;
+              }
               setEditing(undefined);
               setFormOpen(true);
             }}
@@ -150,6 +161,26 @@ export default function Bots() {
       ) : bots.isError ? (
         <Card className="p-10 text-center text-destructive">
           Não foi possível carregar os agentes. Verifique as políticas do Supabase.
+        </Card>
+      ) : !bots.data?.length && appMissing ? (
+        <Card className="relative overflow-hidden p-8 text-center sm:p-12">
+          <div className="pointer-events-none absolute inset-0 gradient-glow opacity-60" />
+          <span className="relative mx-auto grid h-16 w-16 place-items-center rounded-[1.35rem] gradient-primary text-primary-foreground shadow-glow">
+            <Download className="h-7 w-7" aria-hidden="true" />
+          </span>
+          <h2 className="relative mt-5 font-display text-2xl font-bold">
+            Instale o app para criar seus agentes
+          </h2>
+          <p className="relative mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+            Os agentes de prospecção trabalham no app LeadFlow para Windows. Instale no seu PC,
+            entre com a mesma conta e volte aqui para criar o primeiro agente.
+          </p>
+          <Button asChild className="relative mt-6 h-11 gap-2 rounded-2xl px-6 font-semibold shadow-glow">
+            <Link to="/installation">
+              Ver como instalar
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </Card>
       ) : !bots.data?.length ? (
         <Card className="p-10 text-center">
@@ -191,6 +222,8 @@ export default function Bots() {
         onDelete={editing ? remove : undefined}
       />
 
+      <AppRequiredDialog open={appRequiredOpen} onOpenChange={setAppRequiredOpen} />
+
       <Dialog open={Boolean(starting)} onOpenChange={(open) => !open && setStarting(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Iniciar agente</DialogTitle></DialogHeader>
@@ -209,8 +242,11 @@ export default function Bots() {
           </Select>
           {!runners.isLoading && !runners.data?.length && (
             <p className="text-sm text-warning">
-              Nenhum executor online. Inicie `python runner_remoto.py` na máquina
-              que executará o agente.
+              Nenhum PC com o app LeadFlow aberto agora. Abra o app no computador que vai
+              executar o agente.{" "}
+              <Link to="/installation" className="font-semibold underline underline-offset-2">
+                Ver instalação
+              </Link>
             </p>
           )}
           <DialogFooter>

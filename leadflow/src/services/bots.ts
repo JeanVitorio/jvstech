@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  AppInstallationStatus,
   BotConfig,
   BotEvent,
   BotFormData,
@@ -43,6 +44,28 @@ export async function listOnlineRunners(): Promise<BotRunner[]> {
   const { data, error } = await db.rpc("prospecta_list_runners");
   if (error) throw error;
   return (data ?? []) as BotRunner[];
+}
+
+// Mesma janela usada por prospecta_list_runners para considerar o app online.
+const RUNNER_ONLINE_WINDOW_MS = 90_000;
+
+// O app desktop se registra em prospecta_bot_runners (RLS restringe ao tenant atual).
+export async function getAppInstallationStatus(): Promise<AppInstallationStatus> {
+  const { data, error } = await db
+    .from("prospecta_bot_runners")
+    .select("name, status, heartbeat_at")
+    .order("heartbeat_at", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  const runner = (data ?? [])[0] as Pick<BotRunner, "name" | "status" | "heartbeat_at"> | undefined;
+  if (!runner) return { installed: false, online: false, runnerName: null, lastSeenAt: null };
+  const lastSeen = runner.heartbeat_at ? new Date(runner.heartbeat_at).getTime() : 0;
+  return {
+    installed: true,
+    online: runner.status === "online" && Date.now() - lastSeen <= RUNNER_ONLINE_WINDOW_MS,
+    runnerName: runner.name,
+    lastSeenAt: runner.heartbeat_at,
+  };
 }
 
 export async function requestBotCommand(

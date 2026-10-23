@@ -25,6 +25,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/SignupPremium";
 import Collaborators from "./pages/Collaborators";
+import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound.tsx";
 import type { ReactNode } from "react";
 import { useMessageBotPermission } from "@/hooks/useMessageBots";
@@ -112,6 +113,7 @@ const App = () => (
                           }
                         />
                         <Route path="/installation" element={<Installation />} />
+                        <Route path="/duvidas" element={<Faq />} />
                         <Route path="/billing" element={<Billing />} />
                       </Route>
                       <Route path="*" element={<NotFound />} />

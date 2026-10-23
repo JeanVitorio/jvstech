@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteBotConfig,
+  getAppInstallationStatus,
   listBotEvents,
   listBotRuntimes,
   listOnlineRunners,
@@ -38,6 +39,17 @@ export function useOnlineRunners() {
     queryFn: listOnlineRunners,
     staleTime: 30_000,
     refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+    retry: 1,
+  });
+}
+
+export function useAppInstallation() {
+  return useQuery({
+    queryKey: ["bots", "installation"],
+    queryFn: getAppInstallationStatus,
+    staleTime: 10_000,
+    refetchInterval: 20_000,
     refetchIntervalInBackground: false,
     retry: 1,
   });
