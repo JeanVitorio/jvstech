@@ -50,6 +50,10 @@ const LEAD_LIMIT_MAX = 2000;
 const LEAD_LIMIT_STEP = 10;
 const LEAD_LIMIT_DEFAULT = 100;
 
+// Valores fixos de execução, não exibidos ao usuário.
+const FIXED_MAX_SCROLLS = 30;
+const FIXED_HEADLESS = true;
+
 const clampLeadLimit = (value: number) =>
   Math.min(LEAD_LIMIT_MAX, Math.max(LEAD_LIMIT_MIN, Math.round(value) || LEAD_LIMIT_DEFAULT));
 
@@ -66,7 +70,6 @@ export function BotFormDialog({
   const { users } = useApp();
   const isAdmin = user?.role === "leader";
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [ownerId, setOwnerId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [niche, setNiche] = useState("");
@@ -85,15 +88,12 @@ export function BotFormDialog({
   const [includedEnabled, setIncludedEnabled] = useState(true);
   const [excludedEnabled, setExcludedEnabled] = useState(true);
   const [ticket, setTicket] = useState(0);
-  const [maxScrolls, setMaxScrolls] = useState(10);
   const [maxLeadsEnabled, setMaxLeadsEnabled] = useState(true);
   const [maxLeads, setMaxLeads] = useState(LEAD_LIMIT_DEFAULT);
-  const [headless, setHeadless] = useState(true);
 
   useEffect(() => {
     if (!open) return;
     setName(current?.name ?? "");
-    setSlug(current?.slug ?? "");
     setOwnerId(current?.lead_owner_id ?? user?.id ?? "");
     setSearchTerm(current?.search_term ?? "");
     setNiche(current?.niche ?? "");
@@ -110,11 +110,9 @@ export function BotFormDialog({
     setIncludedEnabled(current?.included_words_enabled ?? true);
     setExcludedEnabled(current?.excluded_words_enabled ?? true);
     setTicket(Number(current?.estimated_ticket ?? 0));
-    setMaxScrolls(current?.max_scrolls ?? 10);
     // Agente novo começa limitado; agente existente sem limite continua sem limite.
     setMaxLeadsEnabled(current ? current.max_leads != null : true);
     setMaxLeads(clampLeadLimit(current?.max_leads ?? LEAD_LIMIT_DEFAULT));
-    setHeadless(current?.headless ?? true);
   }, [current, open, user?.id]);
 
   const selectedOwner = users.find((item) => item.id === ownerId);
@@ -132,7 +130,8 @@ export function BotFormDialog({
     }
     onSave({
       name: name.trim(),
-      slug: slug.trim() || slugify(name),
+      // O slug identifica as pastas do agente no app; na edição ele é mantido.
+      slug: current?.slug || slugify(name),
       lead_owner_id: ownerId,
       owner_email: selectedOwner?.email || user?.email || "",
       search_term: searchTerm.trim(),
@@ -144,8 +143,8 @@ export function BotFormDialog({
       estimated_ticket: Math.max(0, ticket),
       website_filter: websiteFilter,
       phone_filter: phoneFilter,
-      headless,
-      max_scrolls: Math.max(1, maxScrolls),
+      headless: FIXED_HEADLESS,
+      max_scrolls: FIXED_MAX_SCROLLS,
       max_leads: maxLeadsEnabled ? clampLeadLimit(maxLeads) : null,
       excluded_words: lines(excluded),
       excluded_words_enabled: excludedEnabled,
@@ -162,17 +161,9 @@ export function BotFormDialog({
         </DialogHeader>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div>
+          <div className="sm:col-span-2">
             <Label>Nome</Label>
             <Input value={name} onChange={(event) => setName(event.target.value)} />
-          </div>
-          <div>
-            <Label>Slug</Label>
-            <Input
-              value={slug}
-              onChange={(event) => setSlug(event.target.value)}
-              placeholder="Gerado automaticamente"
-            />
           </div>
           <div className="sm:col-span-2">
             <Label>Responsável</Label>
@@ -225,10 +216,11 @@ export function BotFormDialog({
           </div>
           <div>
             <div className="flex items-center justify-between gap-3">
-              <Label>Mínimo de avaliações</Label>
+              <Label>Mínimo de avaliações no Google</Label>
               <Switch
                 checked={minReviewsEnabled}
                 onCheckedChange={setMinReviewsEnabled}
+                aria-label="Filtrar pelo mínimo de avaliações no Google"
               />
             </div>
             <Input
@@ -238,6 +230,9 @@ export function BotFormDialog({
               disabled={!minReviewsEnabled}
               onChange={(event) => setMinReviews(Number(event.target.value))}
             />
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              Quantidade mínima de avaliações da empresa no Google Maps.
+            </p>
           </div>
           <div>
             <Label>Empresas por presença de site</Label>
@@ -278,19 +273,6 @@ export function BotFormDialog({
                   : "Empresas com telefone só são salvas se o número tiver WhatsApp."}
             </p>
           </div>
-          <div>
-            <Label>Máximo de rolagens</Label>
-            <Input
-              type="number"
-              min={1}
-              value={maxScrolls}
-              onChange={(event) => setMaxScrolls(Number(event.target.value))}
-            />
-          </div>
-          <div className="flex items-center gap-3 pt-6">
-            <Switch checked={headless} onCheckedChange={setHeadless} />
-            <Label>Executar navegador em modo headless</Label>
-          </div>
           <div className="sm:col-span-2 rounded-xl border border-border bg-muted/30 p-4">
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="bot-max-leads">Limite de leads do agente</Label>
@@ -323,15 +305,24 @@ export function BotFormDialog({
             </p>
           </div>
           <div className="sm:col-span-2">
-            <Label>Cidades — uma por linha</Label>
-            <Textarea rows={5} value={cities} onChange={(e) => setCities(e.target.value)} />
+            <Label>Cidades da pesquisa</Label>
+            <Textarea
+              rows={5}
+              value={cities}
+              onChange={(e) => setCities(e.target.value)}
+              placeholder={"Curitiba - PR\nLondrina - PR\nMaringá - PR"}
+            />
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              Digite as cidades separando cada uma com Enter, ou cole uma lista com uma cidade por linha.
+            </p>
           </div>
           <div>
             <div className="flex items-center justify-between gap-3">
-              <Label>Palavras incluídas</Label>
+              <Label>Palavras incluídas na pesquisa</Label>
               <Switch
                 checked={includedEnabled}
                 onCheckedChange={setIncludedEnabled}
+                aria-label="Usar palavras incluídas na pesquisa"
               />
             </div>
             <Textarea
@@ -339,14 +330,20 @@ export function BotFormDialog({
               value={included}
               disabled={!includedEnabled}
               onChange={(e) => setIncluded(e.target.value)}
+              placeholder={"concessionária\nseminovos\nveículos"}
             />
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              A empresa só entra na pesquisa se o nome ou a categoria no Google tiver uma destas
+              palavras. Separe cada palavra com Enter, ou cole uma lista com uma palavra por linha.
+            </p>
           </div>
           <div>
             <div className="flex items-center justify-between gap-3">
-              <Label>Palavras excluídas</Label>
+              <Label>Palavras excluídas da pesquisa</Label>
               <Switch
                 checked={excludedEnabled}
                 onCheckedChange={setExcludedEnabled}
+                aria-label="Usar palavras excluídas da pesquisa"
               />
             </div>
             <Textarea
@@ -354,7 +351,12 @@ export function BotFormDialog({
               value={excluded}
               disabled={!excludedEnabled}
               onChange={(e) => setExcluded(e.target.value)}
+              placeholder={"oficina\nlava-jato\nautopeças"}
             />
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              Empresas com qualquer destas palavras no nome ou na categoria do Google ficam de fora.
+              Separe cada palavra com Enter, ou cole uma lista com uma palavra por linha.
+            </p>
           </div>
         </div>
 
