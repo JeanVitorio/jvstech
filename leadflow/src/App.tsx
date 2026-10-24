@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AppStoreProvider } from "@/store/AppStore";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { WhatsappRequiredDialog } from "@/components/auth/WhatsappRequiredDialog";
+import { TermsRequiredDialog } from "@/components/auth/TermsRequiredDialog";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { BillingProvider } from "@/context/BillingContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
@@ -36,10 +37,11 @@ function Protected({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
   if (!ready) return null;
   if (!user) return <Navigate to="/login" replace />;
+  // Um aviso por vez: primeiro o aceite dos termos, depois o WhatsApp.
   return (
     <>
       {children}
-      <WhatsappRequiredDialog />
+      {user.terms_accepted ? <WhatsappRequiredDialog /> : <TermsRequiredDialog />}
     </>
   );
 }

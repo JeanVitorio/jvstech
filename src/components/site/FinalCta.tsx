@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import matilha from "@/assets/caminhando_com_os_lobos_vermelho_e_branco_ao_lado.mp4";
 import logo from "@/assets/logo-jvs-wolf.webp";
 import { useVideoVisibility } from "@/hooks/use-video-visibility";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
@@ -96,70 +97,7 @@ export function FinalCta() {
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,var(--background)_0%,transparent_22%,transparent_62%,var(--background)_97%)]" />
       </div>
 
-      <footer className="relative z-10 mx-auto -mt-16 max-w-6xl px-6 pb-12">
-        <div className="grid gap-10 border-t border-border pt-10 md:grid-cols-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <img src={logo} alt="" className="h-8 w-8 object-contain" />
-              <p className="font-display text-base font-semibold">
-                JVS <span className="text-brand">LeadFlow</span>
-              </p>
-            </div>
-            <p className="mt-3 max-w-xs text-xs leading-relaxed text-muted-foreground">
-              Prospecção automatizada, gestão de leads e funil de vendas em um único sistema.
-            </p>
-          </div>
-          <div>
-            <p className="label-xs text-muted-foreground">Navegação</p>
-            <ul className="mt-4 space-y-2 text-xs text-foreground/75">
-              <li>
-                <a className="hover:text-primary" href="#servicos">
-                  Recursos
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-primary" href="#metodo">
-                  Como funciona
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-primary" href="#resultados">
-                  Benefícios
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-primary" href="#planos">
-                  Planos
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-primary" href="#faq">
-                  FAQ
-                </a>
-              </li>
-              <li>
-                <a className="hover:text-primary" href="/LeadFlow/login">
-                  Login
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="label-xs text-muted-foreground">Contacto</p>
-            <ul className="mt-4 space-y-2 text-xs text-foreground/75">
-              <li>
-                <a className="hover:text-primary" href="https://wa.me/5546991163405">
-                  WhatsApp · (46) 99116-3405
-                </a>
-              </li>
-              <li>Atendimento online · Brasil</li>
-            </ul>
-          </div>
-        </div>
-        <p className="mt-10 text-[0.65rem] text-muted-foreground">
-          © 2026 JVS Tech · Todos os direitos reservados.
-        </p>
-      </footer>
+      <SiteFooter className="-mt-16" />
     </section>
   );
 }

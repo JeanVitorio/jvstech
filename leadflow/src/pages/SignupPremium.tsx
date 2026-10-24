@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import type { PlanCode } from "@/types/billing";
 import { formatBrazilianPhoneInput, isValidBrazilianWhatsapp } from "@/lib/whatsapp";
+import { LEGAL_URLS } from "@/lib/legal";
+import { TermsConsentField } from "@/components/auth/TermsConsentField";
 
 const planDetails: Record<PlanCode, { name: string; price: string }> = {
   free: { name: "LeadFlow Free", price: "50 leads por mês" },
@@ -33,6 +35,7 @@ export default function SignupPremium() {
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [password, setPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -54,6 +57,10 @@ export default function SignupPremium() {
     }
     if (password.length < 8) {
       setError("A senha deve ter ao menos 8 caracteres.");
+      return;
+    }
+    if (!termsAccepted) {
+      setError("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.");
       return;
     }
     setBusy(true);
@@ -138,8 +145,12 @@ export default function SignupPremium() {
             }}
             placeholder="(11) 99999-9999"
             className={inputClass}
+            aria-describedby="signup-whatsapp-help"
             required
           />
+          <p id="signup-whatsapp-help" className="text-xs leading-relaxed text-white/55">
+            Usado apenas para falar com você sobre sua conta, suporte e avisos importantes.
+          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -175,6 +186,16 @@ export default function SignupPremium() {
           </div>
         </div>
 
+        <TermsConsentField
+          id="signup-terms"
+          checked={termsAccepted}
+          onCheckedChange={(value) => {
+            setTermsAccepted(value);
+            setError(null);
+          }}
+          className="text-white/75"
+        />
+
         {error && (
           <p className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-red-300">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -209,8 +230,17 @@ export default function SignupPremium() {
           Entrar
         </Link>
       </p>
-      <p className="mt-4 text-center text-[0.68rem] leading-relaxed text-white/25">
-        Ao continuar, você concorda com o processamento seguro dos dados da sua conta.
+      <p className="mt-4 text-center text-xs leading-relaxed text-white/55">
+        Planos pagos podem ser cancelados a qualquer momento. Veja a{" "}
+        <a
+          href={LEGAL_URLS.refund}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-primary underline underline-offset-2"
+        >
+          Política de Reembolso
+        </a>
+        .
       </p>
     </AuthShell>
   );

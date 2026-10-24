@@ -3,6 +3,7 @@ import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabase } from "@/integrations
 import type { Session, User as SupaUser } from "@supabase/supabase-js";
 import type { PlanCode } from "@/types/billing";
 import { isValidBrazilianWhatsapp, normalizeBrazilianPhone } from "@/lib/whatsapp";
+import { TERMS_VERSION } from "@/lib/legal";
 
 // O schema SaaS será incluído nos tipos gerados após a migration remota.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,6 +19,7 @@ export interface AuthUser {
   position?: string | null;
   phone?: string | null;
   onboarding_done: boolean;
+  terms_accepted: boolean;
   role: AppRole;
   is_manager: boolean;
   is_leader: boolean;
@@ -40,6 +42,7 @@ interface AuthState {
     planCode?: PlanCode,
   ) => Promise<{ ok: boolean; error?: string; confirmation?: boolean }>;
   updateWhatsapp: (whatsapp: string) => Promise<{ ok: boolean; error?: string }>;
+  acceptTerms: () => Promise<{ ok: boolean; error?: string }>;
   completeOnboarding: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string }>;
   updatePassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
@@ -58,16 +61,45 @@ function planDestination(planCode: PlanCode): string {
     : `/LeadFlow/billing?plan=${encodeURIComponent(planCode)}&onboarding=1`;
 }
 
+async function registerTermsAcceptance() {
+  return db.rpc("prospecta_accept_terms", {
+    p_version: TERMS_VERSION,
+    p_user_agent: navigator.userAgent,
+  });
+}
+
+// Verifica o aceite da versão vigente. Quem aceitou no cadastro é registrado aqui
+// automaticamente. Falha de leitura não bloqueia o acesso.
+async function loadTermsAccepted(supaUser: SupaUser): Promise<boolean> {
+  const { data, error } = await db
+    .from("prospecta_terms_acceptances")
+    .select("terms_version")
+    .eq("user_id", supaUser.id)
+    .eq("terms_version", TERMS_VERSION)
+    .maybeSingle();
+  if (error) {
+    console.error("[AuthContext] terms acceptance query error:", error);
+    return true;
+  }
+  if (data) return true;
+  if (supaUser.user_metadata?.terms_version !== TERMS_VERSION) return false;
+  const { error: acceptError } = await registerTermsAcceptance();
+  if (acceptError) console.error("[AuthContext] signup terms acceptance:", acceptError);
+  return !acceptError;
+}
+
 async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
-  const [{ data: profile }, { data: roles, error: rolesError }, tenantResult] = await Promise.all([
-    db
-      .from("profiles")
-      .select("name, avatar_url, position, phone, active_tenant_id")
-      .eq("id", supaUser.id)
-      .maybeSingle(),
-    db.from("user_roles").select("role").eq("user_id", supaUser.id),
-    db.rpc("current_tenant_id"),
-  ]);
+  const [{ data: profile }, { data: roles, error: rolesError }, tenantResult, termsAccepted] =
+    await Promise.all([
+      db
+        .from("profiles")
+        .select("name, avatar_url, position, phone, active_tenant_id")
+        .eq("id", supaUser.id)
+        .maybeSingle(),
+      db.from("user_roles").select("role").eq("user_id", supaUser.id),
+      db.rpc("current_tenant_id"),
+      loadTermsAccepted(supaUser),
+    ]);
   if (rolesError) console.error("[AuthContext] user_roles query error:", rolesError);
   const roleList = (roles ?? []).map((roleRow) => roleRow.role as AppRole);
   const role: AppRole = roleList.includes("leader")
@@ -96,6 +128,7 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
     position: profile?.position,
     phone: profile?.phone ?? null,
     onboarding_done: Boolean(supaUser.user_metadata?.[ONBOARDING_METADATA_KEY]),
+    terms_accepted: termsAccepted,
     role,
     is_leader: canManageTenant || role === "leader",
     is_manager: canManageTenant || role === "manager" || role === "leader",
@@ -180,6 +213,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: name.trim(),
           company_name: companyName.trim(),
           whatsapp: normalizeBrazilianPhone(whatsapp),
+          // Aceite marcado no cadastro; vira registro no banco no primeiro acesso.
+          terms_version: TERMS_VERSION,
         },
         emailRedirectTo: `${window.location.origin}${planDestination(planCode)}`,
       },
@@ -217,6 +252,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   }
 
+  async function acceptTerms() {
+    if (!user) return { ok: false, error: "Sessão expirada. Entre novamente." };
+    const { error } = await registerTermsAcceptance();
+    if (error) return { ok: false, error: "Não foi possível registrar o aceite. Tente novamente." };
+    setUser({ ...user, terms_accepted: true });
+    return { ok: true };
+  }
+
   async function completeOnboarding() {
     if (!user || user.onboarding_done) return;
     setUser({ ...user, onboarding_done: true });
@@ -244,6 +287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         updateWhatsapp,
+        acceptTerms,
         completeOnboarding,
         requestPasswordReset,
         updatePassword,

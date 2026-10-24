@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Check, ShieldCheck, Sparkles } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { LEGAL_URLS } from "@/lib/legal";
 
 interface AuthShellProps {
   eyebrow: string;
@@ -13,6 +14,13 @@ const benefits = [
   "Encontre empresas e contatos em poucos cliques",
   "Organize leads, equipe e funil no mesmo painel",
   "Comece com 50 leads mensais sem cartão",
+];
+
+const legalLinks = [
+  { href: LEGAL_URLS.terms, label: "Termos de Uso" },
+  { href: LEGAL_URLS.privacy, label: "Privacidade" },
+  { href: LEGAL_URLS.refund, label: "Reembolso" },
+  { href: LEGAL_URLS.cookies, label: "Cookies" },
 ];
 
 export function AuthShell({ eyebrow, title, description, children }: AuthShellProps) {
@@ -82,6 +90,16 @@ export function AuthShell({ eyebrow, title, description, children }: AuthShellPr
               <p className="mt-3 text-sm leading-relaxed text-white/50">{description}</p>
               <div className="mt-8">{children}</div>
             </div>
+            <nav
+              aria-label="Documentos legais"
+              className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-white/55"
+            >
+              {legalLinks.map((link) => (
+                <a key={link.href} href={link.href} className="hover:text-primary">
+                  {link.label}
+                </a>
+              ))}
+            </nav>
           </div>
         </section>
       </div>

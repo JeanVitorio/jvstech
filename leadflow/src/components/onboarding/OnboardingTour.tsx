@@ -64,7 +64,9 @@ export function OnboardingTour() {
   const [cardHeight, setCardHeight] = useState(240);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const active = Boolean(user && !user.onboarding_done && isValidBrazilianWhatsapp(user.phone));
+  const active = Boolean(
+    user && !user.onboarding_done && user.terms_accepted && isValidBrazilianWhatsapp(user.phone),
+  );
   const step = tourSteps[index];
   const isLast = index === tourSteps.length - 1;
   const installed = installation.data?.installed === true;
