@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader } from "@/components/PageHeader";
+import { AppLoader } from "@/components/AppLoader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function SalesDashboard() {
   const [stages, setStages] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [period, setPeriod] = useState<Period>({ preset: "month" });
+  const [loading, setLoading] = useState(true);
 
   async function load() {
     let leadQuery = supabase.from("leads").select("*");
@@ -35,7 +37,11 @@ export default function SalesDashboard() {
     if (s.data) setStages(s.data);
     if (e.data) setEvents(e.data);
   }
-  useEffect(() => { load(); }, [user?.id, user?.role]);
+  // O loading aparece só na abertura; as atualizações em tempo real recarregam em silêncio.
+  useEffect(() => {
+    setLoading(true);
+    load().finally(() => setLoading(false));
+  }, [user?.id, user?.role]);
   useEffect(() => {
     const ch = supabase
       .channel("sales-dashboard-realtime")
@@ -71,6 +77,12 @@ export default function SalesDashboard() {
     <div className="p-4 max-w-7xl mx-auto">
       <PageHeader title="Comercial" subtitle={user?.role === "leader" ? "Visão geral de todo o comercial." : "Visão geral do seu funil de vendas."} actions={<PeriodFilter value={period} onChange={setPeriod} />} />
 
+      {loading ? (
+        <Card>
+          <AppLoader variant="inline" label="Carregando painel" />
+        </Card>
+      ) : (
+      <>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <Card className="p-5"><div className="text-xs text-muted-foreground flex items-center gap-1"><Target className="w-3 h-3" /> Leads no funil</div><p className="font-display text-2xl font-bold mt-2">{openLeads.length}</p></Card>
         <Card className="p-5"><div className="text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Pipeline</div><p className="font-display text-2xl font-bold mt-2 text-primary">{BRL(pipelineValue)}</p></Card>
@@ -142,6 +154,8 @@ export default function SalesDashboard() {
           })}
         </div>
       </Card>
+      </>
+      )}
     </div>
   );
 }

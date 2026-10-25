@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { AppLoader } from "@/components/AppLoader";
 
 type DBNotification = {
   id: string; title: string; body: string | null; type: string;
@@ -29,17 +30,23 @@ const tone: Record<string, string> = {
 export function NotificationsBell() {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<DBNotification[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.id) return;
     let cancelled = false;
+    setLoading(true);
     supabase
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50)
-      .then(({ data }) => { if (!cancelled && data) setNotifications(data as any); });
+      .then(({ data }) => {
+        if (cancelled) return;
+        if (data) setNotifications(data as any);
+        setLoading(false);
+      });
 
     const ch = supabase
       .channel(`notif-${user.id}`)
@@ -96,7 +103,9 @@ export function NotificationsBell() {
           </div>
         </div>
         <div className="max-h-[420px] overflow-y-auto">
-          {notifications.length === 0 ? (
+          {loading ? (
+            <AppLoader variant="compact" label="Carregando" />
+          ) : notifications.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-10">Nenhuma notificação ainda.</p>
           ) : (
             notifications.map(n => {

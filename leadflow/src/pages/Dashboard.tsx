@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AppLoader } from "@/components/AppLoader";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/context/AuthContext";
 import { useBots } from "@/hooks/useBots";
@@ -101,6 +102,12 @@ export default function Dashboard() {
         </div>
       </Card>
 
+      {bots.isLoading ? (
+        <Card>
+          <AppLoader variant="inline" label="Carregando agentes" />
+        </Card>
+      ) : (
+      <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Metric icon={Bot} label="Agentes disponíveis" value={stats.total} />
         <Metric icon={Play} label="Em execução" value={stats.running} tone="success" />
@@ -110,7 +117,7 @@ export default function Dashboard() {
           value={stats.attention}
           tone={stats.attention ? "danger" : "muted"}
         />
-        <Metric icon={Users} label="Leads no funil" value={leads.data ?? 0} />
+        <Metric icon={Users} label="Leads no funil" value={leads.isLoading ? "…" : leads.data ?? 0} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -187,12 +194,15 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+            {events.isLoading && <AppLoader variant="compact" label="Carregando eventos" />}
             {!events.isLoading && !events.data?.length && (
               <p className="text-sm text-muted-foreground">Nenhum evento recente.</p>
             )}
           </div>
         </Card>
       </div>
+      </>
+      )}
     </div>
   );
 }
@@ -205,7 +215,7 @@ function Metric({
 }: {
   icon: typeof Bot;
   label: string;
-  value: number;
+  value: number | string;
   tone?: "accent" | "success" | "danger" | "muted";
 }) {
   const colors = {

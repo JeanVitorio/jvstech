@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AppLoader } from "@/components/AppLoader";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
@@ -134,7 +135,7 @@ export default function Billing() {
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-[90px]" />
         <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
         {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando assinatura...</p>
+          <AppLoader variant="inline" label="Carregando assinatura" />
         ) : status ? (
           <div className="relative grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
             <div>

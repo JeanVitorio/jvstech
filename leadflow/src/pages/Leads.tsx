@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useApp } from "@/store/AppStore";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
+import { AppLoader } from "@/components/AppLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -284,7 +285,9 @@ export default function Leads() {
       </Card>
 
       {loading ? (
-        <Card className="p-8 text-center text-muted-foreground">Carregando leads…</Card>
+        <Card>
+          <AppLoader variant="inline" label="Carregando leads" />
+        </Card>
       ) : filteredLeads.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground">
           {leads.length === 0 ? "Nenhum lead criado ainda" : "Nenhum lead encontrado"}

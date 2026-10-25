@@ -7,6 +7,7 @@ import { BotCard } from "@/components/bots/BotCard";
 import { BotFormDialog } from "@/components/bots/BotFormDialog";
 import { StartBotDialog } from "@/components/bots/StartBotDialog";
 import { PageHeader } from "@/components/PageHeader";
+import { AppLoader } from "@/components/AppLoader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -164,8 +165,8 @@ export default function Bots() {
       )}
 
       {bots.isLoading ? (
-        <Card className="p-10 text-center text-muted-foreground">
-          Carregando agentes...
+        <Card>
+          <AppLoader variant="inline" label="Carregando agentes" />
         </Card>
       ) : bots.isError ? (
         <Card className="p-10 text-center text-destructive">
@@ -255,7 +256,7 @@ export default function Bots() {
             <DialogTitle>Eventos — {eventsBot?.config.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
-            {events.isLoading && <p className="text-sm text-muted-foreground">Carregando...</p>}
+            {events.isLoading && <AppLoader variant="compact" label="Carregando eventos" />}
             {(events.data ?? []).map((event) => (
               <div key={event.event_id} className="rounded-lg border border-border p-3">
                 <div className="flex justify-between gap-3">

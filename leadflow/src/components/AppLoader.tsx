@@ -1,9 +1,31 @@
 import logo from "@/assets/loading.svg";
+import { cn } from "@/lib/utils";
 
-// Mesmo loading do index.html (estilos ficam lá), usado enquanto a sessão carrega.
-export function AppLoader() {
+type LoaderVariant = "screen" | "inline" | "compact";
+
+const VARIANT_CLASS: Record<LoaderVariant, string> = {
+  screen: "",
+  inline: "jvs-loader--inline text-muted-foreground",
+  compact: "jvs-loader--inline jvs-loader--compact text-muted-foreground",
+};
+
+// Loading com o lobo JVS (estilos no index.html): "screen" cobre a tela,
+// "inline" e "compact" ficam no lugar dos dados que ainda estão chegando.
+export function AppLoader({
+  variant = "screen",
+  label = "Carregando",
+  className,
+}: {
+  variant?: LoaderVariant;
+  label?: string;
+  className?: string;
+}) {
   return (
-    <div className="jvs-loader" role="status" aria-live="polite">
+    <div
+      className={cn("jvs-loader", VARIANT_CLASS[variant], className)}
+      role="status"
+      aria-live="polite"
+    >
       <div className="jvs-loader__stage">
         <div className="jvs-loader__glow" />
         <div className="jvs-loader__ring" />
@@ -15,7 +37,7 @@ export function AppLoader() {
       <div className="jvs-loader__bar">
         <span />
       </div>
-      <span className="jvs-loader__label">Carregando</span>
+      <span className="jvs-loader__label">{label}</span>
     </div>
   );
 }

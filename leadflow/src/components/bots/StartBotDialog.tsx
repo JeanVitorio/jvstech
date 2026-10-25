@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useOnlineRunners } from "@/hooks/useBots";
+import { AppLoader } from "@/components/AppLoader";
 import type { BotRuntime } from "@/types/bots";
 
 // Escolha do PC que executará o agente.
@@ -66,6 +67,7 @@ export function StartBotDialog({
             ))}
           </SelectContent>
         </Select>
+        {runners.isLoading && <AppLoader variant="compact" label="Procurando PCs" />}
         {!runners.isLoading && !runners.data?.length && (
           <p className="text-sm text-warning">
             Nenhum PC com o app LeadFlow aberto agora. Abra o app no computador que vai

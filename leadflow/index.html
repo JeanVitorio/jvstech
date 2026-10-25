@@ -95,6 +95,31 @@
         text-transform: uppercase;
         animation: jvs-pulse 2.4s ease-in-out infinite;
       }
+      /* Variante dentro das páginas: disco escuro para funcionar nos temas claro e escuro. */
+      .jvs-loader--inline {
+        position: relative;
+        inset: auto;
+        z-index: auto;
+        padding: 40px 16px;
+        gap: 18px;
+        background: none;
+      }
+      .jvs-loader--inline .jvs-loader__stage { width: 96px; }
+      .jvs-loader--inline .jvs-loader__stage::before {
+        content: "";
+        position: absolute;
+        inset: -9%;
+        border-radius: 50%;
+        background: radial-gradient(circle, #1c0e05 0%, #050505 70%);
+        box-shadow: 0 0 0 1px rgb(255 101 0 / 14%);
+      }
+      .jvs-loader--inline .jvs-loader__glow { opacity: 0.8; }
+      .jvs-loader--inline .jvs-loader__label { color: inherit; }
+      .jvs-loader--inline .jvs-loader__bar { background: color-mix(in srgb, currentColor 18%, transparent); }
+      .jvs-loader--compact { padding: 20px 8px; gap: 12px; }
+      .jvs-loader--compact .jvs-loader__stage { width: 52px; }
+      .jvs-loader--compact .jvs-loader__bar { width: 96px; }
+      .jvs-loader--compact .jvs-loader__label { font-size: 10px; }
       @keyframes jvs-glow { 50% { opacity: 0.55; transform: scale(0.92); } }
       @keyframes jvs-spin { to { transform: rotate(360deg); } }
       @keyframes jvs-float { 50% { transform: translateY(-6px) scale(1.02); } }

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 import { useOnlineRunners } from "@/hooks/useBots";
+import { AppLoader } from "@/components/AppLoader";
 import {
   useMessageBotActions,
   useMessageBotOptions,
@@ -161,7 +162,9 @@ export default function MessageBots() {
         }
       />
       {bots.isLoading ? (
-        <Card className="p-10 text-center text-muted-foreground">Carregando agentes...</Card>
+        <Card>
+          <AppLoader variant="inline" label="Carregando agentes" />
+        </Card>
       ) : bots.isError ? (
         <Card className="p-10 text-center text-destructive">
           Não foi possível carregar os agentes. Execute o SQL de instalação.

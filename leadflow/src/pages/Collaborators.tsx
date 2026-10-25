@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
 import { Card } from "@/components/ui/card";
+import { AppLoader } from "@/components/AppLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -184,7 +185,9 @@ export default function Collaborators() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Carregando...</p>
+        <Card>
+          <AppLoader variant="inline" label="Carregando usuários" />
+        </Card>
       ) : profiles.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">
           Nenhum usuário cadastrado ainda. Crie o primeiro com o botão acima.

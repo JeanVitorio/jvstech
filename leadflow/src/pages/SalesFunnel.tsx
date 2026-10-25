@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useApp } from "@/store/AppStore";
 import { PageHeader } from "@/components/PageHeader";
+import { AppLoader } from "@/components/AppLoader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -123,6 +124,7 @@ export default function SalesFunnel() {
   const [stages, setStages] = useState<Stage[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
   const [ownerFilter, setOwnerFilter] = useState("mine");
   const [period, setPeriod] = useState<Period>({ preset: "all" });
   const [search, setSearch] = useState("");
@@ -153,7 +155,11 @@ export default function SalesFunnel() {
     if (l.data) setLeads(l.data as Lead[]);
     if (a.data) setActivities(a.data as Activity[]);
   }
-  useEffect(() => { load(); }, [ownerFilter, user?.id, isLeader]);
+  // O loading aparece na abertura e ao trocar o filtro; as atualizações em tempo real recarregam em silêncio.
+  useEffect(() => {
+    setLoading(true);
+    load().finally(() => setLoading(false));
+  }, [ownerFilter, user?.id, isLeader]);
 
   useEffect(() => {
     const ch = supabase
@@ -435,6 +441,11 @@ export default function SalesFunnel() {
         </div>
       </Card>
 
+      {loading ? (
+        <Card>
+          <AppLoader variant="inline" label="Carregando funil" />
+        </Card>
+      ) : (
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <div className="flex gap-3 overflow-x-auto pb-4 -mx-2 px-2">
           {visibleStages.map(s => (
@@ -454,6 +465,7 @@ export default function SalesFunnel() {
           ))}
         </div>
       </DndContext>
+      )}
 
       <Dialog open={!!stageForm} onOpenChange={(o) => !o && setStageForm(null)}>
         <DialogContent className="max-w-md">
