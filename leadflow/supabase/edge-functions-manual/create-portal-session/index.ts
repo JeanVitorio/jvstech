@@ -36,11 +36,11 @@ async function authorizeTenantManager(request) {
       403
     );
   }
-  const tenantId = membership.tenant_id;
-  const { data: tenant, error: tenantError } = await admin.from("tenants").select("id").eq("id", tenantId).maybeSingle();
+  const { data: tenant, error: tenantError } = await admin.from("tenants").select("id").eq("id", membership.tenant_id).maybeSingle();
   if (tenantError || !tenant) {
     throw new AuthorizationError("Empresa n\xE3o encontrada", 403);
   }
+  const tenantId = membership.tenant_id;
   return {
     user: authData.user,
     tenantId,
@@ -97,6 +97,94 @@ function appUrl(path = "") {
   }
   return `${configured}${path}`;
 }
+async function resolvePlanPriceId(stripe, plan) {
+  const priceId = configuredPriceId(plan.code) || plan.stripe_price_id;
+  if (priceId || !plan.stripe_product_id) return priceId;
+  const product = await stripe.products.retrieve(plan.stripe_product_id, {
+    expand: ["default_price"]
+  });
+  const defaultPrice = typeof product.default_price === "string" ? product.default_price : product.default_price?.id ?? null;
+  if (defaultPrice) return defaultPrice;
+  const prices = await stripe.prices.list({
+    product: plan.stripe_product_id,
+    active: true,
+    type: "recurring",
+    limit: 100
+  });
+  return prices.data.find(
+    (price) => price.currency === "brl" && price.unit_amount === plan.monthly_price_cents && price.recurring?.interval === "month"
+  )?.id ?? null;
+}
+function configuredPriceId(planCode) {
+  const keyByPlan = {
+    basic: "STRIPE_PRICE_BASIC",
+    plus: "STRIPE_PRICE_PLUS",
+    pro: "STRIPE_PRICE_PRO"
+  };
+  const key = keyByPlan[planCode];
+  const value = key ? Deno.env.get(key)?.trim() : null;
+  return value?.startsWith("price_") ? value : null;
+}
+
+// supabase/functions/_shared/portal.ts
+var METADATA_KEY = "leadflow_portal";
+async function leadflowPortalConfigurationId(stripe, admin) {
+  const { data: plans, error } = await admin.from("subscription_plans").select("code, monthly_price_cents, stripe_product_id, stripe_price_id").eq("active", true).neq("code", "free").order("monthly_price_cents");
+  if (error) throw error;
+  const products = [];
+  for (const plan of plans ?? []) {
+    const priceId = await resolvePlanPriceId(stripe, plan);
+    if (plan.stripe_product_id && priceId) {
+      products.push({ product: plan.stripe_product_id, prices: [priceId] });
+    }
+  }
+  const signature = `v1:${products.map((item) => item.prices[0]).join(",")}`;
+  const existing = await stripe.billingPortal.configurations.list({
+    active: true,
+    limit: 100
+  });
+  const found = existing.data.find(
+    (configuration) => configuration.metadata?.[METADATA_KEY] === signature
+  );
+  if (found) return found.id;
+  const created = await stripe.billingPortal.configurations.create({
+    business_profile: {
+      privacy_policy_url: appUrl("/privacidade"),
+      terms_of_service_url: appUrl("/termos")
+    },
+    features: {
+      customer_update: {
+        enabled: true,
+        allowed_updates: ["email", "address", "tax_id"]
+      },
+      invoice_history: { enabled: true },
+      payment_method_update: { enabled: true },
+      subscription_cancel: {
+        enabled: true,
+        mode: "at_period_end",
+        proration_behavior: "none",
+        cancellation_reason: {
+          enabled: true,
+          options: [
+            "too_expensive",
+            "missing_features",
+            "switched_service",
+            "unused",
+            "other"
+          ]
+        }
+      },
+      subscription_update: products.length > 1 ? {
+        enabled: true,
+        default_allowed_updates: ["price"],
+        products,
+        proration_behavior: "create_prorations"
+      } : { enabled: false }
+    },
+    metadata: { [METADATA_KEY]: signature }
+  });
+  return created.id;
+}
 
 // supabase/functions/create-portal-session/index.ts
 Deno.serve(async (request) => {
@@ -108,7 +196,6 @@ Deno.serve(async (request) => {
   }
   try {
     const { tenantId, tenantRole, admin } = await authorizeTenantManager(request);
-    // O portal permite cancelar a assinatura: só quem criou a conta pode abrir.
     if (tenantRole !== "owner") {
       throw new AuthorizationError(
         "Apenas quem criou a conta pode gerenciar a cobran\xE7a",
@@ -123,8 +210,16 @@ Deno.serve(async (request) => {
         409
       );
     }
-    const session = await getStripe().billingPortal.sessions.create({
+    const stripe = getStripe();
+    const configuration = await leadflowPortalConfigurationId(stripe, admin).catch(
+      (configError) => {
+        console.error("Configura\xE7\xE3o do portal indispon\xEDvel:", configError);
+        return void 0;
+      }
+    );
+    const session = await stripe.billingPortal.sessions.create({
       customer: tenant.stripe_customer_id,
+      configuration,
       return_url: appUrl("/LeadFlow/billing")
     });
     return jsonResponse(request, { url: session.url });

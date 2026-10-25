@@ -1,6 +1,6 @@
 import { AuthorizationError, authorizeTenantManager } from "../_shared/auth.ts";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
-import { appUrl, configuredPriceId, getStripe } from "../_shared/stripe.ts";
+import { appUrl, getStripe, resolvePlanPriceId } from "../_shared/stripe.ts";
 
 const paidPlans = new Set(["basic", "plus", "pro"]);
 
@@ -92,31 +92,7 @@ Deno.serve(async (request) => {
       if (error) throw error;
     }
 
-    let priceId = configuredPriceId(planCode) || (plan.stripe_price_id as string | null);
-    if (!priceId && plan.stripe_product_id) {
-      const product = await stripe.products.retrieve(plan.stripe_product_id, {
-        expand: ["default_price"],
-      });
-      priceId =
-        typeof product.default_price === "string"
-          ? product.default_price
-          : (product.default_price?.id ?? null);
-      if (!priceId) {
-        const prices = await stripe.prices.list({
-          product: plan.stripe_product_id,
-          active: true,
-          type: "recurring",
-          limit: 100,
-        });
-        priceId =
-          prices.data.find(
-            (price) =>
-              price.currency === "brl" &&
-              price.unit_amount === plan.monthly_price_cents &&
-              price.recurring?.interval === "month",
-          )?.id ?? null;
-      }
-    }
+    const priceId = await resolvePlanPriceId(stripe, plan);
     if (!priceId) {
       throw new Error(`Preço mensal do plano ${planCode} não configurado`);
     }

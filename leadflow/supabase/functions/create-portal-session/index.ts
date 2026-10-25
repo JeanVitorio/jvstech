@@ -1,6 +1,7 @@
 import { AuthorizationError, authorizeTenantManager } from "../_shared/auth.ts";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { appUrl, getStripe } from "../_shared/stripe.ts";
+import { leadflowPortalConfigurationId } from "../_shared/portal.ts";
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
@@ -32,8 +33,17 @@ Deno.serve(async (request) => {
       );
     }
 
-    const session = await getStripe().billingPortal.sessions.create({
+    const stripe = getStripe();
+    // Se a configuração própria falhar, o portal abre com a configuração padrão do painel.
+    const configuration = await leadflowPortalConfigurationId(stripe, admin).catch(
+      (configError) => {
+        console.error("Configuração do portal indisponível:", configError);
+        return undefined;
+      },
+    );
+    const session = await stripe.billingPortal.sessions.create({
       customer: tenant.stripe_customer_id,
+      configuration,
       return_url: appUrl("/LeadFlow/billing"),
     });
     return jsonResponse(request, { url: session.url });
@@ -42,7 +52,7 @@ Deno.serve(async (request) => {
     const status = error instanceof AuthorizationError
       ? error.status
       : 500;
-    const message = error instanceof Error
+    const message = error instanceof AuthorizationError
       ? error.message
       : "Não foi possível abrir o portal";
     return jsonResponse(request, { error: message }, status);

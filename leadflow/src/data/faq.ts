@@ -151,7 +151,7 @@ export const faqItems: FaqItem[] = [
     category: "billing",
     question: "Como troco de plano ou cancelo?",
     answer:
-      "Para mudar de plano, escolha o novo em Plano e consumo. Para atualizar o cartão, ver faturas ou cancelar, clique em \"Gerenciar cobrança\" na mesma página.",
+      "Em Plano e consumo, quem criou a conta escolhe o novo plano, clica em \"Gerenciar cobrança\" para atualizar o cartão e ver faturas, ou em \"Cancelar assinatura\". O plano segue ativo até o fim do período já pago e depois volta para o Free.",
   },
   {
     id: "password",

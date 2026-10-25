@@ -43,7 +43,7 @@ function RefundPage() {
       <LegalSection title="3. Cancelamento após 7 dias">
         <LegalList
           items={[
-            "Você pode cancelar a qualquer momento pela tela Cobrança, no aplicativo, sem multa.",
+            "Quem criou a conta pode cancelar a qualquer momento em Plano e consumo, no aplicativo, sem multa.",
             "O plano continua ativo até o fim do período já pago, e não haverá novas cobranças.",
             "Não há reembolso proporcional dos dias restantes do mês em curso.",
           ]}
@@ -52,8 +52,8 @@ function RefundPage() {
 
       <LegalSection title="4. Troca de plano">
         <p>
-          Você pode mudar de plano pela tela Cobrança. Os valores da troca são exibidos pela Stripe
-          antes da confirmação.
+          Você pode mudar de plano em Plano e consumo, no aplicativo. Os valores da troca são
+          exibidos pela Stripe antes da confirmação.
         </p>
       </LegalSection>
 

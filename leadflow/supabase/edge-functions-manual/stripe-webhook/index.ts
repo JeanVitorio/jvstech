@@ -91,6 +91,15 @@ Deno.serve(async (request) => {
       }
     );
     if (error) throw error;
+    // Depois das tentativas de cobrança a Stripe pode marcar a assinatura como "unpaid":
+    // ela é encerrada para a conta voltar ao Free pelo evento de exclusão.
+    if (subscription.status === "unpaid") {
+      try {
+        await getStripe().subscriptions.cancel(subscription.id);
+      } catch (cancelError) {
+        console.error("Falha ao encerrar assinatura n\xE3o paga:", cancelError);
+      }
+    }
     return Response.json({ received: true });
   } catch (error) {
     console.error(`Falha ao processar ${event.type}:`, error);

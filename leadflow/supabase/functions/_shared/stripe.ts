@@ -21,6 +21,43 @@ export function appUrl(path = ""): string {
   return `${configured}${path}`;
 }
 
+export interface PlanPriceSource {
+  code: string;
+  monthly_price_cents: number;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+}
+
+// Preço mensal do plano: secret, banco, preço padrão do produto ou preço mensal em BRL.
+export async function resolvePlanPriceId(
+  stripe: Stripe,
+  plan: PlanPriceSource,
+): Promise<string | null> {
+  const priceId = configuredPriceId(plan.code) || plan.stripe_price_id;
+  if (priceId || !plan.stripe_product_id) return priceId;
+
+  const product = await stripe.products.retrieve(plan.stripe_product_id, {
+    expand: ["default_price"],
+  });
+  const defaultPrice = typeof product.default_price === "string"
+    ? product.default_price
+    : (product.default_price?.id ?? null);
+  if (defaultPrice) return defaultPrice;
+
+  const prices = await stripe.prices.list({
+    product: plan.stripe_product_id,
+    active: true,
+    type: "recurring",
+    limit: 100,
+  });
+  return prices.data.find(
+    (price) =>
+      price.currency === "brl" &&
+      price.unit_amount === plan.monthly_price_cents &&
+      price.recurring?.interval === "month",
+  )?.id ?? null;
+}
+
 export function configuredPriceId(planCode: string): string | null {
   const keyByPlan: Record<string, string> = {
     basic: "STRIPE_PRICE_BASIC",
