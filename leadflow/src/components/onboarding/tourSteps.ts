@@ -37,7 +37,7 @@ export const tourSteps: TourStep[] = [
     icon: Bot,
     title: "Depois: crie seus agentes",
     description:
-      "Com o app instalado, conecte aqui o WhatsApp que confere os números (pelo QR Code) e crie seus agentes. Escolha o nicho e as cidades, e eles buscam empresas no Google Maps enquanto o app estiver aberto.",
+      "Com o app instalado, crie aqui seus agentes. Escolha o nicho e as cidades, e eles buscam empresas no Google Maps enquanto o app estiver aberto.",
   },
   {
     id: "leads",
@@ -45,7 +45,7 @@ export const tourSteps: TourStep[] = [
     icon: Users,
     title: "Seus leads chegam aqui",
     description:
-      "Todo lead salvo com telefone tem o WhatsApp conferido. Daqui você já chama o cliente com um clique.",
+      "Os leads encontrados pelos agentes ficam todos aqui. Daqui você já chama o cliente no WhatsApp com um clique.",
   },
   {
     id: "faq",

@@ -135,7 +135,7 @@ export default function Bots() {
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <PageHeader
         title="Agentes de Prospecção"
-        subtitle="Acompanhe e controle suas prospecções em tempo real. Leads com telefone só são salvos quando o número tem WhatsApp."
+        subtitle="Acompanhe e controle suas prospecções em tempo real."
         actions={
           <Button
             disabled={installation.isLoading}

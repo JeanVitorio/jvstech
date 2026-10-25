@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 
 const reasons = [
   { icon: Laptop, text: "Os agentes rodam no app LeadFlow, instalado no seu PC com Windows." },
-  { icon: ShieldCheck, text: "É o app que busca as empresas e confere o WhatsApp de cada lead." },
+  { icon: ShieldCheck, text: "É o app que busca as empresas no Google Maps e salva os leads." },
   { icon: Download, text: "A instalação leva poucos minutos. Depois disso, a criação é liberada." },
 ];
 
