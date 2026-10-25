@@ -22,6 +22,11 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
 import type { PlanCode } from "@/types/billing";
+import {
+  billingPeriodEndLabel,
+  billingStatusLabel,
+  isCancellationScheduled,
+} from "@/lib/billingStatus";
 
 const planPresentation = {
   free: {
@@ -65,6 +70,8 @@ export default function Billing() {
   const [busyPlan, setBusyPlan] = useState<PlanCode | "portal" | null>(null);
   const onboardingStarted = useRef(false);
   const canManage = user?.tenant_role === "owner" || user?.tenant_role === "admin";
+  // Só quem criou a conta (owner) vê a opção de cancelar.
+  const isOwner = user?.tenant_role === "owner";
   const usagePercent = useMemo(() => {
     if (status?.is_unlimited) return 0;
     if (!status?.leads_limit) return 0;
@@ -149,8 +156,15 @@ export default function Billing() {
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <h2 className="font-display text-2xl font-bold">{status.plan_name}</h2>
-                    <Badge variant="outline" className="bg-background/35">
-                      {status.status}
+                    <Badge
+                      variant="outline"
+                      className={
+                        isCancellationScheduled(status)
+                          ? "border-warning/40 bg-warning/10 text-warning"
+                          : "bg-background/35"
+                      }
+                    >
+                      {billingStatusLabel(status)}
                     </Badge>
                   </div>
                 </div>
@@ -170,6 +184,16 @@ export default function Billing() {
                   </>
                 )}
               </p>
+              {isCancellationScheduled(status) && (
+                <p className="mt-4 max-w-md rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
+                  <strong className="font-semibold">
+                    Cancelada, válida até {billingPeriodEndLabel(status) ?? "o fim do período pago"}.
+                  </strong>{" "}
+                  <span className="text-muted-foreground">
+                    Depois disso a conta volta para o plano Free, sem novas cobranças.
+                  </span>
+                </p>
+              )}
               {canManage && status.plan_code !== "free" && (
                 <Button
                   variant="outline"
@@ -180,6 +204,16 @@ export default function Billing() {
                   <CreditCard className="w-4 h-4" />
                   Gerenciar cobrança
                 </Button>
+              )}
+              {isOwner && status.plan_code !== "free" && !isCancellationScheduled(status) && (
+                <button
+                  type="button"
+                  className="mt-3 block text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-destructive disabled:opacity-50"
+                  disabled={busyPlan === "portal"}
+                  onClick={manageSubscription}
+                >
+                  Cancelar assinatura
+                </button>
               )}
             </div>
 
