@@ -6,7 +6,6 @@ import { AppRequiredDialog } from "@/components/bots/AppRequiredDialog";
 import { BotCard } from "@/components/bots/BotCard";
 import { BotFormDialog } from "@/components/bots/BotFormDialog";
 import { StartBotDialog } from "@/components/bots/StartBotDialog";
-import { WhatsappValidationPanel } from "@/components/bots/WhatsappValidationPanel";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -163,8 +162,6 @@ export default function Bots() {
           </Button>
         </Card>
       )}
-
-      {installation.data?.installed && <WhatsappValidationPanel />}
 
       {bots.isLoading ? (
         <Card className="p-10 text-center text-muted-foreground">

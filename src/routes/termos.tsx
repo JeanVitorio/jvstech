@@ -96,9 +96,9 @@ function TermsPage() {
 
       <LegalSection title="8. WhatsApp não oficial">
         <p>
-          A validação de números e os agentes de mensagens usam uma conexão com o WhatsApp Web feita
-          a partir do computador do cliente. Essa integração <strong>não é oficial</strong> e não
-          tem vínculo com a Meta ou com o WhatsApp.
+          Os agentes de mensagens, quando disponíveis no plano, usam uma conexão com o WhatsApp Web
+          feita a partir do computador do cliente. Essa integração <strong>não é oficial</strong> e
+          não tem vínculo com a Meta ou com o WhatsApp.
         </p>
         <LegalList
           items={[

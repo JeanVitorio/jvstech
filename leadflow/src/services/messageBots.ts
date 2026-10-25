@@ -29,7 +29,7 @@ export async function listWhatsAppSessions(): Promise<WhatsAppSession[]> {
     .is("deleted_at", null)
     .order("name");
   if (error) throw error;
-  // Sessões de validação pertencem aos agentes de prospecção, não aos de mensagem.
+  // Sessões antigas de validação (já desativadas) não pertencem aos agentes de mensagem.
   return ((data ?? []) as (WhatsAppSession & { purpose?: string })[]).filter(
     (session) => (session.purpose ?? "message") === "message",
   );

@@ -261,16 +261,16 @@ export function BotFormDialog({
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Com ou sem telefone</SelectItem>
-                <SelectItem value="with">Somente com WhatsApp validado</SelectItem>
+                <SelectItem value="with">Somente com telefone</SelectItem>
                 <SelectItem value="without">Somente sem telefone</SelectItem>
               </SelectContent>
             </Select>
             <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
               {phoneFilter === "without"
-                ? "Salva empresas sem telefone, sem validação no WhatsApp."
+                ? "Só salva empresas que não informam telefone no Google."
                 : phoneFilter === "with"
-                  ? "Só salva empresas cujo número abre conversa no WhatsApp."
-                  : "Empresas com telefone só são salvas se o número tiver WhatsApp."}
+                  ? "Só salva empresas que informam telefone no Google."
+                  : "Salva todas as empresas encontradas, com ou sem telefone."}
             </p>
           </div>
           <div className="sm:col-span-2 rounded-xl border border-border bg-muted/30 p-4">
