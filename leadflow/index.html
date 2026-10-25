@@ -13,10 +13,116 @@
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Estilos do loading embutidos: precisam valer antes do bundle carregar. -->
+    <style>
+      .jvs-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        background: radial-gradient(circle at 50% 45%, #1c0e05 0%, #050505 62%);
+        font-family: "Sora", system-ui, sans-serif;
+      }
+      .jvs-loader__stage {
+        position: relative;
+        width: min(44vw, 200px);
+        aspect-ratio: 1;
+      }
+      .jvs-loader__glow {
+        position: absolute;
+        inset: -28%;
+        border-radius: 50%;
+        background: radial-gradient(circle, transparent 30%, rgb(255 101 0 / 30%) 50%, rgb(255 45 0 / 6%) 60%, transparent 70%);
+        filter: blur(12px);
+        animation: jvs-glow 2.4s ease-in-out infinite;
+      }
+      .jvs-loader__ring {
+        position: absolute;
+        inset: -8%;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent 0 68%, rgb(255 176 0 / 90%) 86%, #ff6500 93%, transparent 100%);
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+        animation: jvs-spin 1.6s linear infinite;
+      }
+      /* "screen" faz o fundo preto da imagem sumir sobre o brilho. */
+      .jvs-loader__logo {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        mix-blend-mode: screen;
+        animation: jvs-float 2.4s ease-in-out infinite;
+      }
+      .jvs-loader__logo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: contrast(1.1) saturate(1.2);
+        transform: scale(1.04);
+      }
+      .jvs-loader__shine {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(115deg, transparent 35%, rgb(255 214 170 / 90%) 50%, transparent 65%);
+        mix-blend-mode: overlay;
+        transform: translateX(-120%);
+        animation: jvs-shine 2.4s ease-in-out infinite;
+      }
+      .jvs-loader__bar {
+        width: 160px;
+        height: 2px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: rgb(255 255 255 / 8%);
+      }
+      .jvs-loader__bar span {
+        display: block;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, #ffb000, #ff6500, #ff2d00);
+        box-shadow: 0 0 12px #ff6500;
+        animation: jvs-bar 1.4s ease-in-out infinite;
+      }
+      .jvs-loader__label {
+        color: rgb(255 255 255 / 55%);
+        font-size: 11px;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        animation: jvs-pulse 2.4s ease-in-out infinite;
+      }
+      @keyframes jvs-glow { 50% { opacity: 0.55; transform: scale(0.92); } }
+      @keyframes jvs-spin { to { transform: rotate(360deg); } }
+      @keyframes jvs-float { 50% { transform: translateY(-6px) scale(1.02); } }
+      @keyframes jvs-shine { 60%, 100% { transform: translateX(120%); } }
+      @keyframes jvs-bar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+      @keyframes jvs-pulse { 50% { opacity: 0.45; } }
+      @media (prefers-reduced-motion: reduce) {
+        .jvs-loader * { animation: none !important; }
+      }
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- O React substitui este loading assim que monta a aplicação. -->
+    <div id="root">
+      <div class="jvs-loader" role="status" aria-live="polite">
+        <div class="jvs-loader__stage">
+          <div class="jvs-loader__glow"></div>
+          <div class="jvs-loader__ring"></div>
+          <div class="jvs-loader__logo">
+            <img src="/src/assets/loading.svg" alt="" width="200" height="200" />
+            <span class="jvs-loader__shine"></span>
+          </div>
+        </div>
+        <div class="jvs-loader__bar"><span></span></div>
+        <span class="jvs-loader__label">Carregando</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

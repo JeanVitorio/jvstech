@@ -30,12 +30,13 @@ import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound.tsx";
 import type { ReactNode } from "react";
 import { useMessageBotPermission } from "@/hooks/useMessageBots";
+import { AppLoader } from "@/components/AppLoader";
 
 const queryClient = new QueryClient();
 
 function Protected({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
-  if (!ready) return null;
+  if (!ready) return <AppLoader />;
   if (!user) return <Navigate to="/login" replace />;
   // Um aviso por vez: primeiro o aceite dos termos, depois o WhatsApp.
   return (
@@ -48,7 +49,7 @@ function Protected({ children }: { children: ReactNode }) {
 
 function TenantManagerOnly({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
-  if (!ready) return null;
+  if (!ready) return <AppLoader />;
   if (!user) return <Navigate to="/login" replace />;
   if (!["owner", "admin"].includes(user.tenant_role ?? "")) {
     return <Navigate to="/" replace />;

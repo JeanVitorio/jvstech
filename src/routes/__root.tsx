@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SitePreloader } from "../components/site/SitePreloader";
 
 function NotFoundComponent() {
   return (
@@ -111,6 +112,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <SitePreloader />
         {children}
         <Scripts />
       </body>
