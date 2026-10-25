@@ -70,8 +70,10 @@ export default function Billing() {
   const [busyPlan, setBusyPlan] = useState<PlanCode | "portal" | null>(null);
   const onboardingStarted = useRef(false);
   const canManage = user?.tenant_role === "owner" || user?.tenant_role === "admin";
-  // Só quem criou a conta (owner) vê a opção de cancelar.
+  // O portal da Stripe (cobrança, troca de plano pago e cancelamento) é só de quem criou a conta.
   const isOwner = user?.tenant_role === "owner";
+  // No Free a contratação é pelo checkout; com plano pago a troca passa pelo portal.
+  const canChoosePlan = status?.plan_code === "free" ? canManage : isOwner;
   const usagePercent = useMemo(() => {
     if (status?.is_unlimited) return 0;
     if (!status?.leads_limit) return 0;
@@ -89,7 +91,7 @@ export default function Billing() {
     const requestedPlan = searchParams.get("plan");
     if (
       loading ||
-      !canManage ||
+      !canChoosePlan ||
       !status?.plan_code ||
       onboardingStarted.current ||
       !["basic", "plus", "pro"].includes(requestedPlan ?? "")
@@ -104,10 +106,10 @@ export default function Billing() {
       toast.error(error instanceof Error ? error.message : "Não foi possível abrir o pagamento.");
       setBusyPlan(null);
     });
-  }, [canManage, checkout, loading, openPortal, searchParams, status?.plan_code]);
+  }, [canChoosePlan, checkout, loading, openPortal, searchParams, status?.plan_code]);
 
   async function choosePlan(code: PlanCode) {
-    if (code === "free" || !canManage) return;
+    if (code === "free" || !canChoosePlan) return;
     setBusyPlan(code);
     try {
       if (status?.plan_code !== "free") {
@@ -194,7 +196,7 @@ export default function Billing() {
                   </span>
                 </p>
               )}
-              {canManage && status.plan_code !== "free" && (
+              {isOwner && status.plan_code !== "free" && (
                 <Button
                   variant="outline"
                   className="mt-5 gap-2 bg-background/30"
@@ -372,7 +374,7 @@ export default function Billing() {
               <Button
                 className="relative mt-7 w-full gap-2"
                 variant={current || plan.code === "free" ? "outline" : "default"}
-                disabled={current || plan.code === "free" || !canManage || busyPlan !== null}
+                disabled={current || plan.code === "free" || !canChoosePlan || busyPlan !== null}
                 onClick={() => choosePlan(plan.code)}
               >
                 {current
@@ -399,9 +401,11 @@ export default function Billing() {
             </p>
           </div>
         </div>
-        {!canManage && (
+        {!loading && !canChoosePlan && (
           <p className="max-w-sm text-xs text-muted-foreground">
-            Apenas o proprietário ou administrador da empresa pode alterar o plano.
+            {status?.plan_code === "free"
+              ? "Apenas o proprietário ou administrador da empresa pode contratar um plano."
+              : "Apenas quem criou a conta pode alterar o plano ou a cobrança."}
           </p>
         )}
       </div>

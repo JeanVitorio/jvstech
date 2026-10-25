@@ -11,7 +11,14 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const { tenantId, admin } = await authorizeTenantManager(request);
+    const { tenantId, tenantRole, admin } = await authorizeTenantManager(request);
+    // O portal permite cancelar a assinatura: só quem criou a conta pode abrir.
+    if (tenantRole !== "owner") {
+      throw new AuthorizationError(
+        "Apenas quem criou a conta pode gerenciar a cobrança",
+        403,
+      );
+    }
     const { data: tenant, error } = await admin
       .from("tenants")
       .select("stripe_customer_id")
