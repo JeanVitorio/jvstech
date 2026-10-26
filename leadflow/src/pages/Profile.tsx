@@ -10,6 +10,7 @@ import { Save, User as UserIcon, Mail, Phone, Cake, MapPin, Sparkles, Briefcase,
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { DeleteAccountCard } from "@/components/account/DeleteAccountCard";
 
 export default function Profile() {
   const { user, refresh } = useAuth();
@@ -191,6 +192,8 @@ export default function Profile() {
             </Button>
           </div>
         </Card>
+
+        <DeleteAccountCard />
       </div>
     </div>
   );

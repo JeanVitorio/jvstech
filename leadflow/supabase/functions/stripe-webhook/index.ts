@@ -71,6 +71,16 @@ Deno.serve(async (request) => {
       throw new Error("Configuração Supabase indisponível");
     }
     const admin = createClient(supabaseUrl, serviceRole);
+    // Conta excluída pelo cliente: o cancelamento da assinatura não tem mais onde ser gravado.
+    const { data: tenant, error: tenantError } = await admin
+      .from("tenants")
+      .select("id")
+      .eq("id", tenantId)
+      .maybeSingle();
+    if (tenantError) throw tenantError;
+    if (!tenant) {
+      return Response.json({ received: true, ignored: true });
+    }
     const { error } = await admin.rpc(
       "prospecta_sync_stripe_subscription",
       {

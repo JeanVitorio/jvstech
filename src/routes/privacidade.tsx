@@ -145,6 +145,7 @@ function PrivacyPage() {
           items={[
             "Dados da conta e dados inseridos por você: enquanto a conta estiver ativa.",
             "Registros de acesso: por no mínimo 6 meses, conforme o Marco Civil da Internet.",
+            "Registros de funcionamento do aplicativo para computador: 15 dias.",
             "Dados de cobrança e fiscais: pelo prazo exigido pela legislação tributária (em geral, 5 anos).",
           ]}
         />
@@ -173,7 +174,12 @@ function PrivacyPage() {
           ]}
         />
         <p>
-          Envie o pedido para {COMPANY.email}. Respondemos em até 15 dias. Você também pode reclamar
+          Para excluir a conta, use a opção “Excluir minha conta” em Meu perfil, no LeadFlow: a
+          exclusão é imediata e apaga os dados da conta (quem criou a conta apaga também os dados
+          da empresa). Os registros fiscais de pagamento ficam com a Stripe pelo prazo legal.
+        </p>
+        <p>
+          Para os demais pedidos, escreva para {COMPANY.email}. Respondemos em até 15 dias. Você também pode reclamar
           à Autoridade Nacional de Proteção de Dados (ANPD).
         </p>
       </LegalSection>
