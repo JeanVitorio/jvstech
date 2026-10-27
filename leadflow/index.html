@@ -15,6 +15,10 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!-- Estilos do loading embutidos: precisam valer antes do bundle carregar. -->
     <style>
+      html, body {
+        margin: 0;
+        background: #050505;
+      }
       .jvs-loader {
         position: fixed;
         inset: 0;
@@ -26,6 +30,12 @@
         gap: 28px;
         background: radial-gradient(circle at 50% 45%, #1c0e05 0%, #050505 62%);
         font-family: "Sora", system-ui, sans-serif;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
+      }
+      .jvs-loader.is-done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
       }
       .jvs-loader__stage {
         position: relative;
@@ -133,21 +143,20 @@
   </head>
 
   <body>
-    <!-- O React substitui este loading assim que monta a aplicação. -->
-    <div id="root">
-      <div class="jvs-loader" role="status" aria-live="polite">
-        <div class="jvs-loader__stage">
-          <div class="jvs-loader__glow"></div>
-          <div class="jvs-loader__ring"></div>
-          <div class="jvs-loader__logo">
-            <img src="/src/assets/loading.svg" alt="" width="200" height="200" />
-            <span class="jvs-loader__shine"></span>
-          </div>
+    <!-- Fora do #root: o React não apaga este loading ao montar o app. -->
+    <div id="jvs-boot" class="jvs-loader" role="status" aria-live="polite">
+      <div class="jvs-loader__stage">
+        <div class="jvs-loader__glow"></div>
+        <div class="jvs-loader__ring"></div>
+        <div class="jvs-loader__logo">
+          <img src="/src/assets/loading.svg" alt="" width="200" height="200" />
+          <span class="jvs-loader__shine"></span>
         </div>
-        <div class="jvs-loader__bar"><span></span></div>
-        <span class="jvs-loader__label">Carregando</span>
       </div>
+      <div class="jvs-loader__bar"><span></span></div>
+      <span class="jvs-loader__label">Carregando</span>
     </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

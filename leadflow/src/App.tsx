@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,31 +13,31 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { BillingProvider } from "@/context/BillingContext";
 import { NotificationsProvider } from "@/context/NotificationsContext";
 import { SearchProvider } from "@/context/SearchContext";
-import Dashboard from "./pages/Dashboard";
-import SalesDashboard from "./pages/SalesDashboard";
-import Bots from "./pages/Bots";
-import MessageBots from "./pages/MessageBots";
+import { useMessageBotPermission } from "@/hooks/useMessageBots";
+import { AppLoader } from "@/components/AppLoader";
 import Login from "./pages/LoginPremium";
-import Profile from "./pages/Profile";
-import SalesFunnel from "./pages/SalesFunnel";
-import Leads from "./pages/Leads";
-import Installation from "./pages/Installation";
-import Billing from "./pages/Billing";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/SignupPremium";
-import Collaborators from "./pages/Collaborators";
-import Faq from "./pages/Faq";
-import NotFound from "./pages/NotFound.tsx";
-import type { ReactNode } from "react";
-import { useMessageBotPermission } from "@/hooks/useMessageBots";
-import { AppLoader } from "@/components/AppLoader";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const SalesDashboard = lazy(() => import("./pages/SalesDashboard"));
+const Bots = lazy(() => import("./pages/Bots"));
+const MessageBots = lazy(() => import("./pages/MessageBots"));
+const Profile = lazy(() => import("./pages/Profile"));
+const SalesFunnel = lazy(() => import("./pages/SalesFunnel"));
+const Leads = lazy(() => import("./pages/Leads"));
+const Installation = lazy(() => import("./pages/Installation"));
+const Billing = lazy(() => import("./pages/Billing"));
+const Collaborators = lazy(() => import("./pages/Collaborators"));
+const Faq = lazy(() => import("./pages/Faq"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
 
 function Protected({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
-  if (!ready) return <AppLoader />;
+  if (!ready) return null;
   if (!user) return <Navigate to="/login" replace />;
   // Um aviso por vez: primeiro o aceite dos termos, depois o WhatsApp.
   return (
@@ -49,7 +50,7 @@ function Protected({ children }: { children: ReactNode }) {
 
 function TenantManagerOnly({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
-  if (!ready) return <AppLoader />;
+  if (!ready) return null;
   if (!user) return <Navigate to="/login" replace />;
   if (!["owner", "admin"].includes(user.tenant_role ?? "")) {
     return <Navigate to="/" replace />;
@@ -76,6 +77,7 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <BrowserRouter basename="/LeadFlow">
+                    <Suspense fallback={<AppLoader />}>
                     <Routes>
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<Signup />} />
@@ -121,6 +123,7 @@ const App = () => (
                       </Route>
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                    </Suspense>
                   </BrowserRouter>
                 </TooltipProvider>
               </SearchProvider>

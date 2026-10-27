@@ -1,5 +1,6 @@
 import logo from "@/assets/logo-jvs-wolf.webp";
 import { COMPANY, LEGAL_LINKS } from "@/components/site/legal/company";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 // Links com "/" na frente para funcionarem também nas páginas jurídicas.
 const navigation = [
@@ -31,9 +32,15 @@ export function SiteFooter({ className = "" }: { className?: string }) {
           <ul className="mt-4 space-y-2 text-xs text-foreground/80">
             {navigation.map((item) => (
               <li key={item.href}>
-                <a className="hover:text-primary" href={item.href}>
-                  {item.label}
-                </a>
+                {item.href.startsWith("/LeadFlow/") ? (
+                  <LeadFlowLink className="hover:text-primary" href={item.href}>
+                    {item.label}
+                  </LeadFlowLink>
+                ) : (
+                  <a className="hover:text-primary" href={item.href}>
+                    {item.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

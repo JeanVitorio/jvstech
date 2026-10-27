@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const steps = [
   {
@@ -136,7 +137,7 @@ export function HowItWorks() {
                   </div>
                 </div>
 
-                <a
+                <LeadFlowLink
                   href="/LeadFlow/signup?plan=free"
                   className="group mt-7 inline-flex items-center gap-2 text-sm font-bold text-primary"
                 >
@@ -145,7 +146,7 @@ export function HowItWorks() {
                     className="h-4 w-4 transition-transform group-hover:translate-x-1"
                     aria-hidden="true"
                   />
-                </a>
+                </LeadFlowLink>
               </div>
             </div>
 
@@ -210,7 +211,7 @@ export function HowItWorks() {
               Comece com 50 leads mensais no plano Free. Não precisa cadastrar cartão.
             </p>
           </div>
-          <a
+          <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
             className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-xs font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.03]"
           >
@@ -219,7 +220,7 @@ export function HowItWorks() {
               className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
               aria-hidden="true"
             />
-          </a>
+          </LeadFlowLink>
         </div>
       </div>
     </section>

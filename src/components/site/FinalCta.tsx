@@ -5,6 +5,7 @@ import matilha from "@/assets/caminhando_com_os_lobos_vermelho_e_branco_ao_lado.
 import logo from "@/assets/logo-jvs-wolf.webp";
 import { useVideoVisibility } from "@/hooks/use-video-visibility";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
@@ -58,12 +59,12 @@ export function FinalCta() {
             mais volume, escolha o plano ideal em poucos cliques.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
+            <LeadFlowLink
               href="/LeadFlow/signup?plan=free"
               className="inline-flex items-center rounded-full bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
             >
               Criar minha conta grátis →
-            </a>
+            </LeadFlowLink>
             <a
               href="https://wa.me/5546991163405?text=Ol%C3%A1%21%20Preciso%20de%20ajuda%20para%20escolher%20um%20plano%20do%20LeadFlow."
               target="_blank"

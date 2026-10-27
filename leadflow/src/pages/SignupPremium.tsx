@@ -41,8 +41,9 @@ export default function SignupPremium() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (!ready) return <AppLoader />;
+  if (!ready) return null;
   if (user) return <Navigate to={destination} replace />;
+  if (busy) return <AppLoader label="Criando conta" />;
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();

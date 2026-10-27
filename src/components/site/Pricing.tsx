@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, Check, Crown, Rocket, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import gsap from "gsap";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const tiers = [
   {
@@ -210,7 +211,7 @@ export function Pricing() {
                   ))}
                 </ul>
 
-                <a
+                <LeadFlowLink
                   href={`/LeadFlow/signup?plan=${t.code}`}
                   className={`relative mt-8 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-bold transition-all hover:scale-[1.025] ${
                     t.featured
@@ -225,7 +226,7 @@ export function Pricing() {
                     className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
                     aria-hidden="true"
                   />
-                </a>
+                </LeadFlowLink>
               </article>
             );
           })}
@@ -238,7 +239,7 @@ export function Pricing() {
               O plano Free libera 50 leads mensais. Sem cartão e sem compromisso.
             </p>
           </div>
-          <a
+          <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
             className="group inline-flex shrink-0 items-center gap-2 text-xs font-bold text-primary"
           >
@@ -247,7 +248,7 @@ export function Pricing() {
               className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
               aria-hidden="true"
             />
-          </a>
+          </LeadFlowLink>
         </div>
       </div>
     </section>

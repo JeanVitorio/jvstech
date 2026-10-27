@@ -13,7 +13,22 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    mode === "development" && componentTagger(),
+    {
+      name: "jvs-boot-paint",
+      transformIndexHtml(html) {
+        // O CSS do app não pode bloquear o primeiro desenho: senão a tela
+        // fica preta até o arquivo chegar, e o loading do HTML não aparece.
+        return html.replace(
+          /<link rel="stylesheet" crossorigin href="([^"]+)">/g,
+          `<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel='stylesheet'">` +
+            `<noscript><link rel="stylesheet" href="$1"></noscript>`,
+        );
+      },
+    },
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

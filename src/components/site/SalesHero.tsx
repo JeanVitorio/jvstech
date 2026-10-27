@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import capa from "@/assets/video_da_capa.mp4";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 import { useVideoVisibility } from "@/hooks/use-video-visibility";
 
 const assurances = ["50 leads por mês grátis", "Sem cartão de crédito", "Cancele quando quiser"];
@@ -78,7 +79,7 @@ export function SalesHero() {
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a
+            <LeadFlowLink
               href="/LeadFlow/signup?plan=free"
               className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand px-8 py-4 text-sm font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-all hover:scale-[1.03] hover:shadow-[0_0_80px_-12px_rgb(255_101_0_/_90%)]"
             >
@@ -87,7 +88,7 @@ export function SalesHero() {
                 className="h-4 w-4 transition-transform group-hover:translate-x-1"
                 aria-hidden="true"
               />
-            </a>
+            </LeadFlowLink>
             <a
               href="#planos"
               className="inline-flex min-h-14 items-center justify-center rounded-full border border-border bg-card/55 px-8 py-4 text-sm font-semibold text-foreground/85 backdrop-blur-xl transition-all hover:border-primary/70 hover:bg-primary/[0.06] hover:text-primary"

@@ -171,6 +171,11 @@
   animation: jvs-loader-out 0.6s ease 8s forwards;
 }
 
+/* Clique em Entrar: o overlay precisa ficar até o app abrir. */
+.jvs-loader--hold {
+  animation: none;
+}
+
 .jvs-loader.is-done {
   opacity: 0;
   visibility: hidden;

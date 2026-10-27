@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import logo from "@/assets/logo-jvs-wolf.webp";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const links = [
   { href: "#servicos", label: "Recursos" },
@@ -46,18 +47,18 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <a
+          <LeadFlowLink
             href="/LeadFlow/login"
             className="hidden px-3 py-2 text-xs font-medium text-foreground/80 transition-colors hover:text-primary sm:inline-flex"
           >
             Entrar
-          </a>
-          <a
+          </LeadFlowLink>
+          <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
             className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04] sm:px-5"
           >
             Testar grátis
-          </a>
+          </LeadFlowLink>
         </div>
       </nav>
     </div>

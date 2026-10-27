@@ -1,4 +1,5 @@
 import { ArrowRight, Check, Play } from "lucide-react";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const videoUrl =
   "https://aourdqlbrrzbqguuoawf.supabase.co/storage/v1/object/public/VideoLeadFlow/JVS_LeadFlow_advertisement_script_20261013210229.mp4";
@@ -66,7 +67,7 @@ export function SalesVideo() {
             ))}
           </div>
 
-          <a
+          <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
             className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-xs font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-all hover:scale-[1.03]"
           >
@@ -75,7 +76,7 @@ export function SalesVideo() {
               className="h-4 w-4 transition-transform group-hover:translate-x-1"
               aria-hidden="true"
             />
-          </a>
+          </LeadFlowLink>
         </div>
       </div>
     </section>

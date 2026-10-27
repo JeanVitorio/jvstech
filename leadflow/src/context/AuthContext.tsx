@@ -4,6 +4,7 @@ import type { Session, User as SupaUser } from "@supabase/supabase-js";
 import type { PlanCode } from "@/types/billing";
 import { isValidBrazilianWhatsapp, normalizeBrazilianPhone } from "@/lib/whatsapp";
 import { TERMS_VERSION } from "@/lib/legal";
+import { hideBootLoader } from "@/lib/bootLoader";
 
 // O schema SaaS será incluído nos tipos gerados após a migration remota.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -171,14 +172,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
     });
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      await syncNativeSession(data.session);
-      if (data.session?.user) {
-        setUser(await loadAppUser(data.session.user));
-      }
-      setReady(true);
-    });
+    supabase.auth.getSession()
+      .then(async ({ data }) => {
+        setSession(data.session);
+        await syncNativeSession(data.session);
+        if (data.session?.user) {
+          setUser(await loadAppUser(data.session.user));
+        }
+      })
+      .catch((error) => {
+        console.error("[AuthContext] sessão inicial:", error);
+      })
+      .finally(() => {
+        setReady(true);
+        hideBootLoader();
+      });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -191,8 +199,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   async function login(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     if (error) return { ok: false, error: error.message };
+    if (data.session?.user) {
+      setSession(data.session);
+      setUser(await loadAppUser(data.session.user));
+    }
     return { ok: true };
   }
 

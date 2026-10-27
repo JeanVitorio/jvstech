@@ -1,4 +1,5 @@
 import { CheckCircle2, Clock3, Eye, Users } from "lucide-react";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const benefits = [
   {
@@ -76,12 +77,12 @@ export function ConversionBenefits() {
               Comece gratuitamente e escolha um plano maior quando precisar.
             </p>
           </div>
-          <a
+          <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand px-7 py-3 text-xs font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.03]"
           >
             Testar grátis agora →
-          </a>
+          </LeadFlowLink>
         </div>
       </div>
     </section>

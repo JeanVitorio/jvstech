@@ -26,8 +26,9 @@ export default function LoginPremium() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (!ready) return <AppLoader />;
+  if (!ready) return null;
   if (user) return <Navigate to={destination} replace />;
+  if (busy) return <AppLoader label="Entrando" />;
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const plans = [
   {
@@ -184,12 +185,12 @@ export function Services() {
 
               {/* CTA */}
               {p.cta && (
-                <a
+                <LeadFlowLink
                   href="/LeadFlow/signup?plan=free"
                   className="relative mt-6 inline-flex items-center justify-center rounded-full bg-brand px-5 py-3 text-[0.7rem] font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
                 >
                   {p.cta}
-                </a>
+                </LeadFlowLink>
               )}
 
               {/* Linha inferior animada */}
