@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, ArrowRight, Sparkles } from "lucide-react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { AppLoader } from "@/components/AppLoader";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,7 @@ export default function SignupPremium() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (!ready) return null;
+  if (!ready) return <AppLoader />;
   if (user) return <Navigate to={destination} replace />;
 
   async function submit(event: React.FormEvent) {
@@ -65,12 +66,14 @@ export default function SignupPremium() {
     }
     setBusy(true);
     const result = await signup(name, companyName, email, password, whatsapp, selectedPlan);
-    setBusy(false);
     if (!result.ok) {
+      setBusy(false);
       setError(result.error ?? "Não foi possível criar sua conta.");
       return;
     }
+    // Sem confirmação por e-mail o botão segue ocupado até os dados da conta carregarem.
     if (result.confirmation) {
+      setBusy(false);
       setMessage("Enviamos um link de confirmação para o seu e-mail.");
     }
   }

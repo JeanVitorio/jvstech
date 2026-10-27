@@ -59,7 +59,7 @@ function TenantManagerOnly({ children }: { children: ReactNode }) {
 
 function MessageBotsOnly({ children }: { children: ReactNode }) {
   const permission = useMessageBotPermission();
-  if (permission.isLoading) return null;
+  if (permission.isLoading) return <AppLoader variant="inline" />;
   if (permission.data !== true) return <Navigate to="/" replace />;
   return <>{children}</>;
 }

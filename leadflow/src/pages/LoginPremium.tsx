@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { AppLoader } from "@/components/AppLoader";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ export default function LoginPremium() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (!ready) return null;
+  if (!ready) return <AppLoader />;
   if (user) return <Navigate to={destination} replace />;
 
   async function submit(event: React.FormEvent) {
@@ -33,8 +34,11 @@ export default function LoginPremium() {
     setError(null);
     setBusy(true);
     const result = await login(email, password);
-    setBusy(false);
-    if (!result.ok) setError(result.error ?? "Não foi possível entrar.");
+    // Em caso de sucesso o botão segue em "Entrando..." até os dados da conta carregarem.
+    if (!result.ok) {
+      setBusy(false);
+      setError(result.error ?? "Não foi possível entrar.");
+    }
   }
 
   return (

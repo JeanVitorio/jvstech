@@ -89,17 +89,24 @@ async function loadTermsAccepted(supaUser: SupaUser): Promise<boolean> {
 }
 
 async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
-  const [{ data: profile }, { data: roles, error: rolesError }, tenantResult, termsAccepted] =
-    await Promise.all([
-      db
-        .from("profiles")
-        .select("name, avatar_url, position, phone, active_tenant_id")
-        .eq("id", supaUser.id)
-        .maybeSingle(),
-      db.from("user_roles").select("role").eq("user_id", supaUser.id),
-      db.rpc("current_tenant_id"),
-      loadTermsAccepted(supaUser),
-    ]);
+  // Tudo em paralelo: o papel na empresa sai das associações já carregadas.
+  const [
+    { data: profile },
+    { data: roles, error: rolesError },
+    tenantResult,
+    termsAccepted,
+    { data: memberships },
+  ] = await Promise.all([
+    db
+      .from("profiles")
+      .select("name, avatar_url, position, phone, active_tenant_id")
+      .eq("id", supaUser.id)
+      .maybeSingle(),
+    db.from("user_roles").select("role").eq("user_id", supaUser.id),
+    db.rpc("current_tenant_id"),
+    loadTermsAccepted(supaUser),
+    db.from("tenant_memberships").select("tenant_id, role").eq("user_id", supaUser.id),
+  ]);
   if (rolesError) console.error("[AuthContext] user_roles query error:", rolesError);
   const roleList = (roles ?? []).map((roleRow) => roleRow.role as AppRole);
   const role: AppRole = roleList.includes("leader")
@@ -110,14 +117,9 @@ async function loadAppUser(supaUser: SupaUser): Promise<AuthUser> {
         ? "commercial"
         : "collaborator";
   const tenantId = (tenantResult.data as string | null) ?? null;
-  const { data: membership } = tenantId
-    ? await db
-        .from("tenant_memberships")
-        .select("role")
-        .eq("tenant_id", tenantId)
-        .eq("user_id", supaUser.id)
-        .maybeSingle()
-    : { data: null };
+  const membership = tenantId
+    ? (memberships ?? []).find((item) => item.tenant_id === tenantId)
+    : undefined;
   const tenantRole = (membership?.role as AuthUser["tenant_role"] | undefined) ?? null;
   const canManageTenant = tenantRole === "owner" || tenantRole === "admin";
   return {
