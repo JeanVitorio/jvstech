@@ -59,7 +59,7 @@ export async function listOnlineRunners(): Promise<BotRunner[]> {
 }
 
 // Mesma janela usada por prospecta_list_runners para considerar o app online.
-const RUNNER_ONLINE_WINDOW_MS = 90_000;
+const RUNNER_ONLINE_WINDOW_MS = 150_000;
 
 // O app desktop se registra em prospecta_bot_runners (RLS restringe ao tenant atual).
 export async function getAppInstallationStatus(): Promise<AppInstallationStatus> {

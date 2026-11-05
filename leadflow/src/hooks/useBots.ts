@@ -46,11 +46,13 @@ export function useBotLeadCounts() {
 }
 
 export function useOnlineRunners() {
+  // Sem cache: ao abrir "Iniciar agente" a lista precisa refletir os PCs de agora.
   return useQuery({
     queryKey: ["bots", "runners"],
     queryFn: listOnlineRunners,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchInterval: 20_000,
     refetchIntervalInBackground: false,
     retry: 1,
   });
