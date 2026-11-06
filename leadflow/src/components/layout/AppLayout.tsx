@@ -22,6 +22,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/Logo";
+import { RefreshButton } from "@/components/layout/RefreshButton";
 import { useTheme } from "@/components/ThemeProvider";
 import { useApp } from "@/store/AppStore";
 import { Button } from "@/components/ui/button";
@@ -232,6 +233,7 @@ export function AppLayout() {
                     ? "Comercial"
                     : "Usuário"}
             </Badge>
+            <RefreshButton />
             <Button variant="ghost" size="icon" onClick={toggle} aria-label="Alternar tema">
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
