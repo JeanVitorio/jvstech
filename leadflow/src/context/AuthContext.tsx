@@ -46,6 +46,11 @@ interface AuthState {
   acceptTerms: () => Promise<{ ok: boolean; error?: string }>;
   completeOnboarding: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  confirmPasswordReset: (
+    email: string,
+    code: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   updatePassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -247,7 +252,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
       redirectTo: `${window.location.origin}/LeadFlow/reset-password`,
     });
-    return error ? { ok: false, error: error.message } : { ok: true };
+    if (!error) return { ok: true };
+    const segundos = error.message.match(/after (\d+) seconds/)?.[1];
+    if (segundos) {
+      return {
+        ok: false,
+        error: `Aguarde ${segundos} segundos para pedir outro código.`,
+      };
+    }
+    return { ok: false, error: "Não foi possível enviar o código. Tente novamente." };
+  }
+
+  // O código chega por e-mail e vale por 1 hora. Confirmar o código já conecta
+  // a conta, então a nova senha é salva na sequência.
+  async function confirmPasswordReset(
+    email: string,
+    code: string,
+    password: string,
+  ) {
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim().toLowerCase(),
+      token: code.replace(/\D/g, ""),
+      type: "recovery",
+    });
+    if (error) {
+      return { ok: false, error: "Código inválido ou expirado." };
+    }
+    const { error: erroSenha } = await supabase.auth.updateUser({ password });
+    if (erroSenha) {
+      return { ok: false, error: "Não foi possível salvar a nova senha." };
+    }
+    return { ok: true };
   }
 
   async function updatePassword(password: string) {
@@ -307,6 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         acceptTerms,
         completeOnboarding,
         requestPasswordReset,
+        confirmPasswordReset,
         updatePassword,
         logout,
         refresh,
