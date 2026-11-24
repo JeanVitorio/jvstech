@@ -1,14 +1,25 @@
 import { PixelWorker } from "./PixelWorker";
 
 interface BossDeskProps {
+  nome: string;
   totalLeads: number;
   x: number;
   y: number;
   recebendo: boolean;
+  camisa: string;
+  cabelo: string;
 }
 
-// Mesa do responsável: é para cá que os agentes levam os leads encontrados.
-export function BossDesk({ totalLeads, x, y, recebendo }: BossDeskProps) {
+// Mesa de um responsável: é para cá que os agentes dele levam os leads.
+export function BossDesk({
+  nome,
+  totalLeads,
+  x,
+  y,
+  recebendo,
+  camisa,
+  cabelo,
+}: BossDeskProps) {
   // A pilha cresce com o volume, mas para de crescer para não furar a mesa.
   const camadas = Math.min(6, Math.floor(totalLeads / 150) + (totalLeads > 0 ? 1 : 0));
 
@@ -17,9 +28,9 @@ export function BossDesk({ totalLeads, x, y, recebendo }: BossDeskProps) {
       className="jvs-desk"
       style={{ left: `${x}%`, top: `${y}%`, zIndex: Math.round(y) }}
     >
-      <div className="relative flex flex-col items-center">
+      <div className="relative flex w-[180px] flex-col items-center">
         <div className="relative -mb-6 h-[86px]">
-          <PixelWorker pose={recebendo ? "done" : "idle"} shirt="#ff6500" hair="#2b2118" size={54} />
+          <PixelWorker pose={recebendo ? "done" : "idle"} shirt={camisa} hair={cabelo} size={54} />
         </div>
 
         <svg width="170" height="74" viewBox="0 0 170 74" shapeRendering="crispEdges" aria-hidden="true">
@@ -34,7 +45,7 @@ export function BossDesk({ totalLeads, x, y, recebendo }: BossDeskProps) {
           <path d="M18 24 L33 24 L29 16 L22 16 Z" fill="#ff6500" />
           <ellipse cx="25" cy="40" rx="16" ry="4" fill="rgba(255,176,0,0.18)" />
 
-          {/* pilha de leads entregues */}
+          {/* pilha de leads recebidos */}
           {Array.from({ length: camadas }).map((_, i) => (
             <g key={i}>
               <rect x={118} y={36 - i * 4} width="30" height="4" fill="#f4f1ea" />
@@ -52,12 +63,10 @@ export function BossDesk({ totalLeads, x, y, recebendo }: BossDeskProps) {
           <ellipse cx="85" cy="72" rx="70" ry="5" fill="rgba(0,0,0,0.5)" />
         </svg>
 
-        <div className="-mt-1 rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-            Mesa do responsável
-          </p>
+        <div className="-mt-1 w-full rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-center">
+          <p className="truncate text-[11.5px] font-semibold text-primary">{nome}</p>
           <p className="text-sm font-bold text-white">
-            {totalLeads.toLocaleString("pt-BR")} leads entregues
+            {totalLeads.toLocaleString("pt-BR")} leads recebidos
           </p>
         </div>
       </div>

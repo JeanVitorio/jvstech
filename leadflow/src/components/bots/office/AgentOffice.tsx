@@ -6,6 +6,7 @@ import { Bebedouro, PlacaDaParede, Planta } from "./OfficeProps";
 import { PixelWorker } from "./PixelWorker";
 import { Button } from "@/components/ui/button";
 import { botStatusLabel, botVisualStatus } from "@/lib/bots";
+import { useApp } from "@/store/AppStore";
 import type { BotRuntime } from "@/types/bots";
 import "./office.css";
 
@@ -26,6 +27,9 @@ interface Ponto {
 interface Entrega {
   id: number;
   origem: Ponto;
+  destino: Ponto;
+  // Chave do responsável que vai receber os papéis.
+  responsavel: string;
   camisa: string;
   cabelo: string;
   quantidade: number;
@@ -57,6 +61,19 @@ function corDoAgente(id: string, paleta: string[]) {
   return paleta[soma % paleta.length];
 }
 
+// Agentes sem responsável definido caem no e-mail de quem criou o agente.
+function chaveDoResponsavel(runtime: BotRuntime) {
+  return runtime.config.lead_owner_id || runtime.config.owner_email || "sem-responsavel";
+}
+
+function nomeDoResponsavel(
+  runtime: BotRuntime,
+  usuarios: { id: string; name: string; email: string }[],
+) {
+  const usuario = usuarios.find((item) => item.id === runtime.config.lead_owner_id);
+  return usuario?.name || runtime.config.owner_email || "Sem responsável";
+}
+
 // Distribui as mesas em filas, da frente para o fundo da sala.
 function posicaoDaMesa(indice: number, total: number): Ponto {
   const filas = Math.max(1, Math.ceil(total / POR_FILA));
@@ -78,15 +95,16 @@ export function AgentOffice({
   onSelect,
   onNovoAgente,
 }: AgentOfficeProps) {
+  const { users } = useApp();
   const [entregas, setEntregas] = useState<Entrega[]>([]);
   const [pops, setPops] = useState<Pop[]>([]);
-  const [recebendo, setRecebendo] = useState(false);
+  const [recebendo, setRecebendo] = useState<string[]>([]);
   const contagemAnterior = useRef<Record<string, number> | null>(null);
   const proximoId = useRef(1);
 
   const filas = Math.max(1, Math.ceil(runtimes.length / POR_FILA));
   const alturaSala = ALTURA_POR_FILAS[filas] ?? ALTURA_POR_FILAS[3];
-  const mesaChefe: Ponto = { x: 50, y: ALTURA_MESA_CHEFE[filas] ?? 16 };
+  const alturaChefes = ALTURA_MESA_CHEFE[filas] ?? 16;
 
   const mesas = useMemo(
     () =>
@@ -96,9 +114,41 @@ export function AgentOffice({
         camisa: corDoAgente(runtime.config.id, CAMISAS),
         cabelo: corDoAgente(runtime.config.slug, CABELOS),
         status: botVisualStatus(runtime),
+        responsavel: chaveDoResponsavel(runtime),
       })),
     [runtimes],
   );
+
+  // Uma mesa por responsável que tenha pelo menos um agente, ativo ou não.
+  const responsaveis = useMemo(() => {
+    const porChave = new Map<string, { chave: string; nome: string; leads: number }>();
+    for (const mesa of mesas) {
+      const chave = mesa.responsavel;
+      const atual = porChave.get(chave) ?? {
+        chave,
+        nome: nomeDoResponsavel(mesa.runtime, users),
+        leads: 0,
+      };
+      atual.leads += leadCounts?.[mesa.runtime.config.id] ?? 0;
+      porChave.set(chave, atual);
+    }
+
+    const lista = [...porChave.values()].sort((a, b) =>
+      a.nome.localeCompare(b.nome, "pt-BR"),
+    );
+    return lista.map((item, indice) => ({
+      ...item,
+      posicao: {
+        x: ((indice + 1) * 100) / (lista.length + 1),
+        y: alturaChefes,
+      } as Ponto,
+      camisa: corDoAgente(item.chave, CAMISAS),
+      cabelo: corDoAgente(item.nome, CABELOS),
+    }));
+  }, [mesas, users, leadCounts, alturaChefes]);
+
+  const mesaDoResponsavel = (chave: string) =>
+    responsaveis.find((item) => item.chave === chave) ?? responsaveis[0];
 
   const resumo = useMemo(() => {
     const conta = { trabalhando: 0, parados: 0, concluidos: 0 };
@@ -110,19 +160,17 @@ export function AgentOffice({
     return conta;
   }, [mesas]);
 
-  const totalLeads = useMemo(
-    () => Object.values(leadCounts ?? {}).reduce((soma, valor) => soma + valor, 0),
-    [leadCounts],
-  );
-
   function enviarEntrega(indiceMesa: number, quantidade: number) {
     const mesa = mesas[indiceMesa];
-    if (!mesa) return;
+    const destino = mesa && mesaDoResponsavel(mesa.responsavel);
+    if (!mesa || !destino) return;
     setEntregas((atual) => [
       ...atual,
       {
         id: proximoId.current++,
         origem: mesa.posicao,
+        destino: { x: destino.posicao.x - 14, y: destino.posicao.y + 13 },
+        responsavel: destino.chave,
         camisa: mesa.camisa,
         cabelo: mesa.cabelo,
         quantidade,
@@ -147,12 +195,27 @@ export function AgentOffice({
   }, [leadCounts]);
 
   function aoEntregar(entrega: Entrega) {
-    setRecebendo(true);
-    window.setTimeout(() => setRecebendo(false), 1600);
+    const destino = mesaDoResponsavel(entrega.responsavel);
+    setRecebendo((atual) => [...atual, entrega.responsavel]);
+    window.setTimeout(
+      () =>
+        setRecebendo((atual) => {
+          const copia = [...atual];
+          const posicao = copia.indexOf(entrega.responsavel);
+          if (posicao >= 0) copia.splice(posicao, 1);
+          return copia;
+        }),
+      1600,
+    );
     const id = proximoId.current++;
     setPops((atual) => [
       ...atual,
-      { id, texto: `+${entrega.quantidade} leads`, x: mesaChefe.x + 18, y: mesaChefe.y - 16 },
+      {
+        id,
+        texto: `+${entrega.quantidade} leads`,
+        x: (destino?.posicao.x ?? 50) + 10,
+        y: (destino?.posicao.y ?? 16) - 16,
+      },
     ]);
     window.setTimeout(
       () => setPops((atual) => atual.filter((pop) => pop.id !== id)),
@@ -218,12 +281,18 @@ export function AgentOffice({
         <Planta x={95} y={74} />
         <Bebedouro x={10} y={40} />
 
-        <BossDesk
-          totalLeads={totalLeads}
-          x={mesaChefe.x}
-          y={mesaChefe.y}
-          recebendo={recebendo}
-        />
+        {responsaveis.map((responsavel) => (
+          <BossDesk
+            key={responsavel.chave}
+            nome={responsavel.nome}
+            totalLeads={responsavel.leads}
+            x={responsavel.posicao.x}
+            y={responsavel.posicao.y}
+            recebendo={recebendo.includes(responsavel.chave)}
+            camisa={responsavel.camisa}
+            cabelo={responsavel.cabelo}
+          />
+        ))}
 
         {mesas.map((mesa) => {
           const estado = mesa.runtime.checkpoints.scraper?.state ?? {};
@@ -258,7 +327,7 @@ export function AgentOffice({
         {entregas.map((entrega) => (
           <Entregador
             key={entrega.id}
-            destino={{ x: mesaChefe.x - 14, y: mesaChefe.y + 13 }}
+            destino={entrega.destino}
             entrega={entrega}
             onEntregar={() => aoEntregar(entrega)}
             onFim={() =>
