@@ -21,7 +21,7 @@ with tabelas as (
   where n.nspname = 'public'
     and c.relkind = 'r'
 ),
-politicas_abertas as (
+politicas as (
   select
     p.polrelid::regclass::text as tabela,
     p.polname::text as politica,
@@ -31,15 +31,33 @@ politicas_abertas as (
       when 'w' then 'UPDATE'
       when 'd' then 'DELETE'
       else 'TODOS'
-    end as comando
+    end as comando,
+    pg_get_expr(p.polqual, p.polrelid) as leitura,
+    pg_get_expr(p.polwithcheck, p.polrelid) as gravacao,
+    (
+      select string_agg(r.rolname::text, ', ' order by r.rolname)
+      from pg_roles r
+      where r.oid = any (p.polroles)
+    ) as papeis
   from pg_policy p
   join pg_class c on c.oid = p.polrelid
   join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public'
-    and (
-      coalesce(pg_get_expr(p.polqual, p.polrelid), 'true') = 'true'
-      or coalesce(pg_get_expr(p.polwithcheck, p.polrelid), '') = 'true'
-    )
+),
+-- Aberta de verdade: a condição que existe para aquele comando é "true".
+-- INSERT não tem condição de leitura, então só a de gravação conta.
+politicas_abertas as (
+  select tabela, politica, comando
+  from politicas
+  where (comando = 'INSERT' and coalesce(gravacao, 'true') = 'true')
+     or (comando <> 'INSERT' and coalesce(leitura, 'true') = 'true')
+),
+politicas_anonimas as (
+  select tabela, politica, comando, coalesce(papeis, 'todos') as papeis
+  from politicas
+  where papeis is null
+     or papeis ilike '%anon%'
+     or papeis ilike '%public%'
 ),
 funcoes_inseguras as (
   select p.proname::text as nome
@@ -95,28 +113,40 @@ from (
          'SECURITY DEFINER sem search_path fixo'
   from funcoes_inseguras
 
-  -- 5. Permissões concedidas a visitante não logado
+  -- 5. Permissões de tabela concedidas a visitante não logado.
+  --    Sozinho isso não vaza nada: o RLS ainda vale. Vira risco se um dia
+  --    aparecer política valendo para anon (seção 5b).
   union all
   select 5, row_number() over (order by tabela), '5. Acesso anonimo',
          tabela,
          permissoes
   from acesso_anonimo
 
+  -- 5b. Políticas que valem para visitante não logado: estas sim vazam.
+  union all
+  select 6, row_number() over (order by tabela, politica), '5b. Politica anonima',
+         tabela || ' / ' || politica,
+         'comando ' || comando || ', papeis: ' || papeis
+  from politicas_anonimas
+
   -- 6. Resumo para bater o olho
   union all
-  select 6, 1, '6. Resumo', 'Tabelas publicas',
+  select 7, 1, '6. Resumo', 'Tabelas publicas',
          (select count(*)::text from tabelas)
   union all
-  select 6, 2, '6. Resumo', 'Tabelas sem RLS',
+  select 7, 2, '6. Resumo', 'Tabelas sem RLS',
          (select count(*)::text from tabelas where not rls_ligado)
   union all
-  select 6, 3, '6. Resumo', 'Politicas abertas',
+  select 7, 3, '6. Resumo', 'Politicas abertas',
          (select count(*)::text from politicas_abertas)
   union all
-  select 6, 4, '6. Resumo', 'Funcoes sem search_path',
+  select 7, 4, '6. Resumo', 'Politicas valendo para anonimo',
+         (select count(*)::text from politicas_anonimas)
+  union all
+  select 7, 5, '6. Resumo', 'Funcoes sem search_path',
          (select count(*)::text from funcoes_inseguras)
   union all
-  select 6, 5, '6. Resumo', 'Tabelas com acesso anonimo',
+  select 7, 6, '6. Resumo', 'Tabelas com acesso anonimo',
          (select count(*)::text from acesso_anonimo)
 ) auditoria
 order by ordem, sub;
