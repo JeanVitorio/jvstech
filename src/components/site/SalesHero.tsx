@@ -129,16 +129,6 @@ export function SalesHero() {
               ))}
             </div>
           </div>
-
-          <div className="absolute -bottom-5 -left-3 hidden items-center gap-3 rounded-2xl border border-white/10 bg-[#111]/90 px-4 py-3 shadow-2xl backdrop-blur-xl sm:flex">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/12">
-              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-            </span>
-            <div>
-              <p className="text-[0.62rem] text-foreground/45">Pronto para sua equipe</p>
-              <p className="text-xs font-semibold">Contato enriquecido</p>
-            </div>
-          </div>
         </div>
       </div>
 
