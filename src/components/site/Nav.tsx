@@ -24,9 +24,9 @@ export function Nav() {
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 py-4">
       <nav
-        className={`pointer-events-auto flex w-full max-w-5xl items-center justify-between rounded-full border px-3 py-2 transition-all duration-500 ${
+        className={`pointer-events-auto flex w-full max-w-5xl items-center justify-between border-2 px-3 py-2 transition-colors duration-300 ${
           solid
-            ? "border-border bg-background/80 shadow-[0_10px_40px_-20px_rgb(255_101_0_/_65%)] backdrop-blur-xl"
+            ? "border-white/10 bg-[#0d0d10] shadow-[5px_5px_0_rgb(0_0_0_/_55%)]"
             : "border-transparent bg-transparent"
         }`}
       >
@@ -56,7 +56,7 @@ export function Nav() {
           </LeadFlowLink>
           <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
-            className="rounded-full bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04] sm:px-5"
+            className="pixel-btn bg-brand px-4 py-2 text-xs font-semibold text-primary-foreground sm:px-5"
           >
             Testar grátis
           </LeadFlowLink>

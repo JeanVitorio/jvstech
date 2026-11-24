@@ -148,17 +148,15 @@ export function Pricing() {
             return (
               <article
                 key={t.name}
-                className={`price-card group relative flex h-full flex-col overflow-hidden rounded-[1.75rem] p-6 transition-all duration-500 hover:-translate-y-2 md:p-7 ${
-                  t.featured
-                    ? "border border-primary/65 bg-[linear-gradient(155deg,rgb(255_101_0_/_16%),#121212_38%,#050505_100%)] shadow-[0_30px_100px_-32px_rgb(255_101_0_/_75%)] xl:-my-4 xl:py-11"
-                    : "border border-white/[0.09] bg-[linear-gradient(165deg,rgb(24_24_24_/_94%),rgb(5_5_5_/_97%))] shadow-[0_28px_70px_-45px_rgb(0_0_0_/_95%)] hover:border-primary/45"
+                className={`price-card pixel-panel group relative flex h-full flex-col overflow-hidden p-6 transition-transform duration-200 hover:-translate-y-1 md:p-7 ${
+                  t.featured ? "pixel-panel--brand xl:-my-4 xl:py-11" : "hover:border-primary/45"
                 }`}
               >
                 <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-primary/15 blur-3xl transition-opacity group-hover:opacity-100" />
                 <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-80" />
 
                 {t.featured ? (
-                  <span className="absolute right-5 top-5 rounded-full bg-brand px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.12em] text-primary-foreground shadow-[var(--glow-ice)]">
+                  <span className="absolute right-5 top-5 border-2 border-[#0a0a0a] bg-brand px-3 py-1 text-[0.56rem] font-bold uppercase tracking-[0.12em] text-primary-foreground">
                     melhor escolha
                   </span>
                 ) : null}
@@ -190,7 +188,7 @@ export function Pricing() {
                   </span>
                 </p>
 
-                <div className="relative mt-5 rounded-2xl border border-white/[0.06] bg-white/[0.035] p-4">
+                <div className="relative mt-5 border-2 border-white/[0.08] bg-white/[0.035] p-4">
                   <p className="text-[0.62rem] uppercase tracking-[0.16em] text-foreground/40">
                     Capacidade mensal
                   </p>
@@ -241,7 +239,7 @@ export function Pricing() {
           })}
         </div>
 
-        <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center justify-between gap-5 rounded-3xl border border-primary/25 bg-primary/[0.055] p-6 text-left backdrop-blur-xl sm:flex-row sm:px-8">
+        <div className="pixel-panel pixel-panel--brand mx-auto mt-12 flex max-w-3xl flex-col items-center justify-between gap-5 p-6 text-left sm:flex-row sm:px-8">
           <div>
             <p className="font-display text-lg font-semibold">Ainda quer experimentar primeiro?</p>
             <p className="mt-1 text-xs text-muted-foreground">

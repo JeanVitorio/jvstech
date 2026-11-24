@@ -40,7 +40,7 @@ export function AgentsRoom() {
       <div className="relative mx-auto max-w-7xl px-5 md:px-6">
         <div className="grid items-end gap-8 lg:grid-cols-[1fr_0.72fr]">
           <div>
-            <span className="label-xs inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/[0.08] px-4 py-2 text-primary">
+            <span className="pixel-tag">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               Quem procura enquanto vocês vendem
             </span>
@@ -57,7 +57,7 @@ export function AgentsRoom() {
         </div>
 
         {/* a sala, desenhada igual à do produto */}
-        <div className="mt-12 overflow-hidden rounded-[2rem] border border-white/[0.09] bg-[#0b0b0c] shadow-[0_40px_120px_-50px_rgb(0_0_0_/_95%)] md:mt-16">
+        <div className="pixel-panel mt-12 overflow-hidden md:mt-16">
           <div className="relative flex items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-4 sm:px-7">
             <p className="font-display text-base font-semibold text-white">Sala da prospecção</p>
             <div className="flex flex-wrap items-center gap-2">
@@ -75,9 +75,9 @@ export function AgentsRoom() {
             return (
               <article
                 key={item.titulo}
-                className="rounded-3xl border border-white/[0.07] bg-white/[0.02] p-6 transition-colors hover:border-primary/30"
+                className="pixel-panel p-6 transition-colors hover:border-primary/40"
               >
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/10">
+                <span className="grid h-11 w-11 place-items-center border-2 border-primary/40 bg-primary/10">
                   <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
                 </span>
                 <h3 className="mt-4 font-display text-base font-semibold sm:text-lg">
@@ -89,7 +89,7 @@ export function AgentsRoom() {
           })}
         </div>
 
-        <div className="mt-6 flex flex-col items-center justify-between gap-5 rounded-3xl border border-primary/25 bg-primary/[0.055] p-6 sm:flex-row sm:px-8">
+        <div className="pixel-panel pixel-panel--brand mt-6 flex flex-col items-center justify-between gap-5 p-6 sm:flex-row sm:px-8">
           <div>
             <p className="font-display text-lg font-semibold">
               Monte sua sala e deixe o primeiro agente buscando leads.
@@ -100,7 +100,7 @@ export function AgentsRoom() {
           </div>
           <LeadFlowLink
             href="/LeadFlow/signup?plan=free"
-            className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-xs font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.03]"
+            className="pixel-btn group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 bg-brand px-7 py-3 text-xs font-bold text-primary-foreground"
           >
             Gerar meus leads grátis
             <ArrowRight

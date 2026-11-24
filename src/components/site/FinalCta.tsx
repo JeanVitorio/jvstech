@@ -49,7 +49,7 @@ export function FinalCta() {
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-40" />
 
       <div className="relative mx-auto grid max-w-5xl gap-5 px-6 md:grid-cols-[1.3fr_1fr]">
-        <div className="cta-copy glass-card rounded-2xl p-9">
+        <div className="cta-copy pixel-panel p-9">
           <div className="absolute" />
           <p className="label-xs text-primary">◆ Seu próximo lead começa aqui</p>
           <h2 className="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
@@ -63,7 +63,7 @@ export function FinalCta() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <LeadFlowLink
               href="/LeadFlow/signup?plan=free"
-              className="inline-flex items-center rounded-full bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.04]"
+              className="pixel-btn inline-flex items-center bg-brand px-8 py-4 text-xs font-semibold text-primary-foreground"
             >
               Criar minha conta grátis →
             </LeadFlowLink>
@@ -71,14 +71,14 @@ export function FinalCta() {
               href="https://wa.me/5546991163405?text=Ol%C3%A1%21%20Preciso%20de%20ajuda%20para%20escolher%20um%20plano%20do%20LeadFlow."
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full border border-border px-6 py-4 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center border-2 border-white/15 px-6 py-4 text-xs font-semibold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
             >
               Falar com um especialista
             </a>
           </div>
         </div>
 
-        <div className="glass-card flex flex-col items-center justify-center gap-6 rounded-2xl p-8">
+        <div className="pixel-panel flex flex-col items-center justify-center gap-6 p-8">
           <img
             src={logo}
             alt="Marca JVS Tech"

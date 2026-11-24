@@ -65,9 +65,7 @@ export function ProductTour() {
 
       <div className="relative mx-auto max-w-6xl px-5 md:px-6">
         <div className="flex flex-col items-center text-center">
-          <span className="label-xs rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-foreground/60">
-            Por dentro do sistema
-          </span>
+          <span className="pixel-tag">Por dentro do sistema</span>
           <h2 className="mt-5 max-w-3xl font-display text-2xl font-semibold leading-[1.1] tracking-[-0.03em] sm:text-3xl md:text-4xl">
             Os leads chegam organizados. Sua equipe só precisa{" "}
             <span className="text-brand">decidir quem atender primeiro.</span>
@@ -75,7 +73,7 @@ export function ProductTour() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <div className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] p-1">
+          <div className="inline-flex items-center gap-1 border-2 border-white/[0.08] bg-white/[0.03] p-1">
             <Botao ativo={aba === "funil"} onClick={() => setAba("funil")} icone={Columns3}>
               Funil de vendas
             </Botao>
@@ -85,7 +83,7 @@ export function ProductTour() {
           </div>
         </div>
 
-        <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-white/[0.09] bg-[linear-gradient(145deg,rgb(23_23_23_/_96%),rgb(5_5_5_/_98%))] shadow-[0_40px_120px_-50px_rgb(0_0_0_/_95%)]">
+        <div className="pixel-panel mt-8 overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-3.5">
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
@@ -123,7 +121,7 @@ function Botao({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
+      className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-colors ${
         ativo ? "bg-brand text-primary-foreground" : "text-foreground/55 hover:text-foreground/80"
       }`}
     >
@@ -139,7 +137,7 @@ function Funil() {
       {etapas.map((etapa) => (
         <div
           key={etapa.nome}
-          className="min-w-[200px] flex-1 rounded-2xl border border-white/[0.07] bg-black/40 p-3"
+          className="min-w-[200px] flex-1 border-2 border-white/[0.08] bg-black/40 p-3"
         >
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: etapa.cor }} />
@@ -153,7 +151,7 @@ function Funil() {
             {etapa.leads.map((lead) => (
               <div
                 key={lead.nome}
-                className="rounded-xl border border-white/[0.06] bg-[#121214] px-2.5 py-2"
+                className="border-2 border-white/[0.06] bg-[#121214] px-2.5 py-2"
               >
                 <p className="truncate text-[0.72rem] font-medium">{lead.nome}</p>
                 <div className="mt-1 flex items-center justify-between gap-2 text-[0.6rem] text-foreground/45">

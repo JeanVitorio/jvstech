@@ -46,7 +46,7 @@ export function SalesHero() {
 
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-10rem)] max-w-7xl items-center gap-12 px-5 md:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-10">
         <div className="hero-copy max-w-2xl">
-          <span className="label-xs inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/[0.09] px-4 py-2 text-primary shadow-[0_0_30px_-10px_rgb(255_101_0_/_80%)] backdrop-blur">
+          <span className="pixel-tag">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             Sua próxima venda começa com o lead certo
           </span>
@@ -61,7 +61,7 @@ export function SalesHero() {
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <LeadFlowLink
               href="/LeadFlow/signup?plan=free"
-              className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand px-8 py-4 text-sm font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-all hover:scale-[1.03] hover:shadow-[0_0_80px_-12px_rgb(255_101_0_/_90%)]"
+              className="pixel-btn group inline-flex min-h-14 items-center justify-center gap-2 bg-brand px-8 py-4 text-sm font-bold text-primary-foreground"
             >
               Gerar meus primeiros leads
               <ArrowRight
@@ -71,7 +71,7 @@ export function SalesHero() {
             </LeadFlowLink>
             <a
               href="#planos"
-              className="inline-flex min-h-14 items-center justify-center rounded-full border border-border bg-card/55 px-8 py-4 text-sm font-semibold text-foreground/85 backdrop-blur-xl transition-all hover:border-primary/70 hover:bg-primary/[0.06] hover:text-primary"
+              className="inline-flex min-h-14 items-center justify-center border-2 border-white/15 bg-white/[0.03] px-8 py-4 text-sm font-semibold text-foreground/85 transition-colors hover:border-primary/70 hover:bg-primary/[0.06] hover:text-primary"
             >
               Conhecer os planos
             </a>
@@ -95,7 +95,7 @@ export function SalesHero() {
         {/* a sala do produto já no topo: é o que a pessoa vai usar */}
         <div className="hero-sala relative mx-auto w-full max-w-[620px] lg:ml-auto">
           <div className="pointer-events-none absolute -inset-10 rounded-full bg-primary/15 blur-[100px]" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b0b0c]/90 shadow-[0_40px_120px_-32px_rgb(0_0_0_/_95%),0_0_80px_-35px_rgb(255_101_0_/_85%)] backdrop-blur-2xl">
+          <div className="pixel-panel relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-white/[0.07] px-4 py-3">
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
@@ -119,7 +119,7 @@ export function SalesHero() {
               {resumo.map(([valor, rotulo]) => (
                 <div
                   key={rotulo}
-                  className="rounded-xl border border-white/[0.06] bg-white/[0.025] px-3 py-2.5 text-center"
+                  className="border-2 border-white/[0.08] bg-white/[0.025] px-3 py-2.5 text-center"
                 >
                   <p className="text-xs font-semibold text-foreground/90">{valor}</p>
                   <p className="mt-0.5 text-[0.58rem] uppercase tracking-wider text-foreground/35">

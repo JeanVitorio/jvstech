@@ -51,7 +51,7 @@ export function Faq() {
             <AccordionItem
               key={f.q}
               value={`item-${i}`}
-              className="glass-card overflow-hidden rounded-xl border-b px-5"
+              className="pixel-panel overflow-hidden px-5"
             >
               <AccordionTrigger className="text-left text-sm hover:no-underline">
                 {f.q}

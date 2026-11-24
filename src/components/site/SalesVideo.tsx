@@ -39,7 +39,7 @@ export function SalesVideo() {
 
         <div className="relative mx-auto mt-12 max-w-5xl">
           <div className="pointer-events-none absolute -inset-5 rounded-[2.5rem] bg-primary/10 blur-3xl" />
-          <div className="relative overflow-hidden rounded-[1.5rem] border border-primary/30 bg-[#090909] p-2 shadow-[0_35px_110px_-35px_rgb(0_0_0_/_95%),0_0_90px_-45px_rgb(255_101_0_/_95%)] sm:rounded-[2rem] sm:p-3">
+          <div className="pixel-panel pixel-panel--brand relative overflow-hidden p-2 sm:p-3">
             <div className="absolute inset-x-16 top-0 z-10 h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
             <video
               className="aspect-video w-full rounded-[1.1rem] bg-black object-cover sm:rounded-[1.45rem]"
@@ -52,7 +52,7 @@ export function SalesVideo() {
           </div>
         </div>
 
-        <div className="mx-auto mt-9 flex max-w-5xl flex-col items-center justify-between gap-7 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-6 py-6 backdrop-blur-xl lg:flex-row lg:px-8">
+        <div className="pixel-panel mx-auto mt-9 flex max-w-5xl flex-col items-center justify-between gap-7 px-6 py-6 lg:flex-row lg:px-8">
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 lg:justify-start">
             {benefits.map((benefit) => (
               <p
