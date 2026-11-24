@@ -12,21 +12,21 @@ const agentes = [
 const beneficios = [
   {
     icon: Clock3,
-    titulo: "Trabalham enquanto você vende",
+    titulo: "Procuram enquanto vocês vendem",
     texto:
       "Cada agente busca empresas do seu nicho nas cidades que você escolher, sem ninguém precisar ficar olhando.",
   },
   {
     icon: Inbox,
-    titulo: "Entregam no colo do responsável",
+    titulo: "Entregam o contato pronto",
     texto:
-      "O lead encontrado já chega com telefone, WhatsApp e site, atribuído ao vendedor que vai atender.",
+      "O lead chega com telefone, WhatsApp e site, já atribuído ao consultor que vai fazer a abordagem.",
   },
   {
     icon: MonitorCheck,
-    titulo: "Você acompanha ao vivo",
+    titulo: "Quem vende é a sua equipe",
     texto:
-      "A sala mostra quem está trabalhando, quem terminou e quantos leads cada responsável recebeu.",
+      "O agente não fala com o cliente: ele entrega a oportunidade e você acompanha tudo pela sala.",
   },
 ];
 
@@ -43,16 +43,17 @@ export function AgentsRoom() {
           <div>
             <span className="label-xs inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/[0.08] px-4 py-2 text-primary">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              Sua equipe que nunca para
+              Quem procura enquanto vocês vendem
             </span>
             <h2 className="mt-6 max-w-4xl font-display text-3xl font-semibold leading-[1.05] tracking-[-0.035em] sm:text-4xl md:text-5xl">
-              Conheça os agentes que prospectam{" "}
-              <span className="text-brand">no lugar da sua equipe.</span>
+              Conheça os agentes que encontram os leads{" "}
+              <span className="text-brand">para a sua equipe vender.</span>
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
             Dentro do LeadFlow cada agente tem a própria mesa. Ele procura as empresas, organiza os
-            contatos e leva os leads prontos até o responsável — e você vê isso acontecendo.
+            contatos e entrega a lista pronta ao responsável. Quem conversa, negocia e fecha
+            continua sendo a sua equipe.
           </p>
         </div>
 
@@ -137,7 +138,7 @@ export function AgentsRoom() {
         <div className="mt-6 flex flex-col items-center justify-between gap-5 rounded-3xl border border-primary/25 bg-primary/[0.055] p-6 sm:flex-row sm:px-8">
           <div>
             <p className="font-display text-lg font-semibold">
-              Monte sua sala e coloque o primeiro agente para trabalhar.
+              Monte sua sala e deixe o primeiro agente buscando leads.
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Começa no plano Free, com 50 leads por mês e sem cartão.
@@ -147,7 +148,7 @@ export function AgentsRoom() {
             href="/LeadFlow/signup?plan=free"
             className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-xs font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.03]"
           >
-            Criar meu agente grátis
+            Gerar meus leads grátis
             <ArrowRight
               className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
               aria-hidden="true"

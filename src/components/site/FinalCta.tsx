@@ -90,7 +90,7 @@ export function FinalCta() {
             <PixelWorker pose="done" shirt="#38bdf8" hair="#4a2c13" size={38} />
           </div>
           <p className="text-center text-[0.62rem] uppercase tracking-[0.16em] text-foreground/40">
-            Seu agente entrega. Sua equipe vende.
+            O agente encontra. Sua equipe vende.
           </p>
         </div>
       </div>
