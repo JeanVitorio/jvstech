@@ -10,14 +10,26 @@ import {
   requestBotCommand,
   saveBotConfig,
 } from "@/services/bots";
-import type { BotConfig, BotFormData } from "@/types/bots";
+import { botVisualStatus } from "@/lib/bots";
+import type { BotConfig, BotFormData, BotRuntime } from "@/types/bots";
+
+// Com agente trabalhando os números mudam a todo momento; parado, quase nunca.
+// O ritmo lento evita consultas inúteis ao banco com a tela apenas aberta.
+const RITMO_ATIVO = 30_000;
+const RITMO_PARADO = 120_000;
+
+const temAgenteTrabalhando = (runtimes?: BotRuntime[]) =>
+  (runtimes ?? []).some((runtime) =>
+    ["running", "starting", "stopping"].includes(botVisualStatus(runtime)),
+  );
 
 export function useBots() {
   return useQuery({
     queryKey: ["bots", "runtime"],
     queryFn: listBotRuntimes,
     staleTime: 15_000,
-    refetchInterval: 30_000,
+    refetchInterval: (query) =>
+      temAgenteTrabalhando(query.state.data) ? RITMO_ATIVO : RITMO_PARADO,
     refetchIntervalInBackground: false,
     retry: 1,
   });
@@ -36,7 +48,7 @@ export function useBotEvents(botId?: string) {
 }
 
 // Última importação de leads registrada por qualquer agente da empresa.
-export function useLastLeadDelivery() {
+export function useLastLeadDelivery(agenteTrabalhando = false) {
   return useQuery({
     queryKey: ["bots", "ultima-entrega"],
     queryFn: async () => {
@@ -53,31 +65,33 @@ export function useLastLeadDelivery() {
       };
     },
     staleTime: 30_000,
-    refetchInterval: 60_000,
+    refetchInterval: agenteTrabalhando ? RITMO_ATIVO * 2 : RITMO_PARADO * 2,
     refetchIntervalInBackground: false,
     retry: 1,
   });
 }
 
-export function useBotLeadCounts() {
+export function useBotLeadCounts(agenteTrabalhando = false) {
   return useQuery({
     queryKey: ["bots", "lead-counts"],
     queryFn: listBotLeadCounts,
     staleTime: 15_000,
-    refetchInterval: 30_000,
+    refetchInterval: agenteTrabalhando ? RITMO_ATIVO : RITMO_PARADO,
     refetchIntervalInBackground: false,
     retry: 1,
   });
 }
 
-export function useOnlineRunners() {
+// A lista de PCs só interessa com a janela de iniciar agente aberta.
+export function useOnlineRunners(ativo = true) {
   // Sem cache: ao abrir "Iniciar agente" a lista precisa refletir os PCs de agora.
   return useQuery({
     queryKey: ["bots", "runners"],
     queryFn: listOnlineRunners,
+    enabled: ativo,
     staleTime: 0,
     refetchOnMount: "always",
-    refetchInterval: 20_000,
+    refetchInterval: ativo ? 20_000 : false,
     refetchIntervalInBackground: false,
     retry: 1,
   });
@@ -88,7 +102,9 @@ export function useAppInstallation() {
     queryKey: ["bots", "installation"],
     queryFn: getAppInstallationStatus,
     staleTime: 10_000,
-    refetchInterval: 20_000,
+    // Com o app fora do ar o usuário está esperando ele conectar, então a
+    // checagem continua rápida. Já conectado, não há o que esperar.
+    refetchInterval: (query) => (query.state.data?.online ? 60_000 : 20_000),
     refetchIntervalInBackground: false,
     retry: 1,
   });

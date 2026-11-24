@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/context/AuthContext";
 import { useBilling } from "@/context/BillingContext";
+import { botVisualStatus } from "@/lib/bots";
 import {
   useAppInstallation,
   useBotActions,
@@ -35,8 +36,13 @@ export default function Bots() {
   const { user } = useAuth();
   const { status: billing } = useBilling();
   const bots = useBots();
-  const leadCounts = useBotLeadCounts();
-  const ultimaEntrega = useLastLeadDelivery();
+  // Com todos os agentes parados não há número novo para buscar: a tela
+  // consulta o banco em ritmo lento e só acelera quando alguém está rodando.
+  const agenteTrabalhando = (bots.data ?? []).some((runtime) =>
+    ["running", "starting", "stopping"].includes(botVisualStatus(runtime)),
+  );
+  const leadCounts = useBotLeadCounts(agenteTrabalhando);
+  const ultimaEntrega = useLastLeadDelivery(agenteTrabalhando);
   const installation = useAppInstallation();
   const actions = useBotActions();
   const [editing, setEditing] = useState<BotConfig | undefined>();

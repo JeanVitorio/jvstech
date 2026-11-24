@@ -40,7 +40,8 @@ export function StartBotDialog({
   onClose: () => void;
   onStart: (runnerId: string) => void;
 }) {
-  const runners = useOnlineRunners();
+  // Fora da janela aberta não há motivo para ficar perguntando ao banco.
+  const runners = useOnlineRunners(Boolean(runtime));
   const [runnerId, setRunnerId] = useState("");
 
   const botId = runtime?.config.id;
