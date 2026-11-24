@@ -3,7 +3,6 @@ import { DndContext, type DragEndEvent, useDraggable, useDroppable, PointerSenso
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useApp } from "@/store/AppStore";
-import { PageHeader } from "@/components/PageHeader";
 import { AppLoader } from "@/components/AppLoader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,11 +13,19 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, MessageCircle, Instagram, Phone, Calendar, Trash2, Pencil, Save, Clock, MapPin, Search } from "lucide-react";
+import { Plus, MessageCircle, Instagram, Phone, Calendar, Trash2, Pencil, Save, Clock, MapPin, Search, Columns3, Flame, Route, Snowflake } from "lucide-react";
 import { toast } from "sonner";
 import { PeriodFilter, type Period, inPeriod } from "@/components/PeriodFilter";
 import { googleMapsLink } from "@/lib/googleMaps";
 import { whatsappWebLink } from "@/lib/whatsapp";
+import { SalesFloor } from "@/components/sales/SalesFloor";
+import { FunnelCorridor } from "@/components/sales/FunnelCorridor";
+import {
+  COR_TEMPERATURA,
+  ROTULO_TEMPERATURA,
+  diasParado,
+  temperaturaDoLead,
+} from "@/components/sales/funnelData";
 
 const BRL = (v: number) => `R$ ${(v ?? 0).toLocaleString("pt-BR")}`;
 
@@ -74,26 +81,44 @@ function LeadCard({ lead, onClick }: { lead: Lead; onClick: () => void }) {
     lead.first_contact_message ?? undefined,
   );
   const maps = googleMapsLink(lead.google_maps_url || lead.notes);
+  // Empresa só entra quando acrescenta algo ao nome do lead.
+  const mesmoNome = (lead.company ?? "").trim().toLowerCase() === (lead.name ?? "").trim().toLowerCase();
+  const detalhes = [mesmoNome ? null : lead.company, lead.city, lead.niche].filter(Boolean).join(" · ");
   return (
-    <div ref={setNodeRef} style={style} className={`bg-card border border-border rounded-lg p-3 space-y-2 ${isDragging ? "opacity-40" : ""} hover:border-accent/40 transition`}>
+    <div ref={setNodeRef} style={style} className={`bg-card border border-border rounded-lg px-2.5 py-2 ${isDragging ? "opacity-40" : ""} hover:border-accent/40 transition`}>
       <div {...listeners} {...attributes} className="cursor-grab active:cursor-grabbing space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <button onClick={onClick} className="font-medium text-sm leading-tight text-left hover:text-accent">{lead.name}</button>
+          <button onClick={onClick} className="line-clamp-2 text-[12.5px] font-medium leading-tight text-left hover:text-accent">{lead.name}</button>
           {lead.estimated_value ? <Badge variant="outline" className="text-[10px] shrink-0">{BRL(Number(lead.estimated_value))}</Badge> : null}
         </div>
-        {lead.company && <p className="text-xs text-muted-foreground truncate">{lead.company}</p>}
-        {lead.niche && <p className="text-[10px] text-muted-foreground truncate">{lead.niche}</p>}
-        {lead.city && <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1"><MapPin className="w-3 h-3 shrink-0" /> {lead.city}</p>}
-        {lead.next_followup_at && <p className="text-[10px] text-warning flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(lead.next_followup_at).toLocaleDateString("pt-BR")}</p>}
-        {!!lead.time_spent_seconds && <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> {Math.round(lead.time_spent_seconds / 60)} min</p>}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+          <Temperatura lead={lead} />
+          {lead.next_followup_at && <span className="flex items-center gap-1 text-warning"><Calendar className="w-3 h-3" /> {new Date(lead.next_followup_at).toLocaleDateString("pt-BR")}</span>}
+          {!!lead.time_spent_seconds && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {Math.round(lead.time_spent_seconds / 60)} min</span>}
+        </div>
+        {detalhes && <p className="truncate text-[10px] text-muted-foreground">{detalhes}</p>}
       </div>
-      <div className="flex items-center gap-1 pt-1 border-t border-border">
-        {wa && <a href={wa} target="_blank" rel="noreferrer" className="p-1.5 rounded hover:bg-success/15 text-success" title="WhatsApp"><MessageCircle className="w-3.5 h-3.5" /></a>}
-        {maps && <a href={maps} target="_blank" rel="noreferrer" className="p-1.5 rounded hover:bg-accent/15 text-accent" title="Google Maps"><MapPin className="w-3.5 h-3.5" /></a>}
-        {instagramLink(lead.instagram) && <a href={instagramLink(lead.instagram)!} target="_blank" rel="noreferrer" className="p-1.5 rounded hover:bg-primary/15 text-primary" title="Instagram"><Instagram className="w-3.5 h-3.5" /></a>}
-        {telLink(lead.phone) && <a href={telLink(lead.phone)!} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Telefone"><Phone className="w-3.5 h-3.5" /></a>}
+      <div className="mt-1.5 flex items-center gap-0.5 border-t border-border pt-1">
+        {wa && <a href={wa} target="_blank" rel="noreferrer" className="p-1 rounded hover:bg-success/15 text-success" title="WhatsApp"><MessageCircle className="w-3.5 h-3.5" /></a>}
+        {maps && <a href={maps} target="_blank" rel="noreferrer" className="p-1 rounded hover:bg-accent/15 text-accent" title="Google Maps"><MapPin className="w-3.5 h-3.5" /></a>}
+        {instagramLink(lead.instagram) && <a href={instagramLink(lead.instagram)!} target="_blank" rel="noreferrer" className="p-1 rounded hover:bg-primary/15 text-primary" title="Instagram"><Instagram className="w-3.5 h-3.5" /></a>}
+        {telLink(lead.phone) && <a href={telLink(lead.phone)!} className="p-1 rounded hover:bg-muted text-muted-foreground" title="Telefone"><Phone className="w-3.5 h-3.5" /></a>}
       </div>
     </div>
+  );
+}
+
+// Quanto tempo o lead está parado: lembra de voltar antes de esfriar.
+function Temperatura({ lead }: { lead: Lead }) {
+  const nivel = temperaturaDoLead(lead);
+  if (nivel === "quente") return null;
+  const dias = diasParado(lead);
+  const cor = COR_TEMPERATURA[nivel];
+  return (
+    <span className="flex items-center gap-1" style={{ color: cor }}>
+      {nivel === "morno" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
+      {ROTULO_TEMPERATURA[nivel]} · {dias}d parado
+    </span>
   );
 }
 
@@ -101,7 +126,8 @@ function StageColumn({ stage, leads, onCardClick }: { stage: Stage; leads: Lead[
   const { setNodeRef, isOver } = useDroppable({ id: `stage:${stage.id}` });
   const total = leads.reduce((s, l) => s + Number(l.estimated_value || 0), 0);
   return (
-    <div ref={setNodeRef} className={`min-w-[280px] w-[280px] h-[calc(100vh-260px)] max-h-[calc(100vh-260px)] bg-muted/30 rounded-xl p-3 flex flex-col ${isOver ? "ring-2 ring-accent" : ""}`}>
+    // A coluna cresce com os leads até caber cerca de 10 cards; o resto rola dentro dela.
+    <div ref={setNodeRef} className={`min-w-[280px] w-[280px] max-h-[1400px] bg-black/40 border border-white/10 rounded-xl p-3 flex flex-col ${isOver ? "ring-2 ring-primary" : ""}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full" style={{ background: stage.color }} />
@@ -131,8 +157,16 @@ export default function SalesFunnel() {
   const [stageFilter, setStageFilter] = useState("all");
   const [nicheFilter, setNicheFilter] = useState("all");
   const [stageForm, setStageForm] = useState<Partial<Stage> | null>(null);
+  const [visao, setVisao] = useState<"quadro" | "corredor">("quadro");
+  // Guarda o último ganho para a mesa do responsável comemorar.
+  const [comemoracao, setComemoracao] = useState<
+    { id: number; ownerId: string | null; valor: number } | null
+  >(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const isLeader = user?.role === "leader";
+  // Proprietário e administrador enxergam a equipe toda no salão, sempre.
+  const podeVerEquipe = Boolean(user?.is_leader);
+  const [leadsEquipe, setLeadsEquipe] = useState<Lead[]>([]);
 
   async function load() {
     let leadQuery = supabase.from("leads").select("*").order("created_at", { ascending: false });
@@ -154,6 +188,16 @@ export default function SalesFunnel() {
     }
     if (l.data) setLeads(l.data as Lead[]);
     if (a.data) setActivities(a.data as Activity[]);
+
+    // O salão não acompanha o filtro: busca a equipe toda, só as colunas usadas.
+    if (podeVerEquipe) {
+      const equipe = await supabase
+        .from("leads")
+        .select("id,name,owner_id,stage_id,estimated_value,next_followup_at,created_at,updated_at");
+      if (equipe.data) setLeadsEquipe(equipe.data as Lead[]);
+    } else if (l.data) {
+      setLeadsEquipe(l.data as Lead[]);
+    }
   }
   // O loading aparece na abertura e ao trocar o filtro; as atualizações em tempo real recarregam em silêncio.
   useEffect(() => {
@@ -240,6 +284,15 @@ export default function SalesFunnel() {
     const lead = leads.find(l => l.id === id);
     if (!lead || lead.stage_id === newStage) return;
     setLeads(prev => prev.map(l => l.id === id ? { ...l, stage_id: newStage } : l));
+    // Fechou negócio: a mesa do responsável comemora com o valor subindo.
+    if (stages.find((stage) => stage.id === newStage)?.is_won) {
+      setComemoracao({
+        id: Date.now(),
+        ownerId: lead.owner_id,
+        valor: Number(lead.estimated_value || 0),
+      });
+      window.setTimeout(() => setComemoracao(null), 2800);
+    }
     await supabase.from("leads").update({ stage_id: newStage }).eq("id", id);
   }
 
@@ -328,12 +381,8 @@ export default function SalesFunnel() {
 
   const leadActivities = useMemo(() => openLead ? activities.filter(a => a.lead_id === openLead.id) : [], [openLead, activities]);
 
-  return (
-    <div className="p-4">
-      <PageHeader
-        title="Funil de Vendas"
-        subtitle="Organize abordagens, follow-ups e fechamentos."
-        actions={
+  // Ações e filtros moram dentro da sala, que ocupa a tela inteira.
+  const acoesDaSala = (
           <div className="flex flex-wrap gap-2">
           <PeriodFilter value={period} onChange={setPeriod} />
           {isLeader && (
@@ -398,11 +447,10 @@ export default function SalesFunnel() {
             </DialogContent>
           </Dialog>
           </div>
-        }
-      />
+  );
 
-      <Card className="mb-4 p-3">
-        <div className="grid gap-3 md:grid-cols-[minmax(260px,1fr)_220px_220px]">
+  const filtrosDaSala = (
+        <div className="grid gap-3 md:grid-cols-[minmax(220px,1fr)_190px_190px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -439,15 +487,61 @@ export default function SalesFunnel() {
             </SelectContent>
           </Select>
         </div>
-      </Card>
+  );
 
+  return (
+    <div className="p-4">
       {loading ? (
         <Card>
           <AppLoader variant="inline" label="Carregando funil" />
         </Card>
       ) : (
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="flex gap-3 overflow-x-auto pb-4 -mx-2 px-2">
+        <SalesFloor
+          usuarios={users}
+          leads={leadsEquipe}
+          etapas={stages}
+          mostrarTodos={podeVerEquipe}
+          responsavelSelecionado={ownerFilter === "mine" ? user?.id ?? "" : ownerFilter}
+          comemoracao={comemoracao}
+          onSelecionar={(ownerId) => {
+            if (!podeVerEquipe) return;
+            // Clicar de novo na mesma mesa volta a mostrar o funil inteiro.
+            setOwnerFilter(ownerFilter === ownerId ? "all" : ownerId);
+          }}
+          acoes={acoesDaSala}
+          filtros={filtrosDaSala}
+        >
+        <div className="mb-3 flex items-center gap-1 rounded-lg border border-white/10 bg-black/40 p-1 w-fit">
+          <Button
+            size="sm"
+            variant={visao === "quadro" ? "default" : "ghost"}
+            className="h-7 gap-1.5 text-xs"
+            onClick={() => setVisao("quadro")}
+          >
+            <Columns3 className="h-3.5 w-3.5" /> Quadro
+          </Button>
+          <Button
+            size="sm"
+            variant={visao === "corredor" ? "default" : "ghost"}
+            className="h-7 gap-1.5 text-xs"
+            onClick={() => setVisao("corredor")}
+          >
+            <Route className="h-3.5 w-3.5" /> Corredor
+          </Button>
+        </div>
+
+        {visao === "corredor" ? (
+          <FunnelCorridor
+            etapas={visibleStages}
+            leads={filteredLeads}
+            onAbrirLead={(leadId) => {
+              const lead = leads.find((item) => item.id === leadId);
+              if (lead) openLeadDialog(lead);
+            }}
+          />
+        ) : (
+        <div className="flex flex-1 gap-3 overflow-x-auto pb-2 -mx-2 px-2">
           {visibleStages.map(s => (
             <div key={s.id} className="relative group">
               <StageColumn
@@ -464,6 +558,8 @@ export default function SalesFunnel() {
             </div>
           ))}
         </div>
+        )}
+        </SalesFloor>
       </DndContext>
       )}
 

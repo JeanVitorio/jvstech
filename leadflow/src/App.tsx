@@ -20,7 +20,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/SignupPremium";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const SalesDashboard = lazy(() => import("./pages/SalesDashboard"));
 const Bots = lazy(() => import("./pages/Bots"));
 const MessageBots = lazy(() => import("./pages/MessageBots"));
@@ -91,7 +90,7 @@ const App = () => (
                         }
                       >
                         <Route path="/" element={<SalesDashboard />} />
-                        <Route path="/dashboard-agentes" element={<Dashboard />} />
+                        <Route path="/dashboard-agentes" element={<Navigate to="/agentes" replace />} />
                         <Route path="/agentes" element={<Bots />} />
                         <Route
                           path="/agentes-whatsapp"
@@ -102,7 +101,7 @@ const App = () => (
                           }
                         />
                         {/* Links antigos continuam funcionando */}
-                        <Route path="/dashboard-bots" element={<Navigate to="/dashboard-agentes" replace />} />
+                        <Route path="/dashboard-bots" element={<Navigate to="/agentes" replace />} />
                         <Route path="/bots" element={<Navigate to="/agentes" replace />} />
                         <Route path="/message-bots" element={<Navigate to="/agentes-whatsapp" replace />} />
                         <Route path="/whatsapp-settings" element={<Navigate to="/agentes-whatsapp" replace />} />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
@@ -20,7 +20,8 @@ import {
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import "@/components/bots/office/office.css";
 import { Logo } from "@/components/Logo";
 import { RefreshButton } from "@/components/layout/RefreshButton";
 import { useTheme } from "@/components/ThemeProvider";
@@ -46,13 +47,12 @@ type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean; tou
 
 const nav: NavItem[] = [
   { to: "/", label: "Dashboard de Vendas", icon: LayoutDashboard, end: true },
-  { to: "/dashboard-agentes", label: "Dashboard dos Agentes", icon: Bot },
   { to: "/sales", label: "Funil de Vendas", icon: Target },
   { to: "/agentes", label: "Agentes de Prospecção", icon: Bot, tour: "agentes" },
   { to: "/agentes-whatsapp", label: "Agentes de WhatsApp", icon: MessageCircle },
   { to: "/leads", label: "Leads", icon: Users, tour: "leads" },
-  { to: "/billing", label: "Plano e consumo", icon: CreditCard },
   { to: "/installation", label: "Instalação", icon: Download, tour: "installation" },
+  { to: "/billing", label: "Plano e consumo", icon: CreditCard },
   { to: "/duvidas", label: "Dúvidas", icon: CircleHelp, tour: "duvidas" },
 ];
 
@@ -70,7 +70,17 @@ export function AppLayout() {
   const messageBotPermission = useMessageBotPermission();
   const installation = useAppInstallation();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  // O menu fica recolhido por padrão em qualquer tamanho de tela e só abre pelo hambúrguer.
+  const [menuAberto, setMenuAberto] = useState(false);
+
+  // O tour do primeiro acesso destaca itens do menu, então pede para abri-lo.
+  useEffect(() => {
+    const aoPedirMenu = (evento: Event) => {
+      setMenuAberto(Boolean((evento as CustomEvent<boolean>).detail));
+    };
+    window.addEventListener("jvs-tour-menu", aoPedirMenu);
+    return () => window.removeEventListener("jvs-tour-menu", aoPedirMenu);
+  }, []);
   const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
   const canUseMessageBots = messageBotPermission.data === true;
   const authorizedNav = nav.filter(
@@ -90,7 +100,7 @@ export function AppLayout() {
 
   const SidebarContent = (
     <>
-      <div className="mb-8 flex items-center gap-3 px-2">
+      <div className="relative z-10 mb-8 flex items-center gap-3 px-2">
         <Logo size={40} className="rounded-xl" />
         <div>
           <h1 className="font-display text-lg font-bold leading-none tracking-[-0.035em]">
@@ -100,14 +110,14 @@ export function AppLayout() {
         </div>
       </div>
 
-      <nav className="space-y-1 flex-1">
+      <nav className="relative z-10 flex-1 space-y-1">
         {visibleNav.map(({ to, label, icon: Icon, end, tour }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
             data-tour={tour}
-            onClick={() => setMobileOpen(false)}
+            onClick={() => setMenuAberto(false)}
             className={({ isActive }) =>
               `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                 isActive
@@ -122,7 +132,7 @@ export function AppLayout() {
         ))}
       </nav>
 
-      <div className="mt-auto space-y-3 border-t border-sidebar-border/70 pt-4">
+      <div className="relative z-10 mt-auto space-y-3 border-t border-sidebar-border/70 pt-4">
         {billing && (
           <Link
             to="/billing"
@@ -195,31 +205,31 @@ export function AppLayout() {
 
   return (
     <div className="relative flex min-h-screen bg-background text-foreground">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_8%_4%,hsl(var(--primary)/.08),transparent_24rem),radial-gradient(circle_at_94%_92%,hsl(var(--accent)/.05),transparent_28rem)]" />
-      <aside className="sticky top-3 z-10 m-3 mr-0 hidden h-[calc(100vh-1.5rem)] w-72 shrink-0 flex-col rounded-3xl border border-sidebar-border/70 bg-sidebar/80 px-4 py-6 shadow-elegant backdrop-blur-2xl lg:flex">
-        {SidebarContent}
-      </aside>
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+      {/* ambiente de sala por trás de todas as telas */}
+      <div className="jvs-room" aria-hidden="true" />
+
+      <Sheet open={menuAberto} onOpenChange={setMenuAberto}>
         <SheetContent
           side="left"
-          className="flex w-72 flex-col border-r-sidebar-border bg-sidebar/95 p-4 backdrop-blur-2xl"
+          className="jvs-panel jvs-panel--spot flex w-72 flex-col border-r border-sidebar-border/70 p-4"
         >
           {SidebarContent}
         </SheetContent>
       </Sheet>
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-3 z-20 mx-3 mt-3 flex h-16 items-center justify-between gap-2 rounded-2xl border border-border/70 bg-background/72 px-3 shadow-sm backdrop-blur-2xl sm:gap-4 sm:px-5">
+        <header className="jvs-panel sticky top-3 z-20 mx-3 mt-3 flex h-16 items-center justify-between gap-2 rounded-2xl border border-border/70 px-3 shadow-sm sm:gap-4 sm:px-5">
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
-            onClick={() => setMobileOpen(true)}
+            className="relative z-10"
+            aria-label="Abrir menu"
+            onClick={() => setMenuAberto(true)}
           >
             <Menu className="w-5 h-5" />
           </Button>
           <div className="flex-1" />
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="relative z-10 flex items-center gap-2 sm:gap-3">
             <Badge
               variant="outline"
               className="hidden md:inline-flex gap-1 border-accent/40 text-accent"

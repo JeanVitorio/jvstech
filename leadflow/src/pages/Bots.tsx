@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { ArrowRight, Bot, Download, Plus } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { AppRequiredDialog } from "@/components/bots/AppRequiredDialog";
-import { BotCard } from "@/components/bots/BotCard";
+import { AgentOffice } from "@/components/bots/office/AgentOffice";
+import { AgentPanel } from "@/components/bots/office/AgentPanel";
 import { BotFormDialog } from "@/components/bots/BotFormDialog";
 import { StartBotDialog } from "@/components/bots/StartBotDialog";
-import { PageHeader } from "@/components/PageHeader";
 import { AppLoader } from "@/components/AppLoader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -44,6 +44,7 @@ export default function Bots() {
   const appMissing = installation.data?.installed === false;
   const [starting, setStarting] = useState<BotRuntime | null>(null);
   const [eventsBot, setEventsBot] = useState<BotRuntime | null>(null);
+  const [opened, setOpened] = useState<BotRuntime | null>(null);
   const events = useBotEvents(eventsBot?.config.id);
   const busy = actions.command.isPending;
   const isAdmin = user?.role === "leader";
@@ -131,28 +132,17 @@ export default function Bots() {
     }
   }
 
-  return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <PageHeader
-        title="Agentes de Prospecção"
-        subtitle="Acompanhe e controle suas prospecções em tempo real."
-        actions={
-          <Button
-            disabled={installation.isLoading}
-            onClick={() => {
-              if (appMissing) {
-                setAppRequiredOpen(true);
-                return;
-              }
-              setEditing(undefined);
-              setFormOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4 mr-2" /> Novo agente
-          </Button>
-        }
-      />
+  function novoAgente() {
+    if (appMissing) {
+      setAppRequiredOpen(true);
+      return;
+    }
+    setEditing(undefined);
+    setFormOpen(true);
+  }
 
+  return (
+    <div className="mx-auto flex min-h-[calc(100vh-5.5rem)] max-w-[1700px] flex-col p-4 sm:p-6">
       {billing && !canGenerate && (
         <Card className="p-4 mb-5 border-warning/40 bg-warning/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-sm">
@@ -192,40 +182,43 @@ export default function Bots() {
             </Link>
           </Button>
         </Card>
-      ) : !bots.data?.length ? (
-        <Card className="p-10 text-center">
-          <Bot className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <p className="font-medium">Nenhum agente disponível.</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Crie o primeiro agente para começar.
-          </p>
-        </Card>
       ) : (
-        <div className="grid xl:grid-cols-2 gap-5">
-          {bots.data.map((runtime) => (
-            <BotCard
-              key={runtime.config.id}
-              runtime={runtime}
-              generatedLeads={leadCounts.data ? generatedLeads(runtime.config.id) : undefined}
-              busy={busy}
-              showOwner={isAdmin}
-              onStart={() => {
-                if (leadLimitReached(runtime.config)) {
-                  toast.error(leadLimitMessage);
-                  return;
-                }
-                setStarting(runtime);
-              }}
-              onCommand={(value) => command(runtime, value)}
-              onEdit={() => {
-                setEditing(runtime.config);
-                setFormOpen(true);
-              }}
-              onShowEvents={() => setEventsBot(runtime)}
-            />
-          ))}
-        </div>
+        <AgentOffice
+          runtimes={bots.data ?? []}
+          leadCounts={leadCounts.data}
+          selectedId={opened?.config.id}
+          criandoDesabilitado={installation.isLoading}
+          onSelect={setOpened}
+          onNovoAgente={novoAgente}
+        />
       )}
+
+      <AgentPanel
+        runtime={opened}
+        generatedLeads={leadCounts.data ? generatedLeads(opened?.config.id) : undefined}
+        busy={busy}
+        showOwner={isAdmin}
+        onClose={() => setOpened(null)}
+        onStart={() => {
+          if (!opened) return;
+          if (leadLimitReached(opened.config)) {
+            toast.error(leadLimitMessage);
+            return;
+          }
+          setStarting(opened);
+        }}
+        onCommand={(value) => opened && command(opened, value)}
+        onEdit={() => {
+          if (!opened) return;
+          setEditing(opened.config);
+          setFormOpen(true);
+          setOpened(null);
+        }}
+        onShowEvents={() => {
+          setEventsBot(opened);
+          setOpened(null);
+        }}
+      />
 
       <BotFormDialog
         open={formOpen}

@@ -1,620 +1,454 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useApp } from "@/store/AppStore";
-import { PageHeader } from "@/components/PageHeader";
-import { Card } from "@/components/ui/card";
-import { AppLoader } from "@/components/AppLoader";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import {
-  Plus,
-  Trash2,
-  Edit2,
-  Phone,
-  Mail,
-  Building,
-  Target,
-  DollarSign,
-  MessageCircle,
-  MapPin,
-  Globe,
-  Instagram,
-} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { AppLoader } from "@/components/AppLoader";
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { LeadFormDialog } from "@/components/leads/LeadFormDialog";
+import { LeadsBulkActions } from "@/components/leads/LeadsBulkActions";
+import { LeadsTable } from "@/components/leads/LeadsTable";
+import { LeadsToolbar } from "@/components/leads/LeadsToolbar";
+import {
+  LeadsTriage,
+  type AtalhoTriagem,
+  type ContagensTriagem,
+} from "@/components/leads/LeadsTriage";
+import {
+  agruparDuplicados,
+  COLUNAS_DUPLICADOS,
+  idsParaDescartar,
+  type LeadDuplicado,
+} from "@/components/leads/leadsDuplicates";
+import { baixarCsv, montarCsv } from "@/components/leads/leadsExport";
+import {
+  buscarPagina,
+  contarTriagem,
+  COLUNAS_LISTA,
+  FILTROS_PADRAO,
+  varrerFiltro,
+  type FiltrosLeads,
+  type LeadLista,
+} from "@/components/leads/leadsQuery";
+import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDate } from "@/lib/format";
-import { googleMapsLink } from "@/lib/googleMaps";
-import { whatsappWebLink } from "@/lib/whatsapp";
+import { useApp } from "@/store/AppStore";
 
-interface Lead {
-  id: string;
-  name: string;
-  company?: string;
-  email?: string;
-  phone?: string;
-  website?: string;
-  instagram?: string;
-  whatsapp?: string;
-  whatsapp_do_not_contact?: boolean;
-  first_contact_message?: string;
-  google_maps_url?: string;
-  source?: string;
-  estimated_value?: number;
-  stage_id?: string;
-  owner_id?: string;
-  notes?: string;
-  next_followup_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface LeadStage {
+interface Etapa {
   id: string;
   name: string;
   color: string;
   position: number;
-  is_won: boolean;
-  is_lost: boolean;
 }
 
-const errorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "Operação não concluída.";
+const POR_PAGINA = 50;
+const LOTE = 200;
+// Filtrar por lista de ids vai na URL da consulta: limitamos para não estourar o tamanho.
+const LIMITE_IDS = 300;
 
-const externalHttpUrl = (value?: string) => {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
-  } catch {
-    return null;
-  }
-};
+const mensagemErro = (erro: unknown) =>
+  erro instanceof Error ? erro.message : "Operação não concluída.";
 
 export default function Leads() {
   const { user } = useAuth();
   const { users } = useApp();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [stages, setStages] = useState<LeadStage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [form, setForm] = useState<Partial<Lead>>({
-    name: "",
-    company: "",
-    email: "",
-    phone: "",
-    website: "",
-    instagram: "",
-    whatsapp: "",
-    whatsapp_do_not_contact: false,
-    source: "",
-    estimated_value: 0,
-    stage_id: "",
-    owner_id: "",
-    notes: "",
-    next_followup_at: "",
+  const gestor = user?.tenant_role === "owner" || user?.tenant_role === "admin";
+
+  const [etapas, setEtapas] = useState<Etapa[]>([]);
+  const [leads, setLeads] = useState<LeadLista[]>([]);
+  const [total, setTotal] = useState(0);
+  const [pagina, setPagina] = useState(0);
+  const [filtros, setFiltros] = useState<FiltrosLeads>({ ...FILTROS_PADRAO });
+  const [carregando, setCarregando] = useState(true);
+
+  const [contagens, setContagens] = useState<ContagensTriagem>({
+    total: 0,
+    semResponsavel: 0,
+    semContato: 0,
+    semEtapa: 0,
   });
+  const [contando, setContando] = useState(true);
+  const [atalho, setAtalho] = useState<AtalhoTriagem>("todos");
 
-  const canManageTenant = user?.tenant_role === "owner" || user?.tenant_role === "admin";
+  const [selecionados, setSelecionados] = useState<Set<string>>(new Set());
+  const [aplicando, setAplicando] = useState(false);
+  const [exportando, setExportando] = useState(false);
 
-  const loadLeads = useCallback(async () => {
-    setLoading(true);
-    try {
-      const query = supabase.from("leads").select("*");
+  const [duplicados, setDuplicados] = useState<number | null>(null);
+  const [idsDuplicados, setIdsDuplicados] = useState<string[]>([]);
+  const [procurandoDuplicados, setProcurandoDuplicados] = useState(false);
 
-      // Gestores veem a empresa; demais usuários veem somente os próprios leads.
-      if (!canManageTenant) {
-        query.eq("owner_id", user?.id);
-      }
+  const [dialogoAberto, setDialogoAberto] = useState(false);
+  const [emEdicao, setEmEdicao] = useState<LeadLista | null>(null);
 
-      const { data, error } = await query;
-      if (error) throw error;
-      setLeads(data || []);
-    } catch (err: unknown) {
-      toast.error(errorMessage(err));
-    } finally {
-      setLoading(false);
+  const carregarEtapas = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("lead_stages")
+      .select("id,name,color,position")
+      .order("position");
+    if (error) {
+      toast.error(mensagemErro(error));
+      return;
     }
-  }, [canManageTenant, user?.id]);
-
-  const loadStages = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.from("lead_stages").select("*").order("position");
-      if (error) throw error;
-      setStages(data || []);
-      if (data?.length) {
-        setForm((current) => (current.stage_id ? current : { ...current, stage_id: data[0].id }));
-      }
-    } catch (err: unknown) {
-      toast.error(errorMessage(err));
-    }
+    setEtapas((data ?? []) as Etapa[]);
   }, []);
 
-  useEffect(() => {
-    void loadLeads();
-    void loadStages();
-  }, [loadLeads, loadStages]);
+  const carregarPagina = useCallback(async () => {
+    setCarregando(true);
+    try {
+      const resultado = await buscarPagina(filtros, pagina, POR_PAGINA, gestor, user?.id);
+      setLeads(resultado.leads);
+      setTotal(resultado.total);
+    } catch (erro: unknown) {
+      toast.error(mensagemErro(erro));
+    } finally {
+      setCarregando(false);
+    }
+  }, [filtros, pagina, gestor, user?.id]);
 
-  const filteredLeads = useMemo(
-    () =>
-      leads.filter(
-        (l) =>
-          (l.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
-          l.company?.toLowerCase().includes(search.toLowerCase()) ||
-          l.email?.toLowerCase().includes(search.toLowerCase()) ||
-          l.instagram?.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [leads, search],
+  const carregarContagens = useCallback(async () => {
+    setContando(true);
+    try {
+      setContagens(await contarTriagem(gestor, user?.id));
+    } catch (erro: unknown) {
+      toast.error(mensagemErro(erro));
+    } finally {
+      setContando(false);
+    }
+  }, [gestor, user?.id]);
+
+  useEffect(() => {
+    void carregarEtapas();
+  }, [carregarEtapas]);
+
+  useEffect(() => {
+    void carregarPagina();
+  }, [carregarPagina]);
+
+  useEffect(() => {
+    void carregarContagens();
+  }, [carregarContagens]);
+
+  const nomeEtapa = useCallback(
+    (id?: string | null) => {
+      const etapa = etapas.find((item) => item.id === id);
+      return { nome: etapa?.name ?? "—", cor: etapa?.color ?? "#FF6500" };
+    },
+    [etapas],
   );
 
-  function openCreate() {
-    setEditingId(null);
-    setForm({
-      name: "",
-      company: "",
-      email: "",
-      phone: "",
-      website: "",
-      instagram: "",
-      whatsapp: "",
-      whatsapp_do_not_contact: false,
-      source: "",
-      estimated_value: 0,
-      stage_id: stages[0]?.id || "",
-      owner_id: user?.id || "",
-      notes: "",
-      next_followup_at: "",
-    });
-    setIsOpen(true);
+  const nomeResponsavel = useCallback(
+    (id?: string | null) => users.find((item) => item.id === id)?.name ?? "Sem responsável",
+    [users],
+  );
+
+  const podeEditar = useCallback(
+    (lead: LeadLista) => gestor || lead.owner_id === user?.id,
+    [gestor, user?.id],
+  );
+
+  // Trocar de filtro sempre volta para a primeira página e descarta a seleção.
+  const aplicarFiltrosNaTela = (novos: FiltrosLeads, novoAtalho: AtalhoTriagem = "todos") => {
+    setFiltros(novos);
+    setAtalho(novoAtalho);
+    setPagina(0);
+    setSelecionados(new Set());
+  };
+
+  async function usarAtalho(escolhido: AtalhoTriagem) {
+    if (escolhido === "duplicados") {
+      await procurarDuplicados();
+      return;
+    }
+    const base = { ...FILTROS_PADRAO };
+    if (escolhido === "sem_responsavel") base.responsavel = "none";
+    if (escolhido === "sem_contato") base.contato = "sem_contato";
+    if (escolhido === "sem_etapa") base.etapa = "none";
+    aplicarFiltrosNaTela(base, escolhido);
   }
 
-  function openEdit(lead: Lead) {
-    setEditingId(lead.id);
-    setForm(lead);
-    setIsOpen(true);
-  }
-
-  async function save() {
-    if (!form.stage_id) return toast.error("Estágio é obrigatório");
-    if (!form.owner_id && !editingId) return toast.error("Comercial responsável é obrigatório");
-    if (form.website?.trim() && !externalHttpUrl(form.website)) {
-      return toast.error("Informe um link válido para o site");
-    }
-    if (form.instagram?.trim() && !externalHttpUrl(form.instagram)) {
-      return toast.error("Informe um link válido para o Instagram");
-    }
-
+  async function procurarDuplicados() {
+    setProcurandoDuplicados(true);
     try {
-      const payload = {
-        name: form.name?.trim() || form.company?.trim() || form.email?.trim() || "Lead sem nome",
-        company: form.company?.trim() || null,
-        email: form.email?.trim() || null,
-        phone: form.phone?.trim() || null,
-        website: form.website?.trim() || null,
-        instagram: form.instagram?.trim() || null,
-        whatsapp: form.whatsapp?.trim() || null,
-        whatsapp_do_not_contact: !!form.whatsapp_do_not_contact,
-        source: form.source?.trim() || null,
-        estimated_value: form.estimated_value || 0,
-        stage_id: form.stage_id,
-        owner_id: canManageTenant ? form.owner_id || null : user?.id || null,
-        notes: form.notes?.trim() || null,
-        next_followup_at: form.next_followup_at || null,
-      };
-
-      if (editingId) {
-        const { error } = await supabase.from("leads").update(payload).eq("id", editingId);
-        if (error) throw error;
-        toast.success("Lead atualizado");
-      } else {
-        const { error } = await supabase.from("leads").insert([payload]);
-        if (error) throw error;
-        toast.success("Lead criado");
+      const linhas = await varrerFiltro<LeadDuplicado>(
+        { ...FILTROS_PADRAO },
+        COLUNAS_DUPLICADOS,
+        gestor,
+        user?.id,
+      );
+      const grupos = agruparDuplicados(linhas);
+      const ids = idsParaDescartar(grupos);
+      setIdsDuplicados(ids);
+      setDuplicados(ids.length);
+      setAtalho("duplicados");
+      if (!ids.length) {
+        setFiltros({ ...FILTROS_PADRAO });
+        toast.success("Nenhum lead repetido encontrado.");
+        return;
       }
-
-      setIsOpen(false);
-      loadLeads();
-    } catch (err: unknown) {
-      toast.error(errorMessage(err));
+      // A tabela passa a mostrar só os repetidos para o usuário conferir antes de excluir.
+      setFiltros({ ...FILTROS_PADRAO, ids: ids.slice(0, LIMITE_IDS), ordenarPor: "name", ordem: "asc" });
+      setPagina(0);
+      setSelecionados(new Set(ids));
+      toast.success(
+        `${ids.length} lead(s) repetido(s) marcados. O mais antigo de cada grupo foi preservado.`,
+      );
+    } catch (erro: unknown) {
+      toast.error(mensagemErro(erro));
+    } finally {
+      setProcurandoDuplicados(false);
     }
   }
 
-  async function deleteLead(id: string) {
-    if (!confirm("Tem certeza que deseja excluir este lead?")) return;
+  function alternar(id: string) {
+    setSelecionados((atual) => {
+      const copia = new Set(atual);
+      if (copia.has(id)) copia.delete(id);
+      else copia.add(id);
+      return copia;
+    });
+  }
+
+  function alternarPagina(marcar: boolean) {
+    setSelecionados((atual) => {
+      const copia = new Set(atual);
+      for (const lead of leads) {
+        if (marcar) copia.add(lead.id);
+        else copia.delete(lead.id);
+      }
+      return copia;
+    });
+  }
+
+  // Supabase tem limite de itens por filtro: aplicamos em lotes.
+  async function emLotes(ids: string[], acao: (lote: string[]) => Promise<void>) {
+    for (let inicio = 0; inicio < ids.length; inicio += LOTE) {
+      await acao(ids.slice(inicio, inicio + LOTE));
+    }
+  }
+
+  async function aplicarEmMassa(
+    rotulo: string,
+    acao: (lote: string[]) => Promise<void>,
+    limparSelecao = true,
+  ) {
+    const ids = [...selecionados];
+    if (!ids.length) return;
+    setAplicando(true);
     try {
-      const { error } = await supabase.from("leads").delete().eq("id", id);
-      if (error) throw error;
-      toast.success("Lead excluído");
-      loadLeads();
-    } catch (err: unknown) {
-      toast.error(errorMessage(err));
+      await emLotes(ids, acao);
+      toast.success(`${rotulo} em ${ids.length} lead(s).`);
+      if (limparSelecao) setSelecionados(new Set());
+      await Promise.all([carregarPagina(), carregarContagens()]);
+    } catch (erro: unknown) {
+      toast.error(mensagemErro(erro));
+    } finally {
+      setAplicando(false);
     }
   }
 
-  const getStageColor = (stageId?: string) => {
-    const stage = stages.find((s) => s.id === stageId);
-    return stage?.color || "#FF6500";
-  };
+  const atribuir = (ownerId: string) =>
+    aplicarEmMassa("Responsável alterado", async (lote) => {
+      const { error } = await supabase.from("leads").update({ owner_id: ownerId }).in("id", lote);
+      if (error) throw error;
+    });
 
-  const getStageName = (stageId?: string) => {
-    const stage = stages.find((s) => s.id === stageId);
-    return stage?.name || "—";
-  };
+  const mover = (stageId: string) =>
+    aplicarEmMassa("Etapa alterada", async (lote) => {
+      const { error } = await supabase.from("leads").update({ stage_id: stageId }).in("id", lote);
+      if (error) throw error;
+    });
 
-  const getOwnerName = (ownerId?: string) => {
-    const u = users.find((usr) => usr.id === ownerId);
-    return u?.name || "Não atribuído";
-  };
+  const marcarNaoContatar = (valor: boolean) =>
+    aplicarEmMassa(valor ? "Marcado como não contatar" : "Contato liberado", async (lote) => {
+      const { error } = await supabase
+        .from("leads")
+        .update({ whatsapp_do_not_contact: valor })
+        .in("id", lote);
+      if (error) throw error;
+    });
+
+  function excluirSelecionados() {
+    const quantidade = selecionados.size;
+    if (!quantidade) return;
+    if (!confirm(`Excluir ${quantidade} lead(s)? Esta ação não pode ser desfeita.`)) return;
+    void aplicarEmMassa("Excluído", async (lote) => {
+      const { error } = await supabase.from("leads").delete().in("id", lote);
+      if (error) throw error;
+      setIdsDuplicados((atual) => atual.filter((id) => !lote.includes(id)));
+      setDuplicados((atual) => (atual === null ? atual : Math.max(0, atual - lote.length)));
+    });
+  }
+
+  async function excluirUm(lead: LeadLista) {
+    if (!confirm(`Excluir o lead "${lead.name}"?`)) return;
+    try {
+      const { error } = await supabase.from("leads").delete().eq("id", lead.id);
+      if (error) throw error;
+      toast.success("Lead excluído.");
+      await Promise.all([carregarPagina(), carregarContagens()]);
+    } catch (erro: unknown) {
+      toast.error(mensagemErro(erro));
+    }
+  }
+
+  async function exportar() {
+    setExportando(true);
+    try {
+      const linhas = await varrerFiltro<LeadLista>(filtros, COLUNAS_LISTA, gestor, user?.id);
+      if (!linhas.length) {
+        toast.error("Nenhum lead no filtro atual.");
+        return;
+      }
+      const csv = montarCsv(
+        linhas,
+        (id) => nomeEtapa(id).nome,
+        (id) => nomeResponsavel(id),
+      );
+      baixarCsv(csv, `leads-${new Date().toISOString().slice(0, 10)}.csv`);
+      toast.success(`${linhas.length} lead(s) exportados.`);
+    } catch (erro: unknown) {
+      toast.error(mensagemErro(erro));
+    } finally {
+      setExportando(false);
+    }
+  }
+
+  const ultimaPagina = Math.max(0, Math.ceil(total / POR_PAGINA) - 1);
+  const inicio = total === 0 ? 0 : pagina * POR_PAGINA + 1;
+  const fim = Math.min(total, (pagina + 1) * POR_PAGINA);
+
+  const selecaoNaBase = useMemo(() => selecionados.size, [selecionados]);
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <PageHeader title="Leads" subtitle="Gerencie seus leads e oportunidades de vendas." />
-        <Button onClick={openCreate} className="gap-2">
-          <Plus className="w-4 h-4" /> Novo Lead
+    <div className="mx-auto max-w-[1500px] space-y-4 p-4 sm:p-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <PageHeader
+          title="Base de leads"
+          subtitle="Triagem da base: filtre, distribua entre a equipe e limpe o que não serve."
+        />
+        <Button
+          onClick={() => {
+            setEmEdicao(null);
+            setDialogoAberto(true);
+          }}
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" /> Novo lead
         </Button>
       </div>
 
-      <Card className="p-4 mb-6">
-        <Input
-          placeholder="Buscar por nome, empresa ou email…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
-      </Card>
+      <LeadsTriage
+        contagens={contagens}
+        carregando={contando}
+        duplicados={duplicados}
+        procurandoDuplicados={procurandoDuplicados}
+        atalhoAtivo={atalho}
+        onAtalho={(escolhido) => void usarAtalho(escolhido)}
+      />
 
-      {loading ? (
-        <Card>
-          <AppLoader variant="inline" label="Carregando leads" />
+      <LeadsToolbar
+        filtros={filtros}
+        onMudar={(novos) => aplicarFiltrosNaTela(novos)}
+        etapas={etapas}
+        usuarios={users}
+        mostrarResponsavel={gestor}
+        exportando={exportando}
+        onExportar={() => void exportar()}
+      />
+
+      {atalho === "duplicados" && idsDuplicados.length > 0 && (
+        <Card className="border-warning/40 bg-warning/5 p-3 text-sm">
+          {idsDuplicados.length} lead(s) repetidos encontrados — a tabela está mostrando
+          {idsDuplicados.length > LIMITE_IDS ? ` os ${LIMITE_IDS} primeiros` : " eles"}. O registro
+          mais antigo de cada grupo foi preservado; confira a lista e use “Excluir” na barra de
+          ações para limpar os demais.
         </Card>
-      ) : filteredLeads.length === 0 ? (
-        <Card className="p-8 text-center text-muted-foreground">
-          {leads.length === 0 ? "Nenhum lead criado ainda" : "Nenhum lead encontrado"}
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {filteredLeads.map((lead) => {
-            const owner = users.find((u) => u.id === lead.owner_id);
-            const can_edit = canManageTenant || lead.owner_id === user?.id;
-            const whatsappLink = whatsappWebLink(
-              lead.whatsapp || lead.phone,
-              lead.first_contact_message,
-            );
-            const mapsLink = googleMapsLink(lead.google_maps_url || lead.notes);
-            const websiteLink = externalHttpUrl(lead.website);
-            const instagramLink = externalHttpUrl(lead.instagram);
-            return (
-              <Card key={lead.id} className="p-4 hover:bg-muted/50 transition">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-lg">
-                        {lead.name || lead.company || lead.email || "Lead sem nome"}
-                      </h3>
-                      <Badge
-                        style={{ backgroundColor: getStageColor(lead.stage_id), color: "white" }}
-                      >
-                        {getStageName(lead.stage_id)}
-                      </Badge>
-                    </div>
-
-                    <div className="flex gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
-                      {lead.company && (
-                        <div className="flex items-center gap-1">
-                          <Building className="w-3.5 h-3.5" /> {lead.company}
-                        </div>
-                      )}
-                      {lead.email && (
-                        <div className="flex items-center gap-1">
-                          <Mail className="w-3.5 h-3.5" /> {lead.email}
-                        </div>
-                      )}
-                      {lead.phone && (
-                        <div className="flex items-center gap-1">
-                          <Phone className="w-3.5 h-3.5" /> {lead.phone}
-                        </div>
-                      )}
-                      {websiteLink && (
-                        <a
-                          href={websiteLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 hover:text-primary"
-                        >
-                          <Globe className="w-3.5 h-3.5" /> Site
-                        </a>
-                      )}
-                      {instagramLink && (
-                        <a
-                          href={instagramLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 hover:text-primary"
-                        >
-                          <Instagram className="w-3.5 h-3.5" /> Instagram
-                        </a>
-                      )}
-                    </div>
-
-                    <div className="flex gap-4 mt-2 text-sm flex-wrap">
-                      {lead.estimated_value && (
-                        <div className="flex items-center gap-1 text-success font-semibold">
-                          <DollarSign className="w-3.5 h-3.5" /> R${" "}
-                          {lead.estimated_value.toLocaleString("pt-BR")}
-                        </div>
-                      )}
-                      {owner && (
-                        <div className="flex items-center gap-1 text-primary">
-                          <Target className="w-3.5 h-3.5" /> {owner.name}
-                        </div>
-                      )}
-                      {lead.next_followup_at && (
-                        <div className="text-muted-foreground">
-                          Follow-up: {formatDate(lead.next_followup_at)}
-                        </div>
-                      )}
-                    </div>
-
-                    {lead.notes && (
-                      <p className="text-xs text-muted-foreground mt-2 line-clamp-1">
-                        {lead.notes}
-                      </p>
-                    )}
-                  </div>
-
-                  {can_edit && (
-                    <div className="flex gap-2">
-                      {whatsappLink && (
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1 text-success hover:text-success"
-                        >
-                          <a href={whatsappLink} target="_blank" rel="noreferrer">
-                            <MessageCircle className="w-4 h-4" />
-                          </a>
-                        </Button>
-                      )}
-                      {mapsLink && (
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1 text-accent hover:text-accent"
-                        >
-                          <a href={mapsLink} target="_blank" rel="noreferrer">
-                            <MapPin className="w-4 h-4" />
-                          </a>
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEdit(lead)}
-                        className="gap-1"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteLead(lead.id)}
-                        className="gap-1 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
       )}
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-md w-full max-h-[85vh] flex flex-col overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>{editingId ? "Editar Lead" : "Novo Lead"}</DialogTitle>
-          </DialogHeader>
+      <Card className="overflow-hidden">
+        {carregando ? (
+          <AppLoader variant="inline" label="Carregando leads" />
+        ) : leads.length === 0 ? (
+          <p className="p-10 text-center text-muted-foreground">
+            Nenhum lead encontrado com os filtros atuais.
+          </p>
+        ) : (
+          <LeadsTable
+            leads={leads}
+            selecionados={selecionados}
+            onAlternar={alternar}
+            onAlternarPagina={alternarPagina}
+            etapa={nomeEtapa}
+            responsavel={nomeResponsavel}
+            podeEditar={podeEditar}
+            onEditar={(lead) => {
+              setEmEdicao(lead);
+              setDialogoAberto(true);
+            }}
+            onExcluir={(lead) => void excluirUm(lead)}
+          />
+        )}
+      </Card>
 
-          <div className="space-y-4 overflow-y-auto flex-1 pr-1 py-1">
-            <div>
-              <Label>Nome</Label>
-              <Input
-                value={form.name || ""}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Nome do lead (opcional)"
-              />
-            </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+        <span>
+          {total === 0
+            ? "Nenhum lead"
+            : `${inicio.toLocaleString("pt-BR")}–${fim.toLocaleString("pt-BR")} de ${total.toLocaleString("pt-BR")}`}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pagina === 0 || carregando}
+            onClick={() => setPagina((atual) => Math.max(0, atual - 1))}
+            className="gap-1"
+          >
+            <ChevronLeft className="h-4 w-4" /> Anterior
+          </Button>
+          <span className="tabular-nums">
+            {pagina + 1} / {ultimaPagina + 1}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pagina >= ultimaPagina || carregando}
+            onClick={() => setPagina((atual) => Math.min(ultimaPagina, atual + 1))}
+            className="gap-1"
+          >
+            Próxima <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Empresa</Label>
-                <Input
-                  value={form.company || ""}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
-                  placeholder="Ex: Tech Inc"
-                />
-              </div>
-              <div>
-                <Label>Origem</Label>
-                <Input
-                  value={form.source || ""}
-                  onChange={(e) => setForm({ ...form, source: e.target.value })}
-                  placeholder="Ex: LinkedIn"
-                />
-              </div>
-            </div>
+      <LeadsBulkActions
+        quantidade={selecaoNaBase}
+        usuarios={users}
+        etapas={etapas}
+        podeAtribuir={gestor}
+        aplicando={aplicando}
+        onAtribuir={(ownerId) => void atribuir(ownerId)}
+        onMover={(stageId) => void mover(stageId)}
+        onNaoContatar={(valor) => void marcarNaoContatar(valor)}
+        onExcluir={excluirSelecionados}
+        onLimpar={() => setSelecionados(new Set())}
+      />
 
-            <div>
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={form.email || ""}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="contato@empresa.com"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Telefone</Label>
-                <Input
-                  value={form.phone || ""}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="(11) 9999-9999"
-                />
-              </div>
-              <div>
-                <Label>WhatsApp</Label>
-                <Input
-                  value={form.whatsapp || ""}
-                  onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
-                  placeholder="(11) 9999-9999"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Site</Label>
-                <Input
-                  type="url"
-                  value={form.website || ""}
-                  onChange={(e) => setForm({ ...form, website: e.target.value })}
-                  placeholder="https://empresa.com.br"
-                />
-              </div>
-              <div>
-                <Label>Instagram</Label>
-                <Input
-                  type="url"
-                  value={form.instagram || ""}
-                  onChange={(e) => setForm({ ...form, instagram: e.target.value })}
-                  placeholder="https://instagram.com/empresa"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Switch
-                checked={!!form.whatsapp_do_not_contact}
-                onCheckedChange={(value) => setForm({ ...form, whatsapp_do_not_contact: value })}
-              />
-              <Label>Não contatar este lead pelo WhatsApp</Label>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Estágio *</Label>
-                <Select
-                  value={form.stage_id || ""}
-                  onValueChange={(v) => setForm({ ...form, stage_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stages.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Comercial *</Label>
-                {canManageTenant ? (
-                  <Select
-                    value={form.owner_id || ""}
-                    onValueChange={(v) => setForm({ ...form, owner_id: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input value={user?.name || user?.email || ""} disabled />
-                )}
-              </div>
-            </div>
-
-            <div>
-              <Label>Valor estimado</Label>
-              <Input
-                type="number"
-                value={form.estimated_value || 0}
-                onChange={(e) =>
-                  setForm({ ...form, estimated_value: parseFloat(e.target.value) || 0 })
-                }
-                placeholder="R$ 0,00"
-              />
-            </div>
-
-            <div>
-              <Label>Próximo follow-up</Label>
-              <Input
-                type="date"
-                value={form.next_followup_at?.split("T")[0] || ""}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    next_followup_at: e.target.value ? new Date(e.target.value).toISOString() : "",
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <Label>Notas</Label>
-              <Textarea
-                value={form.notes || ""}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                placeholder="Anotações sobre o lead…"
-                rows={3}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={save}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <LeadFormDialog
+        aberto={dialogoAberto}
+        lead={emEdicao}
+        etapas={etapas}
+        usuarios={users}
+        podeAtribuir={gestor}
+        usuarioAtual={user ? { id: user.id, name: user.name, email: user.email } : undefined}
+        onFechar={() => setDialogoAberto(false)}
+        onSalvo={() => {
+          void carregarPagina();
+          void carregarContagens();
+        }}
+      />
     </div>
   );
 }

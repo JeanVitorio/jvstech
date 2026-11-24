@@ -73,6 +73,18 @@ export function OnboardingTour() {
   const rect = useTargetRect(active ? step.target : undefined);
   const layout = computeLayout(rect, cardHeight);
 
+  // Os itens destacados moram no menu lateral, que agora fica recolhido:
+  // avisamos o layout para abri-lo enquanto o passo precisar dele.
+  useEffect(() => {
+    const precisaDoMenu = active && Boolean(step.target);
+    window.dispatchEvent(new CustomEvent("jvs-tour-menu", { detail: precisaDoMenu }));
+    return () => {
+      if (precisaDoMenu) {
+        window.dispatchEvent(new CustomEvent("jvs-tour-menu", { detail: false }));
+      }
+    };
+  }, [active, step.target]);
+
   useLayoutEffect(() => {
     if (cardRef.current) setCardHeight(cardRef.current.offsetHeight);
   }, [index, active, rect]);
