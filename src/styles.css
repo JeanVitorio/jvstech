@@ -91,6 +91,78 @@
   }
 }
 
+/* ---------------------------------------------------------------
+   Kit pixel corporativo: cantos retos, borda de 2px e sombra dura,
+   no lugar do vidro borrado. Mesma linguagem da sala da prospecção.
+   --------------------------------------------------------------- */
+@layer components {
+  .pixel-panel {
+    position: relative;
+    border: 2px solid rgb(255 255 255 / 10%);
+    border-radius: 0;
+    background: #121214;
+    box-shadow: 5px 5px 0 rgb(0 0 0 / 55%);
+  }
+
+  .pixel-panel--brand {
+    border-color: rgb(255 101 0 / 55%);
+    background: linear-gradient(145deg, rgb(255 101 0 / 12%), rgb(18 18 20 / 95%));
+    box-shadow: 5px 5px 0 rgb(255 101 0 / 28%);
+  }
+
+  .pixel-panel--flat {
+    box-shadow: none;
+  }
+
+  /* Etiqueta quadrada, estilo plaquinha de mesa. */
+  .pixel-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid rgb(255 101 0 / 45%);
+    border-radius: 0;
+    background: rgb(255 101 0 / 10%);
+    padding: 0.35rem 0.7rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  /* Botão que afunda ao clicar, como tecla de teclado. */
+  .pixel-btn {
+    border-radius: 0;
+    border: 2px solid #0a0a0a;
+    box-shadow: 4px 4px 0 #0a0a0a;
+    transition:
+      transform 0.12s steps(2, end),
+      box-shadow 0.12s steps(2, end);
+  }
+
+  .pixel-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 #0a0a0a;
+  }
+
+  .pixel-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #0a0a0a;
+  }
+
+  /* Numeração dos passos, quadrada e com contorno. */
+  .pixel-step {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 2px solid rgb(255 101 0 / 55%);
+    background: #0d0d10;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+}
+
 /* brand gradient text */
 @utility text-brand {
   background: var(--gradient-brand);
