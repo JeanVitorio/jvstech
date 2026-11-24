@@ -45,7 +45,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="metodo" className="relative overflow-hidden bg-background py-24 md:py-36">
+    <section id="metodo" className="relative overflow-hidden bg-background py-20 md:py-28">
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-25" />
       <div className="grain pointer-events-none absolute inset-0 opacity-20" />
       <div className="pointer-events-none absolute -left-52 top-1/4 h-[34rem] w-[34rem] rounded-full bg-primary/12 blur-[160px]" />
@@ -200,27 +200,6 @@ export function HowItWorks() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-6 flex flex-col items-center justify-between gap-5 rounded-3xl border border-primary/25 bg-primary/[0.055] p-6 sm:flex-row sm:px-8">
-          <div>
-            <p className="font-display text-lg font-semibold">
-              Enquanto o LeadFlow procura, sua equipe pode vender.
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Comece com 50 leads mensais no plano Free. Não precisa cadastrar cartão.
-            </p>
-          </div>
-          <LeadFlowLink
-            href="/LeadFlow/signup?plan=free"
-            className="group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-brand px-7 py-3 text-xs font-bold text-primary-foreground shadow-[var(--glow-ice)] transition-transform hover:scale-[1.03]"
-          >
-            Criar conta grátis
-            <ArrowRight
-              className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1"
-              aria-hidden="true"
-            />
-          </LeadFlowLink>
         </div>
       </div>
     </section>

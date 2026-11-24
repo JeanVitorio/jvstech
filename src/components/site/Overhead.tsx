@@ -36,8 +36,7 @@ export function Overhead() {
 
       if (!section) return;
 
-      const video =
-        section.querySelector<HTMLElement>(".over-video");
+      const video = section.querySelector<HTMLElement>(".over-video");
 
       /*
        * ==========================================================
@@ -75,8 +74,7 @@ export function Overhead() {
        * ==========================================================
        */
 
-      const cardElements =
-        section.querySelectorAll<HTMLElement>(".over-block");
+      const cardElements = section.querySelectorAll<HTMLElement>(".over-block");
 
       gsap.set(cardElements, {
         opacity: 1,
@@ -90,8 +88,7 @@ export function Overhead() {
        * ==========================================================
        */
 
-      const titleElements =
-        section.querySelectorAll<HTMLElement>(".over-title");
+      const titleElements = section.querySelectorAll<HTMLElement>(".over-title");
 
       gsap.set(titleElements, {
         opacity: 1,
@@ -114,10 +111,7 @@ export function Overhead() {
   }, []);
 
   return (
-    <section
-      ref={root}
-      className="relative overflow-hidden py-20 md:py-24"
-    >
+    <section ref={root} className="relative overflow-hidden py-20 md:py-24">
       {/* ====================================================== */}
       {/* GRID DE FUNDO */}
       {/* ====================================================== */}
@@ -129,16 +123,12 @@ export function Overhead() {
       {/* ====================================================== */}
 
       <div className="relative z-10 mx-auto max-w-6xl px-5 md:px-6">
-        <p className="over-title label-xs text-center text-primary">
-          ◆ Diagnóstico
-        </p>
+        <p className="over-title label-xs text-center text-primary">◆ Diagnóstico</p>
 
         <h2 className="over-title mx-auto mt-4 max-w-3xl text-center font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-5xl">
           Prospecção sem processo gera esforço.
           <br />
-          <span className="text-brand">
-            O LeadFlow transforma esforço em fluxo.
-          </span>
+          <span className="text-brand">O LeadFlow transforma esforço em fluxo.</span>
         </h2>
       </div>
 
@@ -148,13 +138,11 @@ export function Overhead() {
 
       <div className="relative z-10 mx-auto mt-10 max-w-7xl px-5 md:mt-14 md:px-6">
         <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12">
-
           {/* ================================================== */}
           {/* LOBO */}
           {/* ================================================== */}
 
           <div className="relative flex items-center justify-center overflow-hidden">
-
             <video
               ref={videoRef}
               className="
@@ -204,7 +192,6 @@ export function Overhead() {
           {/* ================================================== */}
 
           <div className="over-grid grid gap-4 sm:grid-cols-2 lg:gap-5">
-
             {blocks.map((b) => (
               <article
                 key={b.tag}
@@ -228,7 +215,6 @@ export function Overhead() {
                   md:p-7
                 "
               >
-
                 {/* Glow */}
 
                 <div
@@ -269,20 +255,14 @@ export function Overhead() {
                 {/* Conteúdo */}
 
                 <div className="relative z-10">
-
-                  <p className="label-xs text-primary">
-                    {b.tag}
-                  </p>
+                  <p className="label-xs text-primary">{b.tag}</p>
 
                   <p className="mt-3 text-[0.8rem] leading-relaxed text-white/75 md:text-sm">
                     {b.body}
                   </p>
-
                 </div>
-
               </article>
             ))}
-
           </div>
         </div>
       </div>
@@ -293,7 +273,6 @@ export function Overhead() {
 
       <div className="relative z-10 mx-auto mt-12 max-w-6xl px-5 md:px-6">
         <div className="grid grid-cols-2 gap-6 border-t border-border pt-10 md:grid-cols-4">
-
           {[
             ["Leads", "centralizados no painel"],
             ["Agentes", "configurados por estratégia"],
@@ -301,16 +280,11 @@ export function Overhead() {
             ["Equipe", "com acessos e responsáveis"],
           ].map(([a, b]) => (
             <div key={b}>
-              <p className="font-display text-2xl font-semibold text-brand md:text-3xl">
-                {a}
-              </p>
+              <p className="font-display text-2xl font-semibold text-brand md:text-3xl">{a}</p>
 
-              <p className="mt-1 text-[0.7rem] text-muted-foreground">
-                {b}
-              </p>
+              <p className="mt-1 text-[0.7rem] text-muted-foreground">{b}</p>
             </div>
           ))}
-
         </div>
       </div>
     </section>

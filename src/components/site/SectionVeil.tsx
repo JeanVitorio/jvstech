@@ -18,7 +18,12 @@ export function SectionVeil({ label, flip = false }: Props) {
           scaleX: 1,
           opacity: 1,
           ease: "none",
-          scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: true },
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
         },
       );
       gsap.fromTo(
@@ -28,7 +33,12 @@ export function SectionVeil({ label, flip = false }: Props) {
           letterSpacing: "0.24em",
           opacity: 1,
           ease: "none",
-          scrollTrigger: { trigger: root.current, start: "top bottom", end: "center center", scrub: true },
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top bottom",
+            end: "center center",
+            scrub: true,
+          },
         },
       );
     }, root);

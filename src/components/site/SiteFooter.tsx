@@ -5,8 +5,9 @@ import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 // Links com "/" na frente para funcionarem também nas páginas jurídicas.
 const navigation = [
   { href: "/#servicos", label: "Recursos" },
+  { href: "/#agentes", label: "Agentes" },
+  { href: "/#produto", label: "Por dentro" },
   { href: "/#metodo", label: "Como funciona" },
-  { href: "/#resultados", label: "Benefícios" },
   { href: "/#planos", label: "Planos" },
   { href: "/#faq", label: "FAQ" },
   { href: "/LeadFlow/login", label: "Login" },

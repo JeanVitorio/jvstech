@@ -4,8 +4,9 @@ import { LeadFlowLink } from "@/components/site/LeadFlowLink";
 
 const links = [
   { href: "#servicos", label: "Recursos" },
+  { href: "#agentes", label: "Agentes" },
+  { href: "#produto", label: "Por dentro" },
   { href: "#metodo", label: "Como funciona" },
-  { href: "#resultados", label: "Resultados" },
   { href: "#planos", label: "Planos" },
   { href: "#faq", label: "FAQ" },
 ];

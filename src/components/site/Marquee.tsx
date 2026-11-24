@@ -14,7 +14,12 @@ export function Marquee() {
       <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-56 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgb(255_101_0_/_36%),transparent_70%)]" />
       {[
         { rotate: "-2.5deg", dur: "34s", tint: "var(--gradient-brand)", dir: "normal" },
-        { rotate: "2.5deg", dur: "44s", tint: "linear-gradient(90deg,#171717,#D93600)", dir: "reverse" },
+        {
+          rotate: "2.5deg",
+          dur: "44s",
+          tint: "linear-gradient(90deg,#171717,#D93600)",
+          dir: "reverse",
+        },
       ].map((band, i) => (
         <div
           key={i}

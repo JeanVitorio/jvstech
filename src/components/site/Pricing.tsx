@@ -104,7 +104,7 @@ export function Pricing() {
   }, []);
 
   return (
-    <section id="planos" ref={root} className="relative overflow-hidden py-24 md:py-36">
+    <section id="planos" ref={root} className="relative overflow-hidden py-20 md:py-28">
       <div className="tech-grid pointer-events-none absolute inset-0 opacity-25" />
       <div className="grain pointer-events-none absolute inset-0 opacity-25" />
       <div className="price-aura pointer-events-none absolute left-1/2 top-1/3 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-primary/15 opacity-50 blur-[170px]" />

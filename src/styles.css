@@ -73,6 +73,11 @@
     scroll-behavior: auto;
   }
 
+  /* O menu fica fixo no topo: as âncoras param antes dele. */
+  section[id] {
+    scroll-margin-top: 6.5rem;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

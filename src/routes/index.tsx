@@ -5,9 +5,8 @@ import { SalesVideo } from "@/components/site/SalesVideo";
 import { Marquee } from "@/components/site/Marquee";
 import { Services } from "@/components/site/Services";
 import { AgentsRoom } from "@/components/site/AgentsRoom";
+import { ProductTour } from "@/components/site/ProductTour";
 import { HowItWorks } from "@/components/site/HowItWorks";
-import { ConversionBenefits } from "@/components/site/ConversionBenefits";
-import { Overhead } from "@/components/site/Overhead";
 import { Pricing } from "@/components/site/Pricing";
 import { Faq } from "@/components/site/Faq";
 import { FinalCta } from "@/components/site/FinalCta";
@@ -40,10 +39,9 @@ function Index() {
       <SalesVideo />
       <Services />
       <AgentsRoom />
+      <ProductTour />
       <Marquee />
       <HowItWorks />
-      <ConversionBenefits />
-      <Overhead />
       <Pricing />
       <Faq />
       <FinalCta />
