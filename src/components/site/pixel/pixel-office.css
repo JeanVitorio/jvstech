@@ -1,0 +1,143 @@
+/* Sala da prospecção no site: as mesmas animações que o cliente vê dentro
+   do LeadFlow, para a promessa da página bater com o produto. */
+
+.jvs-worker {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.jvs-worker--idle {
+  animation: jvs-office-breathe 3.2s ease-in-out infinite;
+}
+
+.jvs-worker--working {
+  animation: jvs-office-focus 2.4s ease-in-out infinite;
+}
+
+.jvs-worker--working .jvs-worker__arm {
+  animation: jvs-office-type 0.42s steps(2, end) infinite;
+  transform-origin: 50% 20%;
+}
+
+.jvs-worker--walking {
+  animation: jvs-office-walk 0.5s ease-in-out infinite;
+}
+
+.jvs-worker--walking .jvs-worker__leg-left {
+  animation: jvs-office-step 0.5s ease-in-out infinite;
+}
+
+.jvs-worker--walking .jvs-worker__leg-right {
+  animation: jvs-office-step 0.5s ease-in-out infinite reverse;
+}
+
+.jvs-worker--done .jvs-worker__arm-right {
+  animation: jvs-office-wave 1.6s ease-in-out infinite;
+  transform-origin: 50% 10%;
+}
+
+.jvs-papers {
+  animation: jvs-office-papers 0.6s ease-in-out infinite alternate;
+}
+
+/* Piso e parede da sala desenhada na página. */
+.jvs-site-office {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgb(255 101 0 / 16%), transparent 70%),
+    linear-gradient(180deg, #121014 0%, #0a0a0c 55%, #121216 100%);
+}
+
+.jvs-site-office__wall {
+  position: absolute;
+  inset: 0 0 58% 0;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+}
+
+.jvs-site-office__floor {
+  position: absolute;
+  inset: 42% 0 0 0;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 86px),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 54px);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 18%);
+}
+
+.jvs-site-office__spot {
+  position: absolute;
+  width: 220px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(255 176 0 / 12%), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* Entregador: atravessa o corredor da sala até a mesa do responsável e volta. */
+.jvs-site-courier {
+  position: absolute;
+  bottom: 44%;
+  animation: jvs-site-entrega 9s ease-in-out infinite;
+}
+
+.jvs-desk__screen-glow {
+  animation: jvs-office-screen 2.8s ease-in-out infinite;
+}
+
+@keyframes jvs-office-breathe {
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes jvs-office-focus {
+  50% { transform: translateY(-1px); }
+}
+
+@keyframes jvs-office-type {
+  50% { transform: translateY(1.4px); }
+}
+
+@keyframes jvs-office-walk {
+  25% { transform: translateY(-2.5px) rotate(-1.5deg); }
+  75% { transform: translateY(-2.5px) rotate(1.5deg); }
+}
+
+@keyframes jvs-office-step {
+  50% { transform: translateY(-1.5px); }
+}
+
+@keyframes jvs-office-wave {
+  40% { transform: rotate(-26deg); }
+  60% { transform: rotate(-12deg); }
+}
+
+@keyframes jvs-office-screen {
+  50% { opacity: 0.55; }
+}
+
+@keyframes jvs-office-papers {
+  to { transform: translateY(-1.5px) rotate(-3deg); }
+}
+
+@keyframes jvs-site-entrega {
+  0% { left: 14%; opacity: 0; }
+  8% { opacity: 1; }
+  42% { left: 48%; opacity: 1; }
+  58% { left: 48%; opacity: 1; }
+  92% { left: 14%; opacity: 1; }
+  100% { left: 14%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jvs-worker,
+  .jvs-worker *,
+  .jvs-site-courier,
+  .jvs-papers,
+  .jvs-desk__screen-glow {
+    animation: none !important;
+  }
+}

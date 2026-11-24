@@ -4,6 +4,7 @@ import { SalesHero } from "@/components/site/SalesHero";
 import { SalesVideo } from "@/components/site/SalesVideo";
 import { Marquee } from "@/components/site/Marquee";
 import { Services } from "@/components/site/Services";
+import { AgentsRoom } from "@/components/site/AgentsRoom";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { ConversionBenefits } from "@/components/site/ConversionBenefits";
 import { Overhead } from "@/components/site/Overhead";
@@ -38,6 +39,7 @@ function Index() {
       <SalesHero />
       <SalesVideo />
       <Services />
+      <AgentsRoom />
       <Marquee />
       <HowItWorks />
       <ConversionBenefits />

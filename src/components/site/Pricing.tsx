@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { ArrowRight, Check, Crown, Rocket, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import gsap from "gsap";
 import { LeadFlowLink } from "@/components/site/LeadFlowLink";
+import { PixelWorker } from "@/components/site/pixel/PixelWorker";
+import "@/components/site/pixel/pixel-office.css";
 
 const tiers = [
   {
@@ -117,6 +119,13 @@ export function Pricing() {
           Escolha quantas oportunidades você quer{" "}
           <span className="text-brand">colocar no seu radar.</span>
         </h2>
+
+        {/* a equipe de agentes que vem junto com o plano */}
+        <div className="mt-6 flex items-end justify-center gap-2">
+          <PixelWorker pose="working" shirt="#ff6500" hair="#2b2118" size={34} />
+          <PixelWorker pose="working" shirt="#38bdf8" hair="#4a2c13" size={34} />
+          <PixelWorker pose="working" shirt="#22c55e" hair="#1b1b20" size={34} />
+        </div>
         <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
           Comece sem risco no plano gratuito. Quando quiser acelerar, aumente o volume sem trocar de
           ferramenta, perder dados ou interromper sua operação.

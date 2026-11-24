@@ -6,6 +6,8 @@ import logo from "@/assets/logo-jvs-wolf.webp";
 import { useVideoVisibility } from "@/hooks/use-video-visibility";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { LeadFlowLink } from "@/components/site/LeadFlowLink";
+import { PixelWorker } from "@/components/site/pixel/PixelWorker";
+import "@/components/site/pixel/pixel-office.css";
 
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
@@ -76,12 +78,20 @@ export function FinalCta() {
           </div>
         </div>
 
-        <div className="glass-card flex items-center justify-center rounded-2xl p-8">
+        <div className="glass-card flex flex-col items-center justify-center gap-6 rounded-2xl p-8">
           <img
             src={logo}
             alt="Marca JVS Tech"
-            className="w-40 drop-shadow-[0_0_50px_rgb(255_101_0_/_55%)]"
+            className="w-36 drop-shadow-[0_0_50px_rgb(255_101_0_/_55%)]"
           />
+          {/* o agente entregando os leads, igual ao que acontece dentro do app */}
+          <div className="flex items-end gap-3">
+            <PixelWorker pose="walking" shirt="#ff6500" hair="#2b2118" size={38} carrying />
+            <PixelWorker pose="done" shirt="#38bdf8" hair="#4a2c13" size={38} />
+          </div>
+          <p className="text-center text-[0.62rem] uppercase tracking-[0.16em] text-foreground/40">
+            Seu agente entrega. Sua equipe vende.
+          </p>
         </div>
       </div>
 
