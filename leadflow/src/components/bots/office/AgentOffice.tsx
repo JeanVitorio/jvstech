@@ -13,6 +13,8 @@ import "./office.css";
 interface AgentOfficeProps {
   runtimes: BotRuntime[];
   leadCounts?: Record<string, number>;
+  // Último lote de leads que algum agente importou, vindo dos eventos do banco.
+  ultimaEntrega?: { botId: string; quantidade: number; quando: string } | null;
   selectedId?: string;
   criandoDesabilitado?: boolean;
   onSelect: (runtime: BotRuntime) => void;
@@ -90,6 +92,7 @@ function posicaoDaMesa(indice: number, total: number): Ponto {
 export function AgentOffice({
   runtimes,
   leadCounts,
+  ultimaEntrega,
   selectedId,
   criandoDesabilitado,
   onSelect,
@@ -149,6 +152,11 @@ export function AgentOffice({
 
   const mesaDoResponsavel = (chave: string) =>
     responsaveis.find((item) => item.chave === chave) ?? responsaveis[0];
+
+  // Mesa do agente que fez a última entrega registrada no banco.
+  const indiceUltimaEntrega = ultimaEntrega
+    ? mesas.findIndex((mesa) => mesa.runtime.config.id === ultimaEntrega.botId)
+    : -1;
 
   const resumo = useMemo(() => {
     const conta = { trabalhando: 0, parados: 0, concluidos: 0 };
@@ -250,14 +258,17 @@ export function AgentOffice({
             cor="#38bdf8"
             texto={`${resumo.concluidos} ${resumo.concluidos === 1 ? "concluído" : "concluídos"}`}
           />
-          {mesas.length > 0 && (
+          {indiceUltimaEntrega >= 0 && ultimaEntrega && (
             <Button
               size="sm"
               variant="outline"
               className="h-8 gap-1.5 border-white/15 bg-black/40 text-[11px] text-white/80 hover:bg-black/60"
-              onClick={() => enviarEntrega(0, 12)}
+              title={`${mesas[indiceUltimaEntrega].runtime.config.name} entregou ${ultimaEntrega.quantidade} lead(s) em ${new Date(ultimaEntrega.quando).toLocaleString("pt-BR")}`}
+              onClick={() => enviarEntrega(indiceUltimaEntrega, ultimaEntrega.quantidade)}
             >
-              <Play className="h-3 w-3" /> Demonstrar entrega
+              <Play className="h-3 w-3" /> Última entrega ·{" "}
+              {ultimaEntrega.quantidade.toLocaleString("pt-BR")}{" "}
+              {ultimaEntrega.quantidade === 1 ? "lead" : "leads"}
             </Button>
           )}
           <Button

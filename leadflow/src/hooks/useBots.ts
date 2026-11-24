@@ -6,6 +6,7 @@ import {
   listBotLeadCounts,
   listBotRuntimes,
   listOnlineRunners,
+  listRecentBotEvents,
   requestBotCommand,
   saveBotConfig,
 } from "@/services/bots";
@@ -27,6 +28,30 @@ export function useBotEvents(botId?: string) {
     queryKey: ["bots", botId, "events"],
     queryFn: () => listBotEvents(botId!, 50),
     enabled: Boolean(botId),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+    retry: 1,
+  });
+}
+
+// Última importação de leads registrada por qualquer agente da empresa.
+export function useLastLeadDelivery() {
+  return useQuery({
+    queryKey: ["bots", "ultima-entrega"],
+    queryFn: async () => {
+      const eventos = await listRecentBotEvents(50);
+      const entrega = eventos.find((evento) => {
+        if (evento.event_type !== "lote_leads_processado") return false;
+        return Number((evento.data as { importados?: number })?.importados || 0) > 0;
+      });
+      if (!entrega) return null;
+      return {
+        botId: entrega.bot_id,
+        quantidade: Number((entrega.data as { importados?: number }).importados || 0),
+        quando: entrega.created_at,
+      };
+    },
     staleTime: 30_000,
     refetchInterval: 60_000,
     refetchIntervalInBackground: false,

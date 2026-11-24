@@ -24,6 +24,7 @@ import {
   useBotEvents,
   useBotLeadCounts,
   useBots,
+  useLastLeadDelivery,
 } from "@/hooks/useBots";
 import type { BotConfig, BotFormData, BotRuntime } from "@/types/bots";
 
@@ -35,6 +36,7 @@ export default function Bots() {
   const { status: billing } = useBilling();
   const bots = useBots();
   const leadCounts = useBotLeadCounts();
+  const ultimaEntrega = useLastLeadDelivery();
   const installation = useAppInstallation();
   const actions = useBotActions();
   const [editing, setEditing] = useState<BotConfig | undefined>();
@@ -186,6 +188,7 @@ export default function Bots() {
         <AgentOffice
           runtimes={bots.data ?? []}
           leadCounts={leadCounts.data}
+          ultimaEntrega={ultimaEntrega.data}
           selectedId={opened?.config.id}
           criandoDesabilitado={installation.isLoading}
           onSelect={setOpened}
