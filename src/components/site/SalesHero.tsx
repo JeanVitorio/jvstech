@@ -154,7 +154,7 @@ export function SalesHero() {
             ref={canvasRef}
             width={720}
             height={1280}
-            className="relative block h-auto max-h-[min(72vh,680px)] w-auto max-w-full"
+            className="relative block h-auto max-h-[min(84vh,800px)] w-auto max-w-full"
             aria-label="Agente da sala de prospecção entregando leads"
           />
         </div>
