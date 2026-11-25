@@ -2,15 +2,10 @@ import { useEffect, useRef } from "react";
 import { ArrowRight, Check, ChevronDown, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { LeadFlowLink } from "@/components/site/LeadFlowLink";
-import { OfficeScene } from "@/components/site/pixel/OfficeScene";
+import { useVideoVisibility } from "@/hooks/use-video-visibility";
+import salaProspeccao from "@/assets/sala-prospeccao.mp4";
 
 const assurances = ["50 leads por mês grátis", "Sem cartão de crédito", "Cancele quando quiser"];
-
-// Dois agentes bastam no topo: a sala completa aparece logo abaixo.
-const agentesDoTopo = [
-  { nome: "Distribuidoras", cidade: "Curitiba", camisa: "#ff6500", cabelo: "#2b2118" },
-  { nome: "Suplementos", cidade: "São Paulo", camisa: "#38bdf8", cabelo: "#4a2c13" },
-];
 
 const resumo = [
   ["Automático", "Busca"],
@@ -20,6 +15,8 @@ const resumo = [
 
 export function SalesHero() {
   const root = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useVideoVisibility(videoRef);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -92,9 +89,9 @@ export function SalesHero() {
           </div>
         </div>
 
-        {/* a sala do produto já no topo: é o que a pessoa vai usar */}
-        <div className="hero-sala relative mx-auto w-full max-w-[620px] lg:ml-auto">
-          <div className="pointer-events-none absolute -inset-10 rounded-full bg-primary/15 blur-[100px]" />
+        {/* o vídeo do agente ocupa o lugar da sala desenhada */}
+        <div className="hero-sala relative mx-auto w-fit max-w-full lg:ml-auto">
+          <div className="pointer-events-none absolute -inset-10 rounded-full bg-primary/20 blur-[100px]" />
           <div className="pixel-panel relative overflow-hidden">
             <div className="flex items-center justify-between border-b border-white/[0.07] px-4 py-3">
               <div className="flex items-center gap-1.5">
@@ -108,11 +105,16 @@ export function SalesHero() {
               </span>
             </div>
 
-            <OfficeScene
-              agentes={agentesDoTopo}
-              altura="h-[260px] sm:h-[300px]"
-              tamanho="compacta"
-              descricaoResponsavel="recebe os leads"
+            <video
+              ref={videoRef}
+              className="block h-auto max-h-[min(58vh,560px)] w-auto max-w-full bg-black object-contain"
+              src={salaProspeccao}
+              muted
+              loop
+              playsInline
+              autoPlay
+              preload="metadata"
+              aria-label="Agente da sala de prospecção entregando leads"
             />
 
             <div className="grid grid-cols-3 gap-2 border-t border-white/[0.07] p-3">
