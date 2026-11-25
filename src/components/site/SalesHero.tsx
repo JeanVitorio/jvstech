@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { ArrowRight, Check, ChevronDown, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { LeadFlowLink } from "@/components/site/LeadFlowLink";
@@ -7,16 +7,63 @@ import salaProspeccao from "@/assets/sala-prospeccao.mp4";
 
 const assurances = ["50 leads por mês grátis", "Sem cartão de crédito", "Cancele quando quiser"];
 
-const resumo = [
-  ["Automático", "Busca"],
-  ["Centralizado", "Dados"],
-  ["Organizado", "Funil"],
-];
+// O vídeo vem com fundo preto. Aqui o preto sai e sobra só o agente.
+function useAgenteSemFundo(
+  videoRef: RefObject<HTMLVideoElement | null>,
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+) {
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const contexto = canvas.getContext("2d", { willReadFrequently: true });
+    if (!contexto) return;
+
+    let quadro = 0;
+    let ativo = true;
+
+    const desenhar = () => {
+      if (!ativo) return;
+      if (!video.paused && video.readyState >= 2 && video.videoWidth > 0) {
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+        }
+        contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imagem = contexto.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imagem.data;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const vermelho = pixels[i];
+          const verde = pixels[i + 1];
+          const azul = pixels[i + 2];
+          const maior = Math.max(vermelho, verde, azul);
+          const menor = Math.min(vermelho, verde, azul);
+          // Só o preto sem cor some. Calça e cabelo escuros continuam.
+          if (maior < 42 && maior - menor < 16) {
+            pixels[i + 3] = 0;
+          } else if (maior < 80 && maior - menor < 24) {
+            pixels[i + 3] = Math.round(((maior - 42) / 38) * 255);
+          }
+        }
+        contexto.putImageData(imagem, 0, 0);
+      }
+      quadro = requestAnimationFrame(desenhar);
+    };
+
+    quadro = requestAnimationFrame(desenhar);
+    return () => {
+      ativo = false;
+      cancelAnimationFrame(quadro);
+    };
+  }, [videoRef, canvasRef]);
+}
 
 export function SalesHero() {
   const root = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   useVideoVisibility(videoRef);
+  useAgenteSemFundo(videoRef, canvasRef);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -89,48 +136,27 @@ export function SalesHero() {
           </div>
         </div>
 
-        {/* o vídeo do agente ocupa o lugar da sala desenhada */}
+        {/* só o agente, sem a caixa escura em volta */}
         <div className="hero-sala relative mx-auto w-fit max-w-full lg:ml-auto">
-          <div className="pointer-events-none absolute -inset-10 rounded-full bg-primary/20 blur-[100px]" />
-          <div className="pixel-panel relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-white/[0.07] px-4 py-3">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-              </div>
-              <span className="flex items-center gap-2 text-[0.62rem] font-medium text-foreground/45">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#28c840]" />
-                Sala da prospecção · ao vivo
-              </span>
-            </div>
-
-            <video
-              ref={videoRef}
-              className="block h-auto max-h-[min(58vh,560px)] w-auto max-w-full bg-black object-contain"
-              src={salaProspeccao}
-              muted
-              loop
-              playsInline
-              autoPlay
-              preload="metadata"
-              aria-label="Agente da sala de prospecção entregando leads"
-            />
-
-            <div className="grid grid-cols-3 gap-2 border-t border-white/[0.07] p-3">
-              {resumo.map(([valor, rotulo]) => (
-                <div
-                  key={rotulo}
-                  className="border-2 border-white/[0.08] bg-white/[0.025] px-3 py-2.5 text-center"
-                >
-                  <p className="text-xs font-semibold text-foreground/90">{valor}</p>
-                  <p className="mt-0.5 text-[0.58rem] uppercase tracking-wider text-foreground/35">
-                    {rotulo}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <div className="pointer-events-none absolute -inset-16 rounded-full bg-primary/25 blur-[110px]" />
+          <video
+            ref={videoRef}
+            className="pointer-events-none absolute h-px w-px opacity-0"
+            src={salaProspeccao}
+            muted
+            loop
+            playsInline
+            autoPlay
+            preload="auto"
+            aria-hidden="true"
+          />
+          <canvas
+            ref={canvasRef}
+            width={720}
+            height={1280}
+            className="relative block h-auto max-h-[min(72vh,680px)] w-auto max-w-full"
+            aria-label="Agente da sala de prospecção entregando leads"
+          />
         </div>
       </div>
 
