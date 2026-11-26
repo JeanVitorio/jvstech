@@ -1,9 +1,9 @@
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
-import loading from "@/assets/loading.svg";
+import vortex from "@/assets/loading-vortex.mp4";
 
 // O site (TanStack) e o app (/LeadFlow) são duas aplicações. Sem recarregar
 // a página, o roteador do site intercepta o clique, some o conteúdo e fica
-// a tela preta. Este link mostra o lobo na hora e vai para o app de verdade.
+// a tela preta. Este link mostra o vídeo na hora e vai para o app de verdade.
 
 function mostrarLoader() {
   if (document.getElementById("jvs-nav-loader")) return;
@@ -17,7 +17,7 @@ function mostrarLoader() {
       <div class="jvs-loader__glow"></div>
       <div class="jvs-loader__ring"></div>
       <div class="jvs-loader__logo">
-        <img src="${loading}" alt="" width="200" height="200" />
+        <video src="${vortex}" autoplay muted loop playsinline preload="auto" width="200" height="200"></video>
         <span class="jvs-loader__shine"></span>
       </div>
     </div>

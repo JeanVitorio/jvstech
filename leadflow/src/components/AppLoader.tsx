@@ -1,4 +1,4 @@
-import logo from "@/assets/loading.svg";
+import vortex from "@/assets/loading-vortex.mp4";
 import { cn } from "@/lib/utils";
 
 type LoaderVariant = "screen" | "inline" | "compact";
@@ -9,7 +9,7 @@ const VARIANT_CLASS: Record<LoaderVariant, string> = {
   compact: "jvs-loader--inline jvs-loader--compact text-muted-foreground",
 };
 
-// Loading com o lobo JVS (estilos no index.html): "screen" cobre a tela,
+// Loading com o vídeo do vórtice (estilos no index.html): "screen" cobre a tela,
 // "inline" e "compact" ficam no lugar dos dados que ainda estão chegando.
 export function AppLoader({
   variant = "screen",
@@ -30,7 +30,17 @@ export function AppLoader({
         <div className="jvs-loader__glow" />
         <div className="jvs-loader__ring" />
         <div className="jvs-loader__logo">
-          <img src={logo} alt="" width={200} height={200} />
+          <video
+            src={vortex}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            width={200}
+            height={200}
+            aria-hidden="true"
+          />
           <span className="jvs-loader__shine" />
         </div>
       </div>

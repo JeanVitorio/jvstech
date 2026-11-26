@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "@/assets/loading.svg";
+import vortex from "@/assets/loading-vortex.mp4";
 
 const TEMPO_MINIMO_MS = 600;
 const TEMPO_MAXIMO_MS = 3500;
@@ -44,7 +44,17 @@ export function SitePreloader() {
         <div className="jvs-loader__glow" />
         <div className="jvs-loader__ring" />
         <div className="jvs-loader__logo">
-          <img src={logo} alt="" width={200} height={200} fetchPriority="high" />
+          <video
+            src={vortex}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            width={200}
+            height={200}
+            aria-hidden="true"
+          />
           <span className="jvs-loader__shine" />
         </div>
       </div>
