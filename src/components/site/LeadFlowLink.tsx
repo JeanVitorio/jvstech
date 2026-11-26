@@ -1,5 +1,6 @@
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
 import vortex from "@/assets/loading-vortex.mp4";
+import poster from "@/assets/loading-vortex-poster.webp";
 
 // O site (TanStack) e o app (/LeadFlow) são duas aplicações. Sem recarregar
 // a página, o roteador do site intercepta o clique, some o conteúdo e fica
@@ -17,7 +18,7 @@ function mostrarLoader() {
       <div class="jvs-loader__glow"></div>
       <div class="jvs-loader__ring"></div>
       <div class="jvs-loader__logo">
-        <video src="${vortex}" autoplay muted loop playsinline preload="auto" width="200" height="200"></video>
+        <video src="${vortex}" poster="${poster}" autoplay muted loop playsinline preload="auto" width="200" height="200"></video>
         <span class="jvs-loader__shine"></span>
       </div>
     </div>

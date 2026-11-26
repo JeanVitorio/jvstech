@@ -1,4 +1,5 @@
 import vortex from "@/assets/loading-vortex.mp4";
+import poster from "@/assets/loading-vortex-poster.webp";
 import { cn } from "@/lib/utils";
 
 type LoaderVariant = "screen" | "inline" | "compact";
@@ -32,6 +33,7 @@ export function AppLoader({
         <div className="jvs-loader__logo">
           <video
             src={vortex}
+            poster={poster}
             autoPlay
             muted
             loop

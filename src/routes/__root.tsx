@@ -10,6 +10,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import vortex from "@/assets/loading-vortex.mp4";
+import poster from "@/assets/loading-vortex-poster.webp";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SitePreloader } from "../components/site/SitePreloader";
 
@@ -97,6 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600&display=swap",
       },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "preload", href: poster, as: "image" },
+      { rel: "preload", href: vortex, as: "video" },
     ],
   }),
   shellComponent: RootShell,

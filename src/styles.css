@@ -310,7 +310,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 38%;
+  object-position: center;
   filter: contrast(1.1) saturate(1.2);
   /* esconde a borda clara do arquivo, que aparece com o "screen" */
   transform: scale(1.04);

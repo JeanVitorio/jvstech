@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import vortex from "@/assets/loading-vortex.mp4";
+import poster from "@/assets/loading-vortex-poster.webp";
 
 const TEMPO_MINIMO_MS = 600;
 const TEMPO_MAXIMO_MS = 3500;
@@ -46,6 +47,7 @@ export function SitePreloader() {
         <div className="jvs-loader__logo">
           <video
             src={vortex}
+            poster={poster}
             autoPlay
             muted
             loop
